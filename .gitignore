@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# allow Next env typing for pilot static app
+!pilot-static/next-env.d.ts
+
+# pilot static site
+pilot-static/node_modules
+pilot-static/.next
+pilot-static/out
