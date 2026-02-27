@@ -6,7 +6,8 @@ import {
   Dropdown,
   Input,
   Option,
-  Spinner,
+  Skeleton,
+  SkeletonItem,
   Table,
   TableBody,
   TableCell,
@@ -15,19 +16,22 @@ import {
   TableRow,
   Text,
 } from "@fluentui/react-components";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { ClipboardTask24Regular, DismissCircle24Regular } from "@fluentui/react-icons";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import type { PedidoDotacion } from "@/lib/dataverse/types";
+import { apiFetch, ApiRequestError } from "@/lib/http/client";
+
+import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { apiFetch, ApiRequestError } from "@/lib/http/client";
-import type { PedidoDotacion } from "@/lib/dataverse/types";
 
 type PedidoListResponse = {
   data: PedidoDotacion[];
 };
 
 const statusOptions = ["Todos", "Borrador", "EnAprobacion", "Aprobado", "EnviadoSAP", "Rechazado"];
+const TABLE_COLUMN_COUNT = 6;
 
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<PedidoDotacion[]>([]);
@@ -45,21 +49,29 @@ export default function PedidosPage() {
     return `/api/pedidos${encoded ? `?${encoded}` : ""}`;
   }, [query, status]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const payload = await apiFetch<PedidoListResponse>(requestUrl);
-        setPedidos(payload.data);
-      } catch (err) {
-        setError(err instanceof ApiRequestError ? err.message : "No se pudieron cargar pedidos");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const hasActiveFilters = Boolean(query) || status !== "Todos";
 
-    void loadData();
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const payload = await apiFetch<PedidoListResponse>(requestUrl);
+      setPedidos(payload.data);
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : "No se pudieron cargar pedidos");
+    } finally {
+      setLoading(false);
+    }
   }, [requestUrl]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  const clearFilters = () => {
+    setQuery("");
+    setStatus("Todos");
+  };
 
   return (
     <div className="page-container">
@@ -73,40 +85,49 @@ export default function PedidosPage() {
       <Card>
         <div className="filter-row">
           <Input
+            aria-label="Buscar pedidos por código, empleado o área"
             value={query}
             onChange={(_, data) => setQuery(data.value)}
             placeholder="Buscar por código, empleado o área"
           />
-          <Dropdown value={status} selectedOptions={[status]} onOptionSelect={(_, data) => setStatus(String(data.optionValue))}>
+          <Dropdown
+            aria-label="Filtrar pedidos por estado"
+            value={status}
+            selectedOptions={[status]}
+            onOptionSelect={(_, data) => setStatus(String(data.optionValue))}
+          >
             {statusOptions.map((option) => (
               <Option key={option} value={option}>
                 {option}
               </Option>
             ))}
           </Dropdown>
-          <Button appearance="secondary" onClick={() => {
-            setQuery("");
-            setStatus("Todos");
-          }}>
+          <Button appearance="secondary" onClick={clearFilters}>
             Limpiar
           </Button>
         </div>
       </Card>
 
-      {loading ? (
-        <div className="centered-state">
-          <Spinner label="Cargando pedidos..." />
-        </div>
-      ) : null}
-
       {error ? (
         <Card>
-          <Text className="error-text">{error}</Text>
+          <Text weight="semibold">No se pudieron cargar los pedidos</Text>
+          <Text className="muted-text">{error}</Text>
+          <Button appearance="secondary" onClick={() => void loadData()}>
+            Reintentar
+          </Button>
         </Card>
       ) : null}
 
-      {!loading ? (
-        <Card>
+      <Card>
+        {loading ? (
+          <Skeleton>
+            <div className="skeleton-stack">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <SkeletonItem key={`pedido-skeleton-${index}`} size={16} />
+              ))}
+            </div>
+          </Skeleton>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -129,19 +150,39 @@ export default function PedidosPage() {
                     <StatusBadge status={pedido.estado} />
                   </TableCell>
                   <TableCell>
-                    <Link href={`/pedidos/${pedido.id}`}>Ver detalle</Link>
+                    <Button as="a" href={`/pedidos/${pedido.id}`} appearance="subtle">
+                      Ver detalle
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
               {pedidos.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6}>No hay pedidos para los filtros seleccionados.</TableCell>
+                  <TableCell colSpan={TABLE_COLUMN_COUNT} className="table-empty-cell">
+                    <EmptyState
+                      compact
+                      icon={hasActiveFilters ? <DismissCircle24Regular fontSize={30} /> : <ClipboardTask24Regular fontSize={30} />}
+                      title={hasActiveFilters ? "Sin resultados" : "No hay pedidos aún"}
+                      description={hasActiveFilters
+                        ? "Prueba con otros filtros o limpia la búsqueda."
+                        : "Crea el primer pedido de dotación para esta sede."}
+                      action={hasActiveFilters ? (
+                        <Button appearance="secondary" onClick={clearFilters}>
+                          Limpiar filtros
+                        </Button>
+                      ) : (
+                        <Button as="a" href="/pedidos/nuevo" appearance="primary">
+                          Nuevo pedido
+                        </Button>
+                      )}
+                    />
+                  </TableCell>
                 </TableRow>
               ) : null}
             </TableBody>
           </Table>
-        </Card>
-      ) : null}
+        )}
+      </Card>
     </div>
   );
 }

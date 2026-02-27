@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Badge,
   Button,
   Card,
   CardHeader,
@@ -19,7 +18,7 @@ import { useEffect, useState } from "react";
 
 import { APP_TOASTER_ID } from "@/components/providers/AppProviders";
 import { loginWithEntra } from "@/lib/auth/msal-client";
-import { publicEnv, isEntraConfigured } from "@/lib/config/public-env";
+import { isEntraConfigured } from "@/lib/config/public-env";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
 
 type SessionResponse = {
@@ -116,7 +115,7 @@ export default function LoginPage() {
         <Text as="h2" size={600} block>
           Plataforma Integral
         </Text>
-        <Text className="muted-text" block>
+        <Text className="muted-text-on-dark" block>
           Portal corporativo para operación de Dotación, Inventario, Calidad y Mantenimiento.
         </Text>
       </div>
@@ -155,7 +154,6 @@ export default function LoginPage() {
           </Text>
         ) : null}
 
-        <Badge appearance="outline">Tenant: {publicEnv.entraTenantId || "No configurado"}</Badge>
       </Card>
     </main>
   );

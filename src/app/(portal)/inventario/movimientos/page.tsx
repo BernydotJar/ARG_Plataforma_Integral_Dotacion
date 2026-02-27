@@ -7,6 +7,8 @@ import {
   Field,
   Input,
   Option,
+  Skeleton,
+  SkeletonItem,
   Spinner,
   Table,
   TableBody,
@@ -20,9 +22,11 @@ import {
   ToastBody,
   ToastTitle,
 } from "@fluentui/react-components";
+import { Box24Regular } from "@fluentui/react-icons";
 import { useEffect, useState } from "react";
 
 import { APP_TOASTER_ID } from "@/components/providers/AppProviders";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
@@ -55,6 +59,7 @@ export default function MovimientosPage() {
   const load = async () => {
     try {
       setLoading(true);
+      setError(null);
       const payload = await apiFetch<MovimientoListResponse>("/api/inventario/movimientos");
       setList(payload.data);
     } catch (err) {
@@ -165,11 +170,26 @@ export default function MovimientosPage() {
         </div>
       </Card>
 
-      {error ? <Text className="error-text">{error}</Text> : null}
+      {error ? (
+        <Card>
+          <Text weight="semibold">No se pudieron cargar movimientos</Text>
+          <Text className="muted-text">{error}</Text>
+          <Button appearance="secondary" onClick={() => void load()}>
+            Reintentar
+          </Button>
+        </Card>
+      ) : null}
 
       <Card>
-        {loading ? <Spinner label="Cargando movimientos..." /> : null}
-        {!loading ? (
+        {loading ? (
+          <Skeleton>
+            <div className="skeleton-stack">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <SkeletonItem key={`movement-skeleton-${index}`} size={16} />
+              ))}
+            </div>
+          </Skeleton>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -202,9 +222,21 @@ export default function MovimientosPage() {
                   </TableCell>
                 </TableRow>
               ))}
+              {list.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="table-empty-cell">
+                    <EmptyState
+                      compact
+                      icon={<Box24Regular fontSize={30} />}
+                      title="No hay movimientos aún"
+                      description="Registra ingresos, salidas o ajustes para ver actividad aquí."
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : null}
             </TableBody>
           </Table>
-        ) : null}
+        )}
       </Card>
     </div>
   );

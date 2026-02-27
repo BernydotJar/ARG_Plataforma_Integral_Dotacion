@@ -1,5 +1,4 @@
 import { Button, Text } from "@fluentui/react-components";
-import Link from "next/link";
 
 interface PageHeaderProps {
   title: string;
@@ -20,9 +19,9 @@ export function PageHeader({ title, description, actionHref, actionLabel }: Page
         </Text>
       </div>
       {actionHref && actionLabel ? (
-        <Link href={actionHref} className="unstyled-link">
-          <Button appearance="primary">{actionLabel}</Button>
-        </Link>
+        <Button as="a" href={actionHref} appearance="primary">
+          {actionLabel}
+        </Button>
       ) : null}
     </header>
   );

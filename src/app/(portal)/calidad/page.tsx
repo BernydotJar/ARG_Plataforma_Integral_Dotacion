@@ -1,9 +1,11 @@
 "use client";
 
 import {
+  Button,
   Card,
   Input,
-  Spinner,
+  Skeleton,
+  SkeletonItem,
   Table,
   TableBody,
   TableCell,
@@ -12,17 +14,21 @@ import {
   TableRow,
   Text,
 } from "@fluentui/react-components";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { CheckmarkCircle24Regular, DismissCircle24Regular } from "@fluentui/react-icons";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import type { InspeccionCalidad } from "@/lib/dataverse/types";
+import { apiFetch, ApiRequestError } from "@/lib/http/client";
+
+import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { apiFetch, ApiRequestError } from "@/lib/http/client";
-import type { InspeccionCalidad } from "@/lib/dataverse/types";
 
 type CalidadListResponse = {
   data: InspeccionCalidad[];
 };
+
+const TABLE_COLUMN_COUNT = 6;
 
 export default function CalidadPage() {
   const [list, setList] = useState<InspeccionCalidad[]>([]);
@@ -37,21 +43,24 @@ export default function CalidadPage() {
     return `/api/calidad${search ? `?${search}` : ""}`;
   }, [query]);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        const payload = await apiFetch<CalidadListResponse>(endpoint);
-        setList(payload.data);
-      } catch (err) {
-        setError(err instanceof ApiRequestError ? err.message : "No se pudieron cargar inspecciones");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const hasActiveFilters = Boolean(query);
 
-    void load();
+  const loadInspections = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const payload = await apiFetch<CalidadListResponse>(endpoint);
+      setList(payload.data);
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : "No se pudieron cargar inspecciones");
+    } finally {
+      setLoading(false);
+    }
   }, [endpoint]);
+
+  useEffect(() => {
+    void loadInspections();
+  }, [loadInspections]);
 
   return (
     <div className="page-container">
@@ -64,17 +73,33 @@ export default function CalidadPage() {
 
       <Card>
         <Input
+          aria-label="Buscar inspecciones de calidad"
           value={query}
           onChange={(_, data) => setQuery(data.value)}
           placeholder="Buscar por código, lote o inspector"
         />
       </Card>
 
-      {loading ? <Spinner label="Cargando inspecciones..." /> : null}
-      {error ? <Text className="error-text">{error}</Text> : null}
-
-      {!loading ? (
+      {error ? (
         <Card>
+          <Text weight="semibold">No se pudieron cargar inspecciones</Text>
+          <Text className="muted-text">{error}</Text>
+          <Button appearance="secondary" onClick={() => void loadInspections()}>
+            Reintentar
+          </Button>
+        </Card>
+      ) : null}
+
+      <Card>
+        {loading ? (
+          <Skeleton>
+            <div className="skeleton-stack">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <SkeletonItem key={`quality-skeleton-${index}`} size={16} />
+              ))}
+            </div>
+          </Skeleton>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -97,14 +122,39 @@ export default function CalidadPage() {
                     <StatusBadge status={entry.estado} />
                   </TableCell>
                   <TableCell>
-                    <Link href={`/calidad/${entry.id}`}>Ver detalle</Link>
+                    <Button as="a" href={`/calidad/${entry.id}`} appearance="subtle">
+                      Ver detalle
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
+              {list.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={TABLE_COLUMN_COUNT} className="table-empty-cell">
+                    <EmptyState
+                      compact
+                      icon={hasActiveFilters ? <DismissCircle24Regular fontSize={30} /> : <CheckmarkCircle24Regular fontSize={30} />}
+                      title={hasActiveFilters ? "Sin resultados" : "No hay inspecciones aún"}
+                      description={hasActiveFilters
+                        ? "Prueba otro término de búsqueda."
+                        : "Registra la primera inspección para comenzar el control de calidad."}
+                      action={hasActiveFilters ? (
+                        <Button appearance="secondary" onClick={() => setQuery("")}>
+                          Limpiar búsqueda
+                        </Button>
+                      ) : (
+                        <Button as="a" href="/calidad/nuevo" appearance="primary">
+                          Nueva inspección
+                        </Button>
+                      )}
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : null}
             </TableBody>
           </Table>
-        </Card>
-      ) : null}
+        )}
+      </Card>
     </div>
   );
 }

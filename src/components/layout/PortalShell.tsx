@@ -15,7 +15,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { hasAnyRole } from "@/lib/auth/roles";
-import type { AppUser } from "@/lib/types/app";
+import type { AppRole, AppUser } from "@/lib/types/app";
 
 import { navItems } from "./navigation";
 
@@ -29,6 +29,22 @@ const isRouteActive = (pathname: string, href: string): boolean => {
   return pathname.startsWith(href);
 };
 
+const ROLE_DISPLAY_NAMES: Record<AppRole, string> = {
+  SuperAdmin: "Administrador Global",
+  AdminLocal: "Admin de Sede",
+  UsuarioPedidos: "Gestor de Pedidos",
+  UsuarioFinal: "Usuario",
+  OperarioBodega: "Operario de Bodega",
+  InspectorCalidad: "Inspector de Calidad",
+  TecnicoMantenimiento: "Técnico de Mantenimiento",
+};
+
+const formatSedeName = (sedeId: string): string =>
+  sedeId
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
 export function PortalShell({ user, children }: PortalShellProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -39,6 +55,21 @@ export function PortalShell({ user, children }: PortalShellProps) {
     () => navItems.filter((item) => !item.roles || hasAnyRole(user, item.roles)),
     [user],
   );
+
+  const activeNav = useMemo(
+    () => allowedItems.find((item) => isRouteActive(pathname, item.href)),
+    [allowedItems, pathname],
+  );
+
+  const roleLabel = useMemo(
+    () => user.roles.map((role) => ROLE_DISPLAY_NAMES[role] ?? role).join(", "),
+    [user.roles],
+  );
+
+  const sedeLabel = useMemo(() => {
+    if (user.sedeIds.includes("*")) return "Todas las sedes";
+    return user.sedeIds.map(formatSedeName).join(", ");
+  }, [user.sedeIds]);
 
   const closeDrawer = () => setDrawerOpen(false);
 
@@ -57,6 +88,22 @@ export function PortalShell({ user, children }: PortalShellProps) {
     }
   };
 
+  const renderNav = (onItemClick?: () => void) => (
+    <nav className="portal-nav-list" aria-label="Navegación principal">
+      {allowedItems.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={`portal-nav-link ${isRouteActive(pathname, item.href) ? "active" : ""}`}
+          onClick={onItemClick}
+        >
+          <span aria-hidden="true">{item.icon}</span>
+          <Text className="portal-nav-link-label">{item.label}</Text>
+        </Link>
+      ))}
+    </nav>
+  );
+
   return (
     <div className="portal-shell">
       <OverlayDrawer
@@ -66,22 +113,10 @@ export function PortalShell({ user, children }: PortalShellProps) {
         className="portal-drawer"
       >
         <div className="portal-drawer-header">
-          <Text weight="semibold">ARGOS</Text>
+          <Text weight="semibold">Navegación</Text>
           <Button appearance="subtle" icon={<Dismiss24Regular />} onClick={closeDrawer} aria-label="Cerrar menú" />
         </div>
-        <nav className="portal-nav-list">
-          {allowedItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`portal-nav-link ${isRouteActive(pathname, item.href) ? "active" : ""}`}
-              onClick={closeDrawer}
-            >
-              <span>{item.icon}</span>
-              <Text>{item.label}</Text>
-            </Link>
-          ))}
-        </nav>
+        {renderNav(closeDrawer)}
       </OverlayDrawer>
 
       <aside className="portal-sidebar">
@@ -90,27 +125,18 @@ export function PortalShell({ user, children }: PortalShellProps) {
             <div className="portal-brand-logo-wrap">
               <Image src="/argos-logo.webp" alt="Argos" width={116} height={40} className="portal-brand-logo" priority />
             </div>
-            <Text weight="semibold" block>
-              ARGOS
-            </Text>
-            <Text size={200} className="portal-brand-caption" block>
-              Plataforma Integral
-            </Text>
+            <div className="portal-brand-text">
+              <Text weight="semibold" block>
+                ARGOS
+              </Text>
+              <Text size={200} className="portal-brand-caption" block>
+                Plataforma Integral
+              </Text>
+            </div>
           </div>
         </div>
 
-        <nav className="portal-nav-list">
-          {allowedItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`portal-nav-link ${isRouteActive(pathname, item.href) ? "active" : ""}`}
-            >
-              <span>{item.icon}</span>
-              <Text>{item.label}</Text>
-            </Link>
-          ))}
-        </nav>
+        {renderNav()}
       </aside>
 
       <div className="portal-main-wrap">
@@ -125,16 +151,18 @@ export function PortalShell({ user, children }: PortalShellProps) {
             />
             <div>
               <Text weight="semibold" block>
-                ARGOS - Plataforma Integral
+                {activeNav?.label ?? "ARGOS"}
               </Text>
               <Text size={200} className="muted-text" block>
-                Sede: {user.sedeIds.includes("*") ? "Todas" : user.sedeIds.join(", ")}
+                Sedes: {sedeLabel}
               </Text>
             </div>
           </div>
 
           <div className="portal-topbar-right">
-            <Badge appearance="tint">{user.roles.join(", ")}</Badge>
+            <Badge appearance="tint" color="informative">
+              {roleLabel}
+            </Badge>
             <Tooltip content="Cerrar sesión" relationship="label">
               <Button
                 appearance="subtle"

@@ -11,7 +11,7 @@ const argosTheme: Theme = {
   colorBrandBackgroundPressed: "#011431",
   colorBrandForeground1: "#021D49",
   colorBrandForeground2: "#0072C9",
-  colorStrokeFocus2: "#B6D713",
+  colorStrokeFocus2: "#021D49",
   colorNeutralForeground1: "#1B2740",
   colorNeutralForeground2: "#4D4D4D",
   colorNeutralBackground1: "#F8FAFE",
@@ -19,7 +19,7 @@ const argosTheme: Theme = {
   colorNeutralBackground3: "#EAF0F7",
   colorNeutralStroke1: "#D7DFEB",
   colorNeutralStroke2: "#C8D3E4",
-  fontFamilyBase: "\"Trebuchet MS\", \"Avenir Next\", \"Segoe UI\", sans-serif",
+  fontFamilyBase: "\"Inter\", \"Segoe UI\", system-ui, -apple-system, sans-serif",
   fontFamilyMonospace: "\"SFMono-Regular\", Menlo, Monaco, Consolas, \"Liberation Mono\", monospace",
 };
 

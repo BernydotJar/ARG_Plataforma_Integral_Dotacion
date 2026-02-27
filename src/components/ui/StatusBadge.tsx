@@ -1,17 +1,29 @@
 import { Badge } from "@fluentui/react-components";
 
-const statusAppearance: Record<string, "filled" | "ghost" | "outline" | "tint"> = {
-  Borrador: "outline",
-  EnAprobacion: "tint",
-  Aprobado: "filled",
-  EnviadoSAP: "filled",
-  Rechazado: "ghost",
-  Abierto: "tint",
-  Cerrado: "filled",
-  PendienteAprobacion: "tint",
-  Registrado: "outline",
+const statusStyleMap: Record<
+  string,
+  {
+    appearance: "filled" | "ghost" | "outline" | "tint";
+    color: "brand" | "danger" | "important" | "informative" | "subtle" | "success" | "warning";
+  }
+> = {
+  Borrador: { appearance: "outline", color: "informative" },
+  EnAprobacion: { appearance: "tint", color: "warning" },
+  Aprobado: { appearance: "filled", color: "success" },
+  EnviadoSAP: { appearance: "filled", color: "brand" },
+  Rechazado: { appearance: "filled", color: "danger" },
+  Abierto: { appearance: "tint", color: "warning" },
+  EnProceso: { appearance: "tint", color: "important" },
+  Cerrado: { appearance: "filled", color: "success" },
+  PendienteAprobacion: { appearance: "tint", color: "warning" },
+  Registrado: { appearance: "outline", color: "informative" },
 };
 
 export function StatusBadge({ status }: { status?: string }) {
-  return <Badge appearance={statusAppearance[status || ""] || "outline"}>{status || "Sin estado"}</Badge>;
+  const style = statusStyleMap[status || ""] || { appearance: "outline", color: "informative" };
+  return (
+    <Badge appearance={style.appearance} color={style.color}>
+      {status || "Sin estado"}
+    </Badge>
+  );
 }

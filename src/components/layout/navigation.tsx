@@ -1,10 +1,10 @@
 import {
-  AppsList24Regular,
+  CheckmarkCircle24Regular,
   Box24Regular,
   ClipboardTask24Regular,
+  DatabaseSearch24Regular,
   Home24Regular,
   PeopleTeam24Regular,
-  Settings24Regular,
   Wrench24Regular,
 } from "@fluentui/react-icons";
 
@@ -38,7 +38,7 @@ export const navItems: NavItem[] = [
   {
     href: "/calidad",
     label: "Calidad",
-    icon: <AppsList24Regular />,
+    icon: <CheckmarkCircle24Regular />,
     roles: ["SuperAdmin", "AdminLocal", "InspectorCalidad"],
   },
   {
@@ -50,7 +50,7 @@ export const navItems: NavItem[] = [
   {
     href: "/admin/catalogos",
     label: "Admin Catálogos",
-    icon: <Settings24Regular />,
+    icon: <DatabaseSearch24Regular />,
     roles: ["SuperAdmin", "AdminLocal"],
   },
   {
