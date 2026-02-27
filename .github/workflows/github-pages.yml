@@ -1,0 +1,76 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: ["main", "dev"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build static site artifact
+        run: |
+          set -e
+          mkdir -p _site
+
+          # If docs/ exists, publish docs content first.
+          if [ -d docs ]; then
+            cp -R docs/* _site/
+          fi
+
+          # If root index exists, use it as homepage.
+          if [ -f index.html ]; then
+            cp index.html _site/index.html
+          fi
+
+          # Fallback page to avoid empty deployment.
+          if [ ! -f _site/index.html ]; then
+            cat > _site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="es">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>ARG Plataforma Integral Dotacion</title>
+          </head>
+          <body>
+            <h1>ARG Plataforma Integral Dotacion</h1>
+            <p>GitHub Pages configurado correctamente.</p>
+          </body>
+          </html>
+          HTML
+          fi
+
+          touch _site/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
