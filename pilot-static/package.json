@@ -8,6 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@fluentui/react-components": "^9.73.1",
+    "@fluentui/react-icons": "^2.0.319",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
