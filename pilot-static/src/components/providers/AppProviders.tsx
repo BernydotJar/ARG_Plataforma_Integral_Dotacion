@@ -1,6 +1,8 @@
 "use client";
 
-import { FluentProvider, SSRProvider, webLightTheme, type Theme } from "@fluentui/react-components";
+import { FluentProvider, SSRProvider, Toaster, webLightTheme, type Theme } from "@fluentui/react-components";
+
+export const APP_TOASTER_ID = "argos-toaster";
 
 const argosTheme: Theme = {
   ...webLightTheme,
@@ -18,6 +20,7 @@ const argosTheme: Theme = {
   colorNeutralStroke1: "#D7DFEB",
   colorNeutralStroke2: "#C8D3E4",
   fontFamilyBase: "\"Inter\", \"Segoe UI\", system-ui, -apple-system, sans-serif",
+  fontFamilyMonospace: "\"SFMono-Regular\", Menlo, Monaco, Consolas, \"Liberation Mono\", monospace",
 };
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
@@ -25,6 +28,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <SSRProvider>
       <FluentProvider theme={argosTheme} className="app-provider">
         {children}
+        <Toaster toasterId={APP_TOASTER_ID} position="top-end" />
       </FluentProvider>
     </SSRProvider>
   );

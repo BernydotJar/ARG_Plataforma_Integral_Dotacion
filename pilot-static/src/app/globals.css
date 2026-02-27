@@ -623,24 +623,3 @@ textarea:focus-visible,
     grid-template-columns: 1fr;
   }
 }
-
-/* Static pilot alignment helpers */
-.portal-nav-link {
-  background: transparent;
-  appearance: none;
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
-}
-
-.portal-main-wrap .fui-Card {
-  padding: 12px;
-}
-
-.portal-main-wrap .fui-Table {
-  margin-top: 8px;
-}
-
-.portal-main-wrap .fui-Badge {
-  font-weight: 700;
-}

@@ -10,41 +10,59 @@ import {
 } from "@fluentui/react-components";
 import { Dismiss24Regular, Navigation24Regular, SignOut24Regular } from "@fluentui/react-icons";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
-import type { AppRole, AppUser } from "../../lib/types";
+import { hasAnyRole } from "@/lib/auth/roles";
+import type { AppRole, AppUser } from "@/lib/types/app";
+
 import { navItems } from "./navigation";
 
 interface PortalShellProps {
   user: AppUser;
   children: React.ReactNode;
-  activeKey?: string;
 }
 
-const ROLE_DISPLAY_NAMES: Record<AppRole, string> = {
-  SuperAdmin: "SuperAdmin",
-  AdminLocal: "AdminLocal",
-  UsuarioPedidos: "UsuarioPedidos",
-  UsuarioFinal: "UsuarioFinal",
-  OperarioBodega: "OperarioBodega",
-  InspectorCalidad: "InspectorCalidad",
-  TecnicoMantenimiento: "TecnicoMantenimiento",
+const isRouteActive = (pathname: string, href: string): boolean => {
+  if (href === "/") return pathname === "/";
+  return pathname.startsWith(href);
 };
 
-const formatSedeName = (sedeId: string): string => {
-  if (sedeId === "*") return "Todas";
-  return sedeId
+const ROLE_DISPLAY_NAMES: Record<AppRole, string> = {
+  SuperAdmin: "Administrador Global",
+  AdminLocal: "Admin de Sede",
+  UsuarioPedidos: "Gestor de Pedidos",
+  UsuarioFinal: "Usuario",
+  OperarioBodega: "Operario de Bodega",
+  InspectorCalidad: "Inspector de Calidad",
+  TecnicoMantenimiento: "Técnico de Mantenimiento",
+};
+
+const formatSedeName = (sedeId: string): string =>
+  sedeId
     .toLowerCase()
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
-};
 
-export function PortalShell({ user, children, activeKey = "inicio" }: PortalShellProps) {
+const repoBasePath = process.env.NODE_ENV === "production" ? "/ARG_Plataforma_Integral_Dotacion" : "";
+const logoSrc = `${repoBasePath}/argos-logo.webp`;
+
+export function PortalShell({ user, children }: PortalShellProps) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const logoSrc =
-    process.env.NODE_ENV === "production"
-      ? "/ARG_Plataforma_Integral_Dotacion/argos-logo.webp"
-      : "/argos-logo.webp";
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const allowedItems = useMemo(
+    () => navItems.filter((item) => !item.roles || hasAnyRole(user, item.roles)),
+    [user],
+  );
+
+  const activeNav = useMemo(
+    () => allowedItems.find((item) => isRouteActive(pathname, item.href)),
+    [allowedItems, pathname],
+  );
 
   const roleLabel = useMemo(
     () => user.roles.map((role) => ROLE_DISPLAY_NAMES[role] ?? role).join(", "),
@@ -52,24 +70,39 @@ export function PortalShell({ user, children, activeKey = "inicio" }: PortalShel
   );
 
   const sedeLabel = useMemo(() => {
-    if (user.sedeIds.includes("*")) return "Todas";
+    if (user.sedeIds.includes("*")) return "Todas las sedes";
     return user.sedeIds.map(formatSedeName).join(", ");
   }, [user.sedeIds]);
 
   const closeDrawer = () => setDrawerOpen(false);
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      setIsLoggingOut(false);
+      router.push("/login");
+      router.refresh();
+    }
+  };
+
   const renderNav = (onItemClick?: () => void) => (
     <nav className="portal-nav-list" aria-label="Navegación principal">
-      {navItems.map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          className={`portal-nav-link ${item.key === activeKey ? "active" : ""}`}
+      {allowedItems.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={`portal-nav-link ${isRouteActive(pathname, item.href) ? "active" : ""}`}
           onClick={onItemClick}
         >
           <span aria-hidden="true">{item.icon}</span>
           <Text className="portal-nav-link-label">{item.label}</Text>
-        </button>
+        </Link>
       ))}
     </nav>
   );
@@ -121,10 +154,10 @@ export function PortalShell({ user, children, activeKey = "inicio" }: PortalShel
             />
             <div>
               <Text weight="semibold" block>
-                ARGOS - Plataforma Integral
+                {activeNav?.label ?? "ARGOS"}
               </Text>
               <Text size={200} className="muted-text" block>
-                Sede: {sedeLabel}
+                Sedes: {sedeLabel}
               </Text>
             </div>
           </div>
@@ -134,7 +167,13 @@ export function PortalShell({ user, children, activeKey = "inicio" }: PortalShel
               {roleLabel}
             </Badge>
             <Tooltip content="Cerrar sesión" relationship="label">
-              <Button appearance="subtle" icon={<SignOut24Regular />} aria-label="Cerrar sesión" />
+              <Button
+                appearance="subtle"
+                icon={<SignOut24Regular />}
+                disabled={isLoggingOut}
+                onClick={handleLogout}
+                aria-label="Cerrar sesión"
+              />
             </Tooltip>
           </div>
         </header>

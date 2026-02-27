@@ -1,7 +1,7 @@
-import { Inter } from "next/font/google";
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
-import { AppProviders } from "../components/providers/AppProviders";
+import { AppProviders } from "@/components/providers/AppProviders";
 
 import "./globals.css";
 
@@ -13,13 +13,13 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "ARGOS - Plataforma Integral",
-  description: "Pilot estático alineado al portal main/dev.",
+  description: "Portal corporativo para Dotación, Inventario, Calidad y Mantenimiento",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es">
-      <body className={inter.variable}>
+    <html lang="es" className={inter.variable}>
+      <body>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
