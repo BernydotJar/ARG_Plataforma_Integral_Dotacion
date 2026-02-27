@@ -1,8 +1,9 @@
-name: Deploy GitHub Pages
+name: GitHub Pages
 
 on:
   push:
-    branches: ["main", "dev"]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -16,27 +17,38 @@ concurrency:
 
 jobs:
   build:
+    name: Build Site Artifact
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build static site artifact
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Create static pages artifact
         run: |
-          set -e
+          set -euo pipefail
           mkdir -p _site
 
-          # If docs/ exists, publish docs content first.
           if [ -d docs ]; then
-            cp -R docs/* _site/
+            cp -R docs/. _site/
           fi
 
-          # If root index exists, use it as homepage.
           if [ -f index.html ]; then
             cp index.html _site/index.html
           fi
 
-          # Fallback page to avoid empty deployment.
           if [ ! -f _site/index.html ]; then
             cat > _site/index.html <<'HTML'
           <!doctype html>
@@ -44,11 +56,42 @@ jobs:
           <head>
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <title>ARG Plataforma Integral Dotacion</title>
+            <title>ARGOS - Plataforma Integral</title>
+            <style>
+              :root { color-scheme: light; }
+              body {
+                margin: 0;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                background: linear-gradient(180deg, #f5f7fb 0%, #eef3f8 100%);
+                color: #102a43;
+              }
+              main {
+                min-height: 100vh;
+                display: grid;
+                place-items: center;
+                padding: 24px;
+              }
+              section {
+                background: #ffffff;
+                border: 1px solid #d9e2ec;
+                border-radius: 16px;
+                padding: 24px;
+                max-width: 760px;
+                box-shadow: 0 8px 30px rgba(16, 42, 67, 0.08);
+              }
+              h1 { margin-top: 0; font-size: 1.5rem; }
+              p { line-height: 1.5; }
+              a { color: #005a9e; }
+            </style>
           </head>
           <body>
-            <h1>ARG Plataforma Integral Dotacion</h1>
-            <p>GitHub Pages configurado correctamente.</p>
+            <main>
+              <section>
+                <h1>ARGOS - Plataforma Integral</h1>
+                <p>GitHub Pages esta configurado correctamente.</p>
+                <p>El portal principal se ejecuta como aplicacion Next.js (SSR/API) y su CI se valida en GitHub Actions.</p>
+              </section>
+            </main>
           </body>
           </html>
           HTML
@@ -59,18 +102,19 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
   deploy:
+    name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
