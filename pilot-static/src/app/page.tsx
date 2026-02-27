@@ -1,10 +1,8 @@
-import Image from "next/image";
-
 const modules = [
-  { title: "Dotación / Pedidos", description: "Solicitudes, aprobaciones y trazabilidad de entrega.", count: "18" },
-  { title: "Inventario", description: "Control de stock, movimientos y ajustes por sede.", count: "42" },
-  { title: "Calidad", description: "Inspecciones, checklist y defectos con seguimiento.", count: "9" },
-  { title: "Mantenimiento", description: "Tickets técnicos y planes preventivos operativos.", count: "13" },
+  { id: "dotacion", title: "Dotación / Pedidos", description: "Solicitudes, aprobaciones y trazabilidad de entrega.", count: "18" },
+  { id: "inventario", title: "Inventario", description: "Control de stock, movimientos y ajustes por sede.", count: "42" },
+  { id: "calidad", title: "Calidad", description: "Inspecciones, checklist y defectos con seguimiento.", count: "9" },
+  { id: "mantenimiento", title: "Mantenimiento", description: "Tickets técnicos y planes preventivos operativos.", count: "13" },
 ];
 
 const pendientes = [
@@ -14,12 +12,16 @@ const pendientes = [
 ];
 
 export default function PilotHomePage() {
+  const logoPath = process.env.NODE_ENV === "production"
+    ? "/ARG_Plataforma_Integral_Dotacion/argos-logo.webp"
+    : "/argos-logo.webp";
+
   return (
     <main className="pilot-shell">
       <aside className="pilot-sidebar">
         <div className="pilot-brand">
           <div className="pilot-logo-wrap">
-            <Image src="/argos-logo.webp" alt="Argos" width={116} height={40} priority />
+            <img src={logoPath} alt="Argos" width={116} height={40} />
           </div>
           <h1>ARGOS</h1>
           <p>Plataforma Integral</p>
@@ -43,7 +45,7 @@ export default function PilotHomePage() {
 
         <section className="pilot-cards" aria-label="Resumen por módulo">
           {modules.map((module) => (
-            <article key={module.title} className="pilot-card" id={module.title.toLowerCase().replace(/\s+|\//g, "-")}>
+            <article key={module.id} className="pilot-card" id={module.id}>
               <div className="pilot-card-head">
                 <h3>{module.title}</h3>
                 <span>{module.count}</span>
