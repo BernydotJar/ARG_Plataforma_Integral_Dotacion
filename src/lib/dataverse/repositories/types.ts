@@ -1,8 +1,11 @@
 import type {
+  CentroCosto,
   InspeccionCalidad,
   InspeccionDetail,
   IntegrationRequest,
   Inventario,
+  KitDotacion,
+  KitDotacionItem,
   MovimientoInventario,
   PedidoDetail,
   PedidoDotacion,
@@ -93,6 +96,29 @@ export interface IntegrationRequestInput {
   payload: Record<string, unknown>;
 }
 
+export interface CentroCostoCreateInput {
+  sedeId?: string;
+  codigo: string;
+  nombre: string;
+}
+
+export interface KitDotacionCreateInput {
+  sedeId?: string;
+  nombre: string;
+  genero: KitDotacion["genero"];
+  cargo: string;
+  ciclo: string;
+  items: Array<{
+    itemNombre: string;
+    cantidad: number;
+    obligatorio: boolean;
+  }>;
+}
+
+export type KitDotacionWithItems = KitDotacion & {
+  items: KitDotacionItem[];
+};
+
 export interface IPedidoRepository {
   list(user: AppUser, filters?: ListFilters): Promise<PedidoDotacion[]>;
   create(user: AppUser, input: PedidoCreateInput): Promise<PedidoDotacion>;
@@ -131,6 +157,9 @@ export interface IAdminRepository {
     itemsDotacion: unknown[];
     tallas: unknown[];
     proveedores: unknown[];
+    centrosCosto: unknown[];
+    kitsDotacion: unknown[];
+    kitDotacionItems: unknown[];
     tiposDefecto: unknown[];
     severidades: unknown[];
     criteriosChecklist: unknown[];
@@ -146,6 +175,10 @@ export interface IAdminRepository {
       sedes: string[];
     }>;
   }>;
+  listCentrosCosto(user: AppUser): Promise<CentroCosto[]>;
+  createCentroCosto(user: AppUser, input: CentroCostoCreateInput): Promise<CentroCosto>;
+  listKits(user: AppUser): Promise<KitDotacionWithItems[]>;
+  createKit(user: AppUser, input: KitDotacionCreateInput): Promise<KitDotacionWithItems>;
 }
 
 export interface IIntegrationRepository {

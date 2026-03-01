@@ -34,17 +34,24 @@ export {
 } from "./calidad.repository";
 
 export {
+  createCentroCosto,
+  createKit,
   listCatalogos,
+  listCentrosCosto,
+  listKits,
   listUserRoleCatalog,
 } from "./admin.repository";
 
 export { getDashboardData } from "./dashboard.service";
 
 export type {
+  CentroCostoCreateInput,
   DashboardData,
   HistorialEventInput,
   InspeccionCreateInput,
   IntegrationRequestInput,
+  KitDotacionCreateInput,
+  KitDotacionWithItems,
   ListFilters,
   MovimientoCreateInput,
   PedidoCreateInput,

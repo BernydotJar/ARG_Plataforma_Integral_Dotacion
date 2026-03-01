@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Secondary app artifacts (pilot-static)
+    "pilot-static/.next/**",
+    "pilot-static/out/**",
+    "pilot-static/node_modules/**",
   ]),
 ]);
 

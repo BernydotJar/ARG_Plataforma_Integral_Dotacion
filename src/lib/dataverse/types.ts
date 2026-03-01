@@ -82,6 +82,11 @@ export interface Proveedor extends EntityBase {
   nit?: string;
 }
 
+export interface CentroCosto extends EntityBase {
+  codigo: string;
+  nombre: string;
+}
+
 export interface PedidoDotacion extends EntityBase<EstadoPedidoDotacion> {
   codigo: string;
   empleadoNombre: string;
@@ -89,6 +94,20 @@ export interface PedidoDotacion extends EntityBase<EstadoPedidoDotacion> {
   observacion?: string;
   totalItems: number;
   prioridad: "Baja" | "Media" | "Alta";
+}
+
+export interface KitDotacion extends EntityBase {
+  nombre: string;
+  genero: "Masculino" | "Femenino" | "Unisex";
+  cargo: string;
+  ciclo: string;
+}
+
+export interface KitDotacionItem extends EntityBase {
+  kitId: string;
+  itemNombre: string;
+  cantidad: number;
+  obligatorio: boolean;
 }
 
 export interface PedidoDotacionDetalle extends EntityBase {

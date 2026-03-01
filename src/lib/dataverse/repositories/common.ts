@@ -3,11 +3,14 @@ import { env } from "@/lib/config/env";
 import { createMockEvent, createMockId, getMockDb } from "@/lib/dataverse/mock-store";
 import type {
   ActividadMantenimiento,
+  CentroCosto,
   ChecklistCalidad,
   DefectoCalidad,
   HistorialEvento,
   InspeccionCalidad,
   Inventario,
+  KitDotacion,
+  KitDotacionItem,
   MovimientoInventario,
   PedidoDotacion,
   PedidoDotacionDetalle,
@@ -85,6 +88,25 @@ const asEnumValue = <T extends readonly string[]>(
   return (allowed as readonly string[]).includes(candidate) ? (candidate as T[number]) : fallback;
 };
 
+const asBoolean = (value: unknown, fallback = false): boolean => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["true", "1", "yes", "si", "sí"].includes(normalized)) return true;
+    if (["false", "0", "no"].includes(normalized)) return false;
+  }
+  return fallback;
+};
+
+const asKitGenero = (value: unknown): KitDotacion["genero"] => {
+  const candidate = String(value || "").trim();
+  if (candidate === "Masculino" || candidate === "Femenino" || candidate === "Unisex") {
+    return candidate;
+  }
+  return "Unisex";
+};
+
 export const rowToPedido = (row: Record<string, unknown>): PedidoDotacion => ({
   id: String(row.crf1_pedidodotacionid || row.pedidodotacionid || row.id || ""),
   sedeId: String(row.crf1_sedeid || row.sedeid || DEFAULT_SEDE_FALLBACK),
@@ -135,6 +157,40 @@ export const rowToInventario = (row: Record<string, unknown>): Inventario => ({
   stockActual: Number(row.crf1_stockactual || row.stockactual || 0),
   stockMinimo: Number(row.crf1_stockminimo || row.stockminimo || 0),
   estado: String(row.crf1_estado || row.estado || DEFAULT_INVENTARIO_STATUS),
+  createdOn: String(row.createdon || new Date().toISOString()),
+  modifiedOn: String(row.modifiedon || new Date().toISOString()),
+});
+
+export const rowToCentroCosto = (row: Record<string, unknown>): CentroCosto => ({
+  id: String(row.crf1_centrocostoid || row.centrocostoid || row.id || ""),
+  sedeId: String(row.crf1_sedeid || row.sedeid || DEFAULT_SEDE_FALLBACK),
+  codigo: String(row.crf1_codigo || row.codigo || ""),
+  nombre: String(row.crf1_nombre || row.nombre || ""),
+  estado: String(row.crf1_estado || row.estado || "Activo"),
+  createdOn: String(row.createdon || new Date().toISOString()),
+  modifiedOn: String(row.modifiedon || new Date().toISOString()),
+});
+
+export const rowToKit = (row: Record<string, unknown>): KitDotacion => ({
+  id: String(row.crf1_kitdotacionid || row.kitdotacionid || row.id || ""),
+  sedeId: String(row.crf1_sedeid || row.sedeid || DEFAULT_SEDE_FALLBACK),
+  nombre: String(row.crf1_nombre || row.nombre || "Kit sin nombre"),
+  genero: asKitGenero(row.crf1_genero || row.genero),
+  cargo: String(row.crf1_cargo || row.cargo || ""),
+  ciclo: String(row.crf1_ciclo || row.ciclo || ""),
+  estado: String(row.crf1_estado || row.estado || "Activo"),
+  createdOn: String(row.createdon || new Date().toISOString()),
+  modifiedOn: String(row.modifiedon || new Date().toISOString()),
+});
+
+export const rowToKitItem = (row: Record<string, unknown>, defaultSedeId: string): KitDotacionItem => ({
+  id: String(row.crf1_kitdotacionitemid || row.kitdotacionitemid || row.id || ""),
+  sedeId: String(row.crf1_sedeid || row.sedeid || defaultSedeId),
+  kitId: String(row.crf1_kitid || row._crf1_kitid_value || row.crf1_kitdotacionid || row.kitid || ""),
+  itemNombre: String(row.crf1_itemnombre || row.itemnombre || ""),
+  cantidad: Number(row.crf1_cantidad || row.cantidad || 0),
+  obligatorio: asBoolean(row.crf1_obligatorio ?? row.obligatorio, false),
+  estado: String(row.crf1_estado || row.estado || "Activo"),
   createdOn: String(row.createdon || new Date().toISOString()),
   modifiedOn: String(row.modifiedon || new Date().toISOString()),
 });

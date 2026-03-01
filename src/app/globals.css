@@ -350,6 +350,23 @@ textarea:focus-visible,
   flex-wrap: wrap;
 }
 
+.catalog-inline-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.catalog-inline-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: var(--space-3);
+  align-items: end;
+  padding: var(--space-3);
+  border: 1px solid var(--neutral-200);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
 .centered-state {
   display: flex;
   align-items: center;
@@ -607,6 +624,10 @@ textarea:focus-visible,
   }
 
   .detail-row {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-inline-item {
     grid-template-columns: 1fr;
   }
 

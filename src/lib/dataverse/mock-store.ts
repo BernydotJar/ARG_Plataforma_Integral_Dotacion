@@ -3,6 +3,7 @@ import type {
   Area,
   Bodega,
   ChecklistCalidad,
+  CentroCosto,
   CriterioChecklist,
   DefectoCalidad,
   Empleado,
@@ -12,6 +13,8 @@ import type {
   IntegrationRequest,
   Inventario,
   ItemDotacion,
+  KitDotacion,
+  KitDotacionItem,
   MovimientoInventario,
   PedidoDotacion,
   PedidoDotacionDetalle,
@@ -34,6 +37,9 @@ type MockDatabase = {
   itemsDotacion: ItemDotacion[];
   tallas: Talla[];
   proveedores: Proveedor[];
+  centrosCosto: CentroCosto[];
+  kitsDotacion: KitDotacion[];
+  kitDotacionItems: KitDotacionItem[];
   pedidos: PedidoDotacion[];
   pedidoDetalles: PedidoDotacionDetalle[];
   historial: HistorialEvento[];
@@ -198,6 +204,66 @@ const seedDatabase = (): MockDatabase => {
       sedeId: sedeCentro.id,
       nombre: "Seguridad Industrial S.A.S.",
       nit: "900123456",
+      estado: "Activo",
+      createdOn: now,
+      modifiedOn: now,
+    },
+  ];
+
+  const centrosCosto: CentroCosto[] = [
+    {
+      id: "ceco-001",
+      sedeId: sedeCentro.id,
+      codigo: "CC-1001",
+      nombre: "Operaciones Planta Centro",
+      estado: "Activo",
+      createdOn: now,
+      modifiedOn: now,
+    },
+    {
+      id: "ceco-002",
+      sedeId: sedeNorte.id,
+      codigo: "CC-2001",
+      nombre: "Mantenimiento Planta Norte",
+      estado: "Activo",
+      createdOn: now,
+      modifiedOn: now,
+    },
+  ];
+
+  const kitsDotacion: KitDotacion[] = [
+    {
+      id: "kit-001",
+      sedeId: sedeCentro.id,
+      nombre: "Kit Operario Semestre 1",
+      genero: "Unisex",
+      cargo: "Operario",
+      ciclo: "2026-S1",
+      estado: "Activo",
+      createdOn: now,
+      modifiedOn: now,
+    },
+  ];
+
+  const kitDotacionItems: KitDotacionItem[] = [
+    {
+      id: "kit-item-001",
+      sedeId: sedeCentro.id,
+      kitId: "kit-001",
+      itemNombre: "Bota de seguridad",
+      cantidad: 1,
+      obligatorio: true,
+      estado: "Activo",
+      createdOn: now,
+      modifiedOn: now,
+    },
+    {
+      id: "kit-item-002",
+      sedeId: sedeCentro.id,
+      kitId: "kit-001",
+      itemNombre: "Casco industrial",
+      cantidad: 1,
+      obligatorio: true,
       estado: "Activo",
       createdOn: now,
       modifiedOn: now,
@@ -413,6 +479,9 @@ const seedDatabase = (): MockDatabase => {
     itemsDotacion,
     tallas,
     proveedores,
+    centrosCosto,
+    kitsDotacion,
+    kitDotacionItems,
     pedidos: [pedidoInicial],
     pedidoDetalles,
     historial,
