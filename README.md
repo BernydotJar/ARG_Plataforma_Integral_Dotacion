@@ -66,6 +66,9 @@ Crear `.env.local` en la raíz.
 | `NEXT_PUBLIC_APP_NAME` | No | Nombre visible de la app |
 | `APP_SESSION_SECRET` | Sí (prod) | Secreto para firmar cookie de sesión |
 | `DEMO_MODE` | No | `true` para forzar modo demo |
+| `DEMO_OPERARIO_PASSWORD` | No | Contraseña para login operario en modo demo (default: `Operario2026!`) |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | No | Site key de Cloudflare Turnstile (habilita widget en login operario) |
+| `TURNSTILE_SECRET_KEY` | No | Secret key de Cloudflare Turnstile (valida token en backend) |
 | `DEFAULT_SEDES` | No | CSV de sedes por defecto (ej: `SEDE-CENTRAL,SEDE-NORTE`) |
 
 ### 4.2 Entra ID / MSAL
@@ -116,6 +119,15 @@ Si falta cualquiera, el sistema entra en modo demo automáticamente.
 | `FLOW_SAP_SYNC_STATUS_URL` | No | Endpoint flow SAP sync |
 
 Si no hay URL/config suficiente, el sistema registra `IntegrationRequest` (o stub en modo demo).
+
+### 4.6 Captcha (operario, opcional)
+
+| Variable | Requerida | Descripción |
+|---|---|---|
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | No | Site key para renderizar captcha en la UI |
+| `TURNSTILE_SECRET_KEY` | No | Secret key para validar token en server |
+
+Si ambas variables están configuradas, el login de operario exige completar captcha antes de crear sesión.
 
 ## 5. Seguridad de flows (recomendado)
 

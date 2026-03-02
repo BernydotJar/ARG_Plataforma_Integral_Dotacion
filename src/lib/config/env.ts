@@ -17,6 +17,11 @@ export const env = {
   appName: read("NEXT_PUBLIC_APP_NAME") || "ARGOS - Plataforma Integral",
   appSessionSecret: read("APP_SESSION_SECRET") || "argos-dev-session-secret-change-me",
   demoModeForced: toBoolean(read("DEMO_MODE"), false),
+  demoOperarioPassword: read("DEMO_OPERARIO_PASSWORD") || "Operario2026!",
+  turnstile: {
+    siteKey: read("NEXT_PUBLIC_TURNSTILE_SITE_KEY"),
+    secretKey: read("TURNSTILE_SECRET_KEY"),
+  },
   entra: {
     tenantId: read("ENTRA_TENANT_ID") || read("NEXT_PUBLIC_ENTRA_TENANT_ID"),
     clientId: read("ENTRA_CLIENT_ID") || read("NEXT_PUBLIC_ENTRA_CLIENT_ID"),
@@ -55,3 +60,6 @@ export const isDemoMode = (): boolean => {
   if (env.demoModeForced) return true;
   return !hasDataverseConfig();
 };
+
+export const isTurnstileConfigured = (): boolean =>
+  Boolean(env.turnstile.siteKey && env.turnstile.secretKey);

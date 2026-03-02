@@ -555,6 +555,14 @@ textarea:focus-visible,
   gap: 14px;
 }
 
+.turnstile-slot {
+  min-height: 68px;
+}
+
+.turnstile-slot iframe {
+  max-width: 100%;
+}
+
 .only-mobile {
   display: none;
 }
