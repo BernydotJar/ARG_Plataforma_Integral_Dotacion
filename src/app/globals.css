@@ -161,8 +161,11 @@ textarea:focus-visible,
 }
 
 .portal-brand-logo {
-  width: auto;
-  height: 28px;
+  display: block;
+  width: 108px !important;
+  height: auto !important;
+  object-fit: contain;
+  object-position: left center;
 }
 
 .portal-brand-caption {
@@ -467,11 +470,15 @@ textarea:focus-visible,
 }
 
 .login-logo {
-  width: auto;
-  height: 38px;
-  padding: 4px 8px;
+  display: block;
+  width: 160px !important;
+  max-width: 100%;
+  height: auto !important;
+  object-fit: contain;
+  object-position: left center;
+  padding: 8px 10px;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
 }
 
 .login-card {
@@ -542,7 +549,8 @@ textarea:focus-visible,
   }
 
   .portal-brand-logo {
-    height: 24px;
+    width: 78px !important;
+    height: auto !important;
   }
 
   .portal-brand-text {

@@ -126,7 +126,7 @@ export function PortalShell({ user, children }: PortalShellProps) {
         <div className="portal-brand">
           <div>
             <div className="portal-brand-logo-wrap">
-              <Image src={logoSrc} alt="Argos" width={116} height={40} className="portal-brand-logo" priority />
+              <Image src={logoSrc} alt="Argos" width={302} height={166} className="portal-brand-logo" priority />
             </div>
             <div className="portal-brand-text">
               <Text weight="semibold" block>

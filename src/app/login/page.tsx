@@ -108,7 +108,7 @@ export default function LoginPage() {
   return (
     <main className="login-page">
       <div className="login-hero">
-        <Image src="/argos-logo.webp" alt="Argos" width={130} height={45} className="login-logo" priority />
+        <Image src="/argos-logo.webp" alt="Argos" width={302} height={166} className="login-logo" priority />
         <Text as="h1" size={900} weight="semibold" block>
           ARGOS
         </Text>
