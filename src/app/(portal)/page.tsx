@@ -18,6 +18,7 @@ import { CalendarClock24Regular, Search24Regular } from "@fluentui/react-icons";
 import { useRouter } from "next/navigation";
 import { KeyboardEvent, useCallback, useEffect, useState } from "react";
 
+import { PlantWorkerHero } from "@/components/home/PlantWorkerHero";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
@@ -70,6 +71,8 @@ export default function HomePage() {
         title="Inicio"
         description="Resumen operativo por módulos y pendientes del usuario"
       />
+
+      {!loading ? <PlantWorkerHero /> : null}
 
       {loading ? (
         <>

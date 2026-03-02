@@ -14,6 +14,7 @@ import {
 import { useRouter } from "next/navigation";
 import { KeyboardEvent } from "react";
 
+import { PlantWorkerHero } from "@/components/home/PlantWorkerHero";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { dashboardCards, pendingItems } from "@/lib/mock-data";
 
@@ -34,6 +35,8 @@ export default function HomePage() {
         title="Inicio"
         description="Resumen operativo por módulos y pendientes del usuario"
       />
+
+      <PlantWorkerHero />
 
       <div className="card-grid four-col">
         {dashboardCards.map((card) => (
