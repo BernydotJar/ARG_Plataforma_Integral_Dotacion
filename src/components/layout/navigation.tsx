@@ -1,6 +1,7 @@
 import {
-  CheckmarkCircle24Regular,
+  ArrowSync24Regular,
   Box24Regular,
+  CheckmarkCircle24Regular,
   ClipboardTask24Regular,
   DatabaseSearch24Regular,
   Home24Regular,
@@ -52,6 +53,12 @@ export const navItems: NavItem[] = [
     label: "Admin Catálogos",
     icon: <DatabaseSearch24Regular />,
     roles: ["SuperAdmin", "AdminLocal"],
+  },
+  {
+    href: "/admin/integraciones",
+    label: "Integraciones",
+    icon: <ArrowSync24Regular />,
+    roles: ["SuperAdmin", "AdminLocal", "UsuarioPedidos"],
   },
   {
     href: "/admin/usuarios-roles",

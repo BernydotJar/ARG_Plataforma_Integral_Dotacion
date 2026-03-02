@@ -131,6 +131,8 @@ Este frontend espera endpoints REST equivalentes a:
 - `GET/POST /admin/catalogos/centros-costo`
 - `GET/POST /admin/catalogos/kits`
 - `GET /admin/usuarios-roles`
+- `GET /integraciones/ssff/estado`
+- `POST /integraciones/ssff/sync`
 - `POST /integration/historial`
 - `POST /integration/requests`
 
