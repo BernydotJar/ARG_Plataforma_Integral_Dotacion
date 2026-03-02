@@ -5,12 +5,14 @@ import type { ApiError } from "@/lib/types/app";
 export class ApiRequestError extends Error {
   status: number;
   details?: string;
+  requestId?: string;
 
-  constructor(message: string, status: number, details?: string) {
+  constructor(message: string, status: number, details?: string, requestId?: string) {
     super(message);
     this.name = "ApiRequestError";
     this.status = status;
     this.details = details;
+    this.requestId = requestId;
   }
 }
 
@@ -36,10 +38,15 @@ export const apiFetch = async <T>(
       payload = null;
     }
 
+    const requestId = payload?.requestId || response.headers.get("x-request-id") || undefined;
+    const baseMessage = payload?.error || "Error inesperado en la solicitud";
+    const message = requestId ? `${baseMessage} (ref: ${requestId})` : baseMessage;
+
     throw new ApiRequestError(
-      payload?.error || "Error inesperado en la solicitud",
+      message,
       response.status,
       payload?.details,
+      requestId,
     );
   }
 

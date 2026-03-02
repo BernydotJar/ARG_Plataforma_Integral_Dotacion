@@ -1,14 +1,34 @@
 import { NextResponse } from "next/server";
 
-export const jsonOk = <T>(data: T, init?: ResponseInit) => NextResponse.json(data, init);
+const withRequestId = (init: ResponseInit | undefined, requestId: string): ResponseInit => {
+  const headers = new Headers(init?.headers);
+  headers.set("x-request-id", requestId);
 
-export const jsonError = (error: string, status = 400, details?: string) =>
+  return {
+    ...(init || {}),
+    headers,
+  };
+};
+
+export const jsonOk = <T>(
+  data: T,
+  init?: ResponseInit,
+  requestId = crypto.randomUUID(),
+) => NextResponse.json(data, withRequestId(init, requestId));
+
+export const jsonError = (
+  error: string,
+  status = 400,
+  details?: string,
+  requestId = crypto.randomUUID(),
+) =>
   NextResponse.json(
     {
       error,
       ...(details ? { details } : {}),
+      requestId,
     },
-    { status },
+    withRequestId({ status }, requestId),
   );
 
 export const readJson = async <T>(request: Request): Promise<T> => (await request.json()) as T;

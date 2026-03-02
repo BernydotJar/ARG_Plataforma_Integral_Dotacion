@@ -45,4 +45,5 @@ export interface PendingItem {
 export interface ApiError {
   error: string;
   details?: string;
+  requestId?: string;
 }
