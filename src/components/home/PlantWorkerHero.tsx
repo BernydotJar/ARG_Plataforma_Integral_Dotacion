@@ -1,5 +1,9 @@
+"use client";
+
 import { Badge, Card, Text } from "@fluentui/react-components";
 import { CheckmarkCircle24Regular } from "@fluentui/react-icons";
+import Image from "next/image";
+import { useState } from "react";
 
 const highlights = [
   "Dotación por sede y rol",
@@ -8,6 +12,8 @@ const highlights = [
 ] as const;
 
 export function PlantWorkerHero() {
+  const [showAfterGif, setShowAfterGif] = useState(false);
+
   return (
     <Card className="plant-hero-card">
       <div className="plant-hero-grid">
@@ -33,18 +39,30 @@ export function PlantWorkerHero() {
         </div>
 
         <div className="plant-hero-stage" aria-hidden="true">
-          <video
-            className="plant-hero-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster="/media/operario-poster.jpg"
-          >
-            <source src="/media/operario.webm" type="video/webm" />
-            <source src="/media/operario.mp4" type="video/mp4" />
-          </video>
+          {showAfterGif ? (
+            <Image
+              className="plant-hero-media"
+              src="/media/operario-after.gif"
+              alt=""
+              width={320}
+              height={180}
+              unoptimized
+            />
+          ) : (
+            <video
+              className="plant-hero-media"
+              autoPlay
+              muted
+              playsInline
+              preload="metadata"
+              poster="/media/operario-poster.jpg"
+              onEnded={() => setShowAfterGif(true)}
+              onError={() => setShowAfterGif(true)}
+            >
+              <source src="/media/operario.webm" type="video/webm" />
+              <source src="/media/operario.mp4" type="video/mp4" />
+            </video>
+          )}
         </div>
       </div>
     </Card>

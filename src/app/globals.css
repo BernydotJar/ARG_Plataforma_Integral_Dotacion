@@ -373,7 +373,7 @@ textarea:focus-visible,
   pointer-events: none;
 }
 
-.plant-hero-video {
+.plant-hero-media {
   display: block;
   width: 100%;
   height: 100%;
@@ -705,7 +705,7 @@ textarea:focus-visible,
     min-height: 220px;
   }
 
-  .plant-hero-video {
+  .plant-hero-media {
     min-height: 220px;
   }
 

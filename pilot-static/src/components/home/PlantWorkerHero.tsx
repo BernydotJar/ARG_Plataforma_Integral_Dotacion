@@ -1,5 +1,9 @@
+"use client";
+
 import { Badge, Card, Text } from "@fluentui/react-components";
 import { CheckmarkCircle24Regular } from "@fluentui/react-icons";
+import Image from "next/image";
+import { useState } from "react";
 
 const highlights = [
   "Dotación por sede y rol",
@@ -11,8 +15,11 @@ const repoBasePath = process.env.NODE_ENV === "production" ? "/ARG_Plataforma_In
 const posterSrc = `${repoBasePath}/media/operario-poster.jpg`;
 const webmSrc = `${repoBasePath}/media/operario.webm`;
 const mp4Src = `${repoBasePath}/media/operario.mp4`;
+const afterGifSrc = `${repoBasePath}/media/operario-after.gif`;
 
 export function PlantWorkerHero() {
+  const [showAfterGif, setShowAfterGif] = useState(false);
+
   return (
     <Card className="plant-hero-card">
       <div className="plant-hero-grid">
@@ -38,18 +45,30 @@ export function PlantWorkerHero() {
         </div>
 
         <div className="plant-hero-stage" aria-hidden="true">
-          <video
-            className="plant-hero-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster={posterSrc}
-          >
-            <source src={webmSrc} type="video/webm" />
-            <source src={mp4Src} type="video/mp4" />
-          </video>
+          {showAfterGif ? (
+            <Image
+              className="plant-hero-media"
+              src={afterGifSrc}
+              alt=""
+              width={320}
+              height={180}
+              unoptimized
+            />
+          ) : (
+            <video
+              className="plant-hero-media"
+              autoPlay
+              muted
+              playsInline
+              preload="metadata"
+              poster={posterSrc}
+              onEnded={() => setShowAfterGif(true)}
+              onError={() => setShowAfterGif(true)}
+            >
+              <source src={webmSrc} type="video/webm" />
+              <source src={mp4Src} type="video/mp4" />
+            </video>
+          )}
         </div>
       </div>
     </Card>
