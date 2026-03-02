@@ -1,9 +1,8 @@
 import "server-only";
 
+import { backendApiFetch } from "@/lib/backend/client";
 import { isDemoMode } from "@/lib/config/env";
-import { getDataverseClient } from "@/lib/dataverse/client";
 import { createMockAttachment, createMockId, getMockDb } from "@/lib/dataverse/mock-store";
-import { dataverseEntitySet } from "@/lib/dataverse/schema";
 import type {
   EntityAttachment,
   PedidoDetail,
@@ -16,17 +15,8 @@ import {
   applyTextSearch,
   generateCode,
   getRequestedSede,
-  rowToAttachment,
-  rowToHistorial,
-  rowToPedido,
-  rowToPedidoDetalle,
   scopeMatchesFilters,
 } from "./common";
-import {
-  QUERY_TOP_DEFAULT,
-  QUERY_TOP_DETAIL,
-  QUERY_TOP_HISTORY,
-} from "./constants";
 import { logHistorialEvent } from "./integration.repository";
 import type {
   IPedidoRepository,
@@ -35,6 +25,23 @@ import type {
   PedidoCreateInput,
   PedidoUpdateInput,
 } from "./types";
+
+const unwrap = <T>(payload: T | { data: T }): T => {
+  if (payload && typeof payload === "object" && "data" in payload) {
+    return (payload as { data: T }).data;
+  }
+  return payload as T;
+};
+
+const toQueryString = (filters?: ListFilters): string => {
+  if (!filters) return "";
+  const params = new URLSearchParams();
+  if (filters.query) params.set("query", filters.query);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.sedeId) params.set("sedeId", filters.sedeId);
+  const query = params.toString();
+  return query ? `?${query}` : "";
+};
 
 const demoPedidoRepository: IPedidoRepository = {
   async list(user: AppUser, filters?: ListFilters): Promise<PedidoDotacion[]> {
@@ -232,229 +239,79 @@ const demoPedidoRepository: IPedidoRepository = {
   },
 };
 
-const dataversePedidoRepository: IPedidoRepository = {
+const apiPedidoRepository: IPedidoRepository = {
   async list(user: AppUser, filters?: ListFilters): Promise<PedidoDotacion[]> {
-    const client = getDataverseClient();
-    const rows = await client.list<Record<string, unknown>>(dataverseEntitySet.PedidoDotacion, {
-      orderBy: "createdon desc",
-      top: QUERY_TOP_DEFAULT,
-    });
-
-    const scoped = rows.map(rowToPedido).filter((pedido) => scopeMatchesFilters(pedido, user, filters));
-    return applyTextSearch(scoped, filters?.query, (pedido) => [pedido.codigo, pedido.empleadoNombre, pedido.areaNombre]);
+    const payload = await backendApiFetch<PedidoDotacion[] | { data: PedidoDotacion[] }>(`/pedidos${toQueryString(filters)}`);
+    const data = unwrap(payload);
+    return data.filter((entry) => scopeMatchesFilters(entry, user, filters));
   },
 
-  async create(user: AppUser, input: PedidoCreateInput): Promise<PedidoDotacion> {
-    const client = getDataverseClient();
-    const sedeId = getRequestedSede(user, input.sedeId);
-    const totalItems = input.detalles.reduce((acc, detail) => acc + detail.cantidad, 0);
-
-    const created = await client.create<Record<string, unknown>>(dataverseEntitySet.PedidoDotacion, {
-      crf1_codigo: generateCode("PD"),
-      crf1_empleadonombre: input.empleadoNombre,
-      crf1_areanombre: input.areaNombre,
-      crf1_observacion: input.observacion,
-      crf1_totalitems: totalItems,
-      crf1_prioridad: input.prioridad,
-      crf1_estado: "Borrador",
-      crf1_sedeid: sedeId,
+  async create(_user: AppUser, input: PedidoCreateInput): Promise<PedidoDotacion> {
+    const payload = await backendApiFetch<PedidoDotacion | { data: PedidoDotacion }>("/pedidos", {
+      method: "POST",
+      body: JSON.stringify(input),
     });
-
-    const pedido = rowToPedido(created);
-
-    for (const detail of input.detalles) {
-      await client.create(dataverseEntitySet.PedidoDotacionDetalle, {
-        crf1_pedidoid: pedido.id,
-        crf1_itemnombre: detail.itemNombre,
-        crf1_talla: detail.talla,
-        crf1_cantidad: detail.cantidad,
-        crf1_sedeid: sedeId,
-      });
-    }
-
-    await logHistorialEvent({
-      user,
-      sedeId,
-      entidad: "PedidoDotacion",
-      entidadId: pedido.id,
-      tipo: "Creación",
-      mensaje: "Pedido creado desde portal ARGOS",
-      metadata: { totalItems },
-    });
-
-    return pedido;
+    return unwrap(payload);
   },
 
-  async getDetail(user: AppUser, id: string): Promise<PedidoDetail | null> {
-    const client = getDataverseClient();
-    const pedidoRow = await client.get<Record<string, unknown>>(dataverseEntitySet.PedidoDotacion, id);
-    const pedido = rowToPedido(pedidoRow);
-    if (!scopeMatchesFilters(pedido, user)) return null;
-
-    const detallesRows = await client.list<Record<string, unknown>>(dataverseEntitySet.PedidoDotacionDetalle, {
-      filter: `crf1_pedidoid eq ${id}`,
-      top: QUERY_TOP_DETAIL,
-    });
-
-    const historialRows = await client.list<Record<string, unknown>>(dataverseEntitySet.HistorialEvento, {
-      filter: `crf1_entidad eq 'PedidoDotacion' and crf1_entidadid eq '${id}'`,
-      top: QUERY_TOP_HISTORY,
-      orderBy: "createdon desc",
-    });
-
-    return {
-      pedido,
-      detalles: detallesRows.map((row) => rowToPedidoDetalle(row, pedido.sedeId, id)),
-      historial: historialRows.map((row) =>
-        rowToHistorial(row, {
-          sedeId: pedido.sedeId,
-          entidad: "PedidoDotacion",
-          entidadId: id,
-        }),
-      ),
-    };
-  },
-
-  async listAttachments(user: AppUser, id: string): Promise<EntityAttachment[]> {
-    const detail = await this.getDetail(user, id);
-    if (!detail) return [];
-
-    const client = getDataverseClient();
-    const rows = await client.list<Record<string, unknown>>(dataverseEntitySet.Annotation, {
-      orderBy: "createdon desc",
-      top: QUERY_TOP_DEFAULT,
-    });
-
-    return rows
-      .filter((row) => {
-        const rowEntityId = String(row._objectid_value || row.objectid || row.crf1_entidadid || "");
-        const isDocument = row.isdocument === undefined ? true : Boolean(row.isdocument);
-        return rowEntityId === id && isDocument;
-      })
-      .map((row) =>
-        rowToAttachment(row, {
-          sedeId: detail.pedido.sedeId,
-          entidad: "PedidoDotacion",
-          entidadId: id,
-        }),
-      );
-  },
-
-  async createAttachment(user: AppUser, id: string, input: PedidoAttachmentCreateInput): Promise<EntityAttachment> {
-    const detail = await this.getDetail(user, id);
-    if (!detail) {
-      throw new Error("Pedido no encontrado o sin acceso para adjuntar");
-    }
-
-    const client = getDataverseClient();
-
+  async getDetail(_user: AppUser, id: string): Promise<PedidoDetail | null> {
     try {
-      const created = await client.create<Record<string, unknown>>(dataverseEntitySet.Annotation, {
-        subject: `Adjunto pedido ${detail.pedido.codigo}`,
-        filename: input.fileName,
-        mimetype: input.mimeType,
-        documentbody: input.contentBase64,
-        isdocument: true,
-        notetext: "Adjunto cargado desde ARGOS Portal",
-        "objectid_crf1_pedidodotacion@odata.bind": `/${dataverseEntitySet.PedidoDotacion}(${id})`,
-      });
-
-      const mapped = rowToAttachment(created, {
-        sedeId: detail.pedido.sedeId,
-        entidad: "PedidoDotacion",
-        entidadId: id,
-      });
-
-      if (!mapped.tamanoBytes) {
-        mapped.tamanoBytes = Buffer.from(input.contentBase64, "base64").byteLength;
-      }
-
-      await logHistorialEvent({
-        user,
-        sedeId: detail.pedido.sedeId,
-        entidad: "PedidoDotacion",
-        entidadId: id,
-        tipo: "Adjunto",
-        mensaje: `Archivo adjunto cargado: ${input.fileName}`,
-        metadata: { mimeType: input.mimeType, bytes: mapped.tamanoBytes },
-      });
-
-      return mapped;
-    } catch (error) {
-      throw new Error(
-        `No se pudo crear adjunto en Dataverse. Verifica la relación Notes con PedidoDotacion. ${
-          error instanceof Error ? error.message : ""
-        }`,
-      );
+      const payload = await backendApiFetch<PedidoDetail | { data: PedidoDetail }>(`/pedidos/${id}`);
+      return unwrap(payload);
+    } catch {
+      return null;
     }
   },
 
-  async deleteAttachment(user: AppUser, id: string, attachmentId: string): Promise<boolean> {
-    const detail = await this.getDetail(user, id);
-    if (!detail) return false;
-
-    const client = getDataverseClient();
-    await client.delete(dataverseEntitySet.Annotation, attachmentId);
-
-    await logHistorialEvent({
-      user,
-      sedeId: detail.pedido.sedeId,
-      entidad: "PedidoDotacion",
-      entidadId: id,
-      tipo: "Adjunto",
-      mensaje: `Archivo adjunto eliminado: ${attachmentId}`,
-      metadata: { attachmentId },
-    });
-
-    return true;
+  async listAttachments(_user: AppUser, id: string): Promise<EntityAttachment[]> {
+    const payload = await backendApiFetch<EntityAttachment[] | { data: EntityAttachment[] }>(`/pedidos/${id}/adjuntos`);
+    return unwrap(payload);
   },
 
-  async update(user: AppUser, id: string, input: PedidoUpdateInput): Promise<PedidoDotacion | null> {
-    const existing = await this.getDetail(user, id);
-    if (!existing) return null;
-
-    const client = getDataverseClient();
-    await client.update(dataverseEntitySet.PedidoDotacion, id, {
-      ...(input.observacion !== undefined ? { crf1_observacion: input.observacion } : {}),
-      ...(input.prioridad !== undefined ? { crf1_prioridad: input.prioridad } : {}),
-      ...(input.estado !== undefined ? { crf1_estado: input.estado } : {}),
+  async createAttachment(_user: AppUser, id: string, input: PedidoAttachmentCreateInput): Promise<EntityAttachment> {
+    const payload = await backendApiFetch<EntityAttachment | { data: EntityAttachment }>(`/pedidos/${id}/adjuntos`, {
+      method: "POST",
+      body: JSON.stringify(input),
     });
-
-    await logHistorialEvent({
-      user,
-      sedeId: existing.pedido.sedeId,
-      entidad: "PedidoDotacion",
-      entidadId: id,
-      tipo: "Actualización",
-      mensaje: "Pedido actualizado",
-      metadata: { ...input },
-    });
-
-    return (await this.getDetail(user, id))?.pedido || null;
+    return unwrap(payload);
   },
 
-  async delete(user: AppUser, id: string): Promise<boolean> {
-    const existing = await this.getDetail(user, id);
-    if (!existing) return false;
+  async deleteAttachment(_user: AppUser, id: string, attachmentId: string): Promise<boolean> {
+    const payload = await backendApiFetch<{ ok?: boolean } | { data: { ok?: boolean } }>(
+      `/pedidos/${id}/adjuntos/${attachmentId}`,
+      {
+        method: "DELETE",
+      },
+    );
 
-    const client = getDataverseClient();
-    await client.delete(dataverseEntitySet.PedidoDotacion, id);
+    const result = unwrap(payload);
+    return result.ok ?? true;
+  },
 
-    await logHistorialEvent({
-      user,
-      sedeId: existing.pedido.sedeId,
-      entidad: "PedidoDotacion",
-      entidadId: id,
-      tipo: "Eliminación",
-      mensaje: "Pedido eliminado",
+  async update(_user: AppUser, id: string, input: PedidoUpdateInput): Promise<PedidoDotacion | null> {
+    try {
+      const payload = await backendApiFetch<PedidoDotacion | { data: PedidoDotacion }>(`/pedidos/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      });
+      return unwrap(payload);
+    } catch {
+      return null;
+    }
+  },
+
+  async delete(_user: AppUser, id: string): Promise<boolean> {
+    const payload = await backendApiFetch<{ ok?: boolean } | { data: { ok?: boolean } }>(`/pedidos/${id}`, {
+      method: "DELETE",
     });
 
-    return true;
+    const result = unwrap(payload);
+    return result.ok ?? true;
   },
 };
 
 const resolvePedidoRepository = (): IPedidoRepository =>
-  isDemoMode() ? demoPedidoRepository : dataversePedidoRepository;
+  isDemoMode() ? demoPedidoRepository : apiPedidoRepository;
 
 export const listPedidos = async (user: AppUser, filters?: ListFilters): Promise<PedidoDotacion[]> =>
   resolvePedidoRepository().list(user, filters);

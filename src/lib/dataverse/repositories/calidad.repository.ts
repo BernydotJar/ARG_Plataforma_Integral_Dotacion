@@ -1,9 +1,8 @@
 import "server-only";
 
+import { backendApiFetch } from "@/lib/backend/client";
 import { isDemoMode } from "@/lib/config/env";
-import { getDataverseClient } from "@/lib/dataverse/client";
 import { getMockDb } from "@/lib/dataverse/mock-store";
-import { dataverseEntitySet } from "@/lib/dataverse/schema";
 import type { InspeccionCalidad, InspeccionDetail } from "@/lib/dataverse/types";
 import type { AppUser } from "@/lib/types/app";
 
@@ -12,17 +11,8 @@ import {
   createMockEntityId,
   generateCode,
   getRequestedSede,
-  rowToChecklist,
-  rowToDefecto,
-  rowToHistorial,
-  rowToInspeccion,
   scopeMatchesFilters,
 } from "./common";
-import {
-  QUERY_TOP_DEFAULT,
-  QUERY_TOP_DETAIL,
-  QUERY_TOP_HISTORY,
-} from "./constants";
 import { logHistorialEvent } from "./integration.repository";
 import type {
   ICalidadRepository,
@@ -30,7 +20,24 @@ import type {
   ListFilters,
 } from "./types";
 
-const baseMockCalidadRepository: ICalidadRepository = {
+const unwrap = <T>(payload: T | { data: T }): T => {
+  if (payload && typeof payload === "object" && "data" in payload) {
+    return (payload as { data: T }).data;
+  }
+  return payload as T;
+};
+
+const toQueryString = (filters?: ListFilters): string => {
+  if (!filters) return "";
+  const params = new URLSearchParams();
+  if (filters.query) params.set("query", filters.query);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.sedeId) params.set("sedeId", filters.sedeId);
+  const query = params.toString();
+  return query ? `?${query}` : "";
+};
+
+const demoCalidadRepository: ICalidadRepository = {
   async listInspecciones(user: AppUser, filters?: ListFilters): Promise<InspeccionCalidad[]> {
     const db = getMockDb();
     const scoped = db.inspecciones.filter((entry) => scopeMatchesFilters(entry, user, filters));
@@ -88,99 +95,37 @@ const baseMockCalidadRepository: ICalidadRepository = {
   },
 };
 
-const dataverseCalidadRepository: ICalidadRepository = {
+const apiCalidadRepository: ICalidadRepository = {
   async listInspecciones(user: AppUser, filters?: ListFilters): Promise<InspeccionCalidad[]> {
-    const client = getDataverseClient();
-    const rows = await client.list<Record<string, unknown>>(dataverseEntitySet.InspeccionCalidad, {
-      orderBy: "createdon desc",
-      top: QUERY_TOP_DEFAULT,
-    });
+    const payload = await backendApiFetch<InspeccionCalidad[] | { data: InspeccionCalidad[] }>(
+      `/calidad${toQueryString(filters)}`,
+    );
 
-    const scoped = rows.map(rowToInspeccion).filter((entry) => scopeMatchesFilters(entry, user, filters));
-    return applyTextSearch(scoped, filters?.query, (entry) => [entry.codigo, entry.inspector, entry.lote]);
+    const data = unwrap(payload);
+    return data.filter((entry) => scopeMatchesFilters(entry, user, filters));
   },
 
-  async createInspeccion(user: AppUser, input: InspeccionCreateInput): Promise<InspeccionCalidad> {
-    const client = getDataverseClient();
-    const sedeId = getRequestedSede(user, input.sedeId);
-    const now = new Date().toISOString();
-
-    const created = await client.create<Record<string, unknown>>(dataverseEntitySet.InspeccionCalidad, {
-      crf1_codigo: generateCode("IC"),
-      crf1_inspector: input.inspector,
-      crf1_lote: input.lote,
-      crf1_resultado: input.resultado,
-      crf1_fechainspeccion: now,
-      crf1_observacion: input.observacion,
-      crf1_estado: "Abierta",
-      crf1_sedeid: sedeId,
+  async createInspeccion(_user: AppUser, input: InspeccionCreateInput): Promise<InspeccionCalidad> {
+    const payload = await backendApiFetch<InspeccionCalidad | { data: InspeccionCalidad }>("/calidad", {
+      method: "POST",
+      body: JSON.stringify(input),
     });
 
-    const inspeccion = rowToInspeccion(created);
-
-    await logHistorialEvent({
-      user,
-      sedeId,
-      entidad: "InspeccionCalidad",
-      entidadId: inspeccion.id,
-      tipo: "Creación",
-      mensaje: "Inspección de calidad registrada",
-    });
-
-    return inspeccion;
+    return unwrap(payload);
   },
 
-  async getInspeccionDetail(user: AppUser, id: string): Promise<InspeccionDetail | null> {
-    const client = getDataverseClient();
-    const inspeccionRow = await client.get<Record<string, unknown>>(dataverseEntitySet.InspeccionCalidad, id);
-    const inspeccion = rowToInspeccion(inspeccionRow);
-    if (!scopeMatchesFilters(inspeccion, user)) return null;
-
-    const checklistRows = await client.list<Record<string, unknown>>(dataverseEntitySet.ChecklistCalidad, {
-      filter: `crf1_inspeccionid eq ${id}`,
-      top: QUERY_TOP_DETAIL,
-      orderBy: "createdon desc",
-    });
-
-    const defectoRows = await client.list<Record<string, unknown>>(dataverseEntitySet.DefectoCalidad, {
-      filter: `crf1_inspeccionid eq ${id}`,
-      top: QUERY_TOP_DETAIL,
-      orderBy: "createdon desc",
-    });
-
-    const historialRows = await client.list<Record<string, unknown>>(dataverseEntitySet.HistorialEvento, {
-      filter: `crf1_entidad eq 'InspeccionCalidad' and crf1_entidadid eq '${id}'`,
-      top: QUERY_TOP_HISTORY,
-      orderBy: "createdon desc",
-    });
-
-    return {
-      inspeccion,
-      checklist: checklistRows.map((row) =>
-        rowToChecklist(row, {
-          sedeId: inspeccion.sedeId,
-          inspeccionId: id,
-        }),
-      ),
-      defectos: defectoRows.map((row) =>
-        rowToDefecto(row, {
-          sedeId: inspeccion.sedeId,
-          inspeccionId: id,
-        }),
-      ),
-      historial: historialRows.map((row) =>
-        rowToHistorial(row, {
-          sedeId: inspeccion.sedeId,
-          entidad: "InspeccionCalidad",
-          entidadId: id,
-        }),
-      ),
-    };
+  async getInspeccionDetail(_user: AppUser, id: string): Promise<InspeccionDetail | null> {
+    try {
+      const payload = await backendApiFetch<InspeccionDetail | { data: InspeccionDetail }>(`/calidad/${id}`);
+      return unwrap(payload);
+    } catch {
+      return null;
+    }
   },
 };
 
 const resolveCalidadRepository = (): ICalidadRepository => {
-  return isDemoMode() ? baseMockCalidadRepository : dataverseCalidadRepository;
+  return isDemoMode() ? demoCalidadRepository : apiCalidadRepository;
 };
 
 export const listInspecciones = async (

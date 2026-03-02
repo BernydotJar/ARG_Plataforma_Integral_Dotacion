@@ -1,9 +1,8 @@
 import "server-only";
 
+import { backendApiFetch } from "@/lib/backend/client";
 import { isDemoMode } from "@/lib/config/env";
-import { getDataverseClient } from "@/lib/dataverse/client";
 import { getMockDb } from "@/lib/dataverse/mock-store";
-import { dataverseEntitySet } from "@/lib/dataverse/schema";
 import type { Inventario, MovimientoInventario } from "@/lib/dataverse/types";
 import type { AppUser } from "@/lib/types/app";
 
@@ -11,15 +10,11 @@ import {
   applyTextSearch,
   createMockEntityId,
   getRequestedSede,
-  rowToInventario,
-  rowToMovimiento,
   scopeMatchesFilters,
 } from "./common";
 import {
   DEFAULT_MOVIMIENTO_STATUS_AJUSTE,
   DEFAULT_MOVIMIENTO_STATUS,
-  QUERY_TOP_DEFAULT,
-  QUERY_TOP_LARGE,
 } from "./constants";
 import { logHistorialEvent } from "./integration.repository";
 import type {
@@ -27,6 +22,23 @@ import type {
   ListFilters,
   MovimientoCreateInput,
 } from "./types";
+
+const unwrap = <T>(payload: T | { data: T }): T => {
+  if (payload && typeof payload === "object" && "data" in payload) {
+    return (payload as { data: T }).data;
+  }
+  return payload as T;
+};
+
+const toQueryString = (filters?: ListFilters): string => {
+  if (!filters) return "";
+  const params = new URLSearchParams();
+  if (filters.query) params.set("query", filters.query);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.sedeId) params.set("sedeId", filters.sedeId);
+  const query = params.toString();
+  return query ? `?${query}` : "";
+};
 
 const demoInventarioRepository: IInventarioRepository = {
   async listMovimientos(user: AppUser, filters?: ListFilters): Promise<MovimientoInventario[]> {
@@ -106,84 +118,53 @@ const demoInventarioRepository: IInventarioRepository = {
   },
 };
 
-const dataverseInventarioRepository: IInventarioRepository = {
+const apiInventarioRepository: IInventarioRepository = {
   async listMovimientos(user: AppUser, filters?: ListFilters): Promise<MovimientoInventario[]> {
-    const client = getDataverseClient();
-    const rows = await client.list<Record<string, unknown>>(dataverseEntitySet.MovimientoInventario, {
-      orderBy: "createdon desc",
-      top: QUERY_TOP_LARGE,
-    });
+    const payload = await backendApiFetch<MovimientoInventario[] | { data: MovimientoInventario[] }>(
+      `/inventario/movimientos${toQueryString(filters)}`,
+    );
 
-    const scoped = rows.map(rowToMovimiento).filter((entry) => scopeMatchesFilters(entry, user, filters));
-    return applyTextSearch(scoped, filters?.query, (entry) => [entry.itemNombre, entry.bodegaNombre, entry.ubicacionNombre]);
+    const data = unwrap(payload);
+    return data.filter((entry) => scopeMatchesFilters(entry, user, filters));
   },
 
-  async createMovimiento(user: AppUser, input: MovimientoCreateInput): Promise<MovimientoInventario> {
-    const client = getDataverseClient();
-    const sedeId = getRequestedSede(user, input.sedeId);
+  async createMovimiento(_user: AppUser, input: MovimientoCreateInput): Promise<MovimientoInventario> {
+    const payload = await backendApiFetch<MovimientoInventario | { data: MovimientoInventario }>(
+      "/inventario/movimientos",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
 
-    const created = await client.create<Record<string, unknown>>(dataverseEntitySet.MovimientoInventario, {
-      crf1_tipo: input.tipo,
-      crf1_itemnombre: input.itemNombre,
-      crf1_bodeganombre: input.bodegaNombre,
-      crf1_ubicacionnombre: input.ubicacionNombre,
-      crf1_cantidad: input.cantidad,
-      crf1_motivo: input.motivo,
-      crf1_fecha: new Date().toISOString(),
-      crf1_estado: input.tipo === "Ajuste" ? DEFAULT_MOVIMIENTO_STATUS_AJUSTE : DEFAULT_MOVIMIENTO_STATUS,
-      crf1_sedeid: sedeId,
-    });
-
-    const movimiento = rowToMovimiento(created);
-
-    await logHistorialEvent({
-      user,
-      sedeId,
-      entidad: "MovimientoInventario",
-      entidadId: movimiento.id,
-      tipo: "Creación",
-      mensaje: `Movimiento ${movimiento.tipo} registrado`,
-      metadata: { ...input },
-    });
-
-    return movimiento;
+    return unwrap(payload);
   },
 
-  async updateMovimientoEstado(user: AppUser, id: string, estado: NonNullable<MovimientoInventario["estado"]>): Promise<MovimientoInventario | null> {
-    const existing = await this.listMovimientos(user);
-    const target = existing.find((entry) => entry.id === id);
-    if (!target) return null;
+  async updateMovimientoEstado(_user: AppUser, id: string, estado: NonNullable<MovimientoInventario["estado"]>): Promise<MovimientoInventario | null> {
+    try {
+      const payload = await backendApiFetch<MovimientoInventario | { data: MovimientoInventario }>(
+        `/inventario/movimientos/${id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ estado }),
+        },
+      );
 
-    const client = getDataverseClient();
-    await client.update(dataverseEntitySet.MovimientoInventario, id, {
-      crf1_estado: estado,
-    });
-
-    await logHistorialEvent({
-      user,
-      sedeId: target.sedeId,
-      entidad: "MovimientoInventario",
-      entidadId: id,
-      tipo: "Estado",
-      mensaje: `Estado actualizado a ${estado}`,
-    });
-
-    return { ...target, estado };
+      return unwrap(payload);
+    } catch {
+      return null;
+    }
   },
 
   async listInventario(user: AppUser): Promise<Inventario[]> {
-    const client = getDataverseClient();
-    const rows = await client.list<Record<string, unknown>>(dataverseEntitySet.Inventario, {
-      top: QUERY_TOP_DEFAULT,
-      orderBy: "createdon desc",
-    });
-
-    return rows.map(rowToInventario).filter((item) => scopeMatchesFilters(item, user));
+    const payload = await backendApiFetch<Inventario[] | { data: Inventario[] }>("/inventario/stock");
+    const data = unwrap(payload);
+    return data.filter((item) => scopeMatchesFilters(item, user));
   },
 };
 
 const resolveInventarioRepository = (): IInventarioRepository =>
-  isDemoMode() ? demoInventarioRepository : dataverseInventarioRepository;
+  isDemoMode() ? demoInventarioRepository : apiInventarioRepository;
 
 export const listMovimientos = async (user: AppUser, filters?: ListFilters): Promise<MovimientoInventario[]> =>
   resolveInventarioRepository().listMovimientos(user, filters);

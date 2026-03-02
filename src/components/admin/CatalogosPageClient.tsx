@@ -505,7 +505,7 @@ export function CatalogosPageClient() {
                       compact
                       icon={<DatabaseSearch24Regular fontSize={28} />}
                       title="Sin catálogos base"
-                      description="Verifica los datos seed o la conexión a Dataverse."
+                      description="Verifica los datos seed o la conexión al backend API."
                     />
                   </TableCell>
                 </TableRow>

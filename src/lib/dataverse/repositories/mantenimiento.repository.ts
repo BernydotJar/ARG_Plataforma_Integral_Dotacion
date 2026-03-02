@@ -1,9 +1,8 @@
 import "server-only";
 
+import { backendApiFetch } from "@/lib/backend/client";
 import { isDemoMode } from "@/lib/config/env";
-import { getDataverseClient } from "@/lib/dataverse/client";
 import { getMockDb } from "@/lib/dataverse/mock-store";
-import { dataverseEntitySet } from "@/lib/dataverse/schema";
 import type { TicketDetail, TicketMantenimiento } from "@/lib/dataverse/types";
 import type { AppUser } from "@/lib/types/app";
 
@@ -12,16 +11,8 @@ import {
   createMockEntityId,
   generateCode,
   getRequestedSede,
-  rowToActividad,
-  rowToHistorial,
-  rowToTicket,
   scopeMatchesFilters,
 } from "./common";
-import {
-  QUERY_TOP_DEFAULT,
-  QUERY_TOP_DETAIL,
-  QUERY_TOP_HISTORY,
-} from "./constants";
 import { logHistorialEvent } from "./integration.repository";
 import type {
   IMantenimientoRepository,
@@ -29,6 +20,23 @@ import type {
   TicketCreateInput,
   TicketUpdateInput,
 } from "./types";
+
+const unwrap = <T>(payload: T | { data: T }): T => {
+  if (payload && typeof payload === "object" && "data" in payload) {
+    return (payload as { data: T }).data;
+  }
+  return payload as T;
+};
+
+const toQueryString = (filters?: ListFilters): string => {
+  if (!filters) return "";
+  const params = new URLSearchParams();
+  if (filters.query) params.set("query", filters.query);
+  if (filters.status) params.set("status", filters.status);
+  if (filters.sedeId) params.set("sedeId", filters.sedeId);
+  const query = params.toString();
+  return query ? `?${query}` : "";
+};
 
 const demoMantenimientoRepository: IMantenimientoRepository = {
   async listTickets(user: AppUser, filters?: ListFilters): Promise<TicketMantenimiento[]> {
@@ -121,106 +129,56 @@ const demoMantenimientoRepository: IMantenimientoRepository = {
   },
 };
 
-const dataverseMantenimientoRepository: IMantenimientoRepository = {
+const apiMantenimientoRepository: IMantenimientoRepository = {
   async listTickets(user: AppUser, filters?: ListFilters): Promise<TicketMantenimiento[]> {
-    const client = getDataverseClient();
-    const rows = await client.list<Record<string, unknown>>(dataverseEntitySet.TicketMantenimiento, {
-      top: QUERY_TOP_DEFAULT,
-      orderBy: "createdon desc",
-    });
+    const payload = await backendApiFetch<TicketMantenimiento[] | { data: TicketMantenimiento[] }>(
+      `/mantenimiento/tickets${toQueryString(filters)}`,
+    );
 
-    const scoped = rows.map(rowToTicket).filter((entry) => scopeMatchesFilters(entry, user, filters));
-    return applyTextSearch(scoped, filters?.query, (entry) => [entry.codigo, entry.equipoNombre, entry.descripcion]);
+    const data = unwrap(payload);
+    return data.filter((entry) => scopeMatchesFilters(entry, user, filters));
   },
 
-  async createTicket(user: AppUser, input: TicketCreateInput): Promise<TicketMantenimiento> {
-    const client = getDataverseClient();
-    const sedeId = getRequestedSede(user, input.sedeId);
+  async createTicket(_user: AppUser, input: TicketCreateInput): Promise<TicketMantenimiento> {
+    const payload = await backendApiFetch<TicketMantenimiento | { data: TicketMantenimiento }>(
+      "/mantenimiento/tickets",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
 
-    const created = await client.create<Record<string, unknown>>(dataverseEntitySet.TicketMantenimiento, {
-      crf1_codigo: generateCode("TM"),
-      crf1_equiponombre: input.equipoNombre,
-      crf1_prioridad: input.prioridad,
-      crf1_descripcion: input.descripcion,
-      crf1_tecnicoasignado: input.tecnicoAsignado,
-      crf1_fechareporte: new Date().toISOString(),
-      crf1_estado: "Abierto",
-      crf1_sedeid: sedeId,
-    });
-
-    const ticket = rowToTicket(created);
-
-    await logHistorialEvent({
-      user,
-      sedeId,
-      entidad: "TicketMantenimiento",
-      entidadId: ticket.id,
-      tipo: "Creación",
-      mensaje: "Ticket de mantenimiento creado",
-    });
-
-    return ticket;
+    return unwrap(payload);
   },
 
-  async getTicketDetail(user: AppUser, id: string): Promise<TicketDetail | null> {
-    const client = getDataverseClient();
-    const ticketRow = await client.get<Record<string, unknown>>(dataverseEntitySet.TicketMantenimiento, id);
-    const ticket = rowToTicket(ticketRow);
-    if (!scopeMatchesFilters(ticket, user)) return null;
-
-    const actividadRows = await client.list<Record<string, unknown>>(dataverseEntitySet.ActividadMantenimiento, {
-      filter: `crf1_ticketid eq ${id}`,
-      top: QUERY_TOP_DETAIL,
-      orderBy: "createdon desc",
-    });
-
-    const historialRows = await client.list<Record<string, unknown>>(dataverseEntitySet.HistorialEvento, {
-      filter: `crf1_entidad eq 'TicketMantenimiento' and crf1_entidadid eq '${id}'`,
-      top: QUERY_TOP_HISTORY,
-      orderBy: "createdon desc",
-    });
-
-    return {
-      ticket,
-      actividades: actividadRows.map((row) => rowToActividad(row, ticket.sedeId, id)),
-      historial: historialRows.map((row) =>
-        rowToHistorial(row, {
-          sedeId: ticket.sedeId,
-          entidad: "TicketMantenimiento",
-          entidadId: id,
-        }),
-      ),
-    };
+  async getTicketDetail(_user: AppUser, id: string): Promise<TicketDetail | null> {
+    try {
+      const payload = await backendApiFetch<TicketDetail | { data: TicketDetail }>(`/mantenimiento/tickets/${id}`);
+      return unwrap(payload);
+    } catch {
+      return null;
+    }
   },
 
-  async updateTicket(user: AppUser, id: string, input: TicketUpdateInput): Promise<TicketMantenimiento | null> {
-    const existing = await this.getTicketDetail(user, id);
-    if (!existing) return null;
+  async updateTicket(_user: AppUser, id: string, input: TicketUpdateInput): Promise<TicketMantenimiento | null> {
+    try {
+      const payload = await backendApiFetch<TicketMantenimiento | { data: TicketMantenimiento }>(
+        `/mantenimiento/tickets/${id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(input),
+        },
+      );
 
-    const client = getDataverseClient();
-    await client.update(dataverseEntitySet.TicketMantenimiento, id, {
-      ...(input.prioridad !== undefined ? { crf1_prioridad: input.prioridad } : {}),
-      ...(input.descripcion !== undefined ? { crf1_descripcion: input.descripcion } : {}),
-      ...(input.tecnicoAsignado !== undefined ? { crf1_tecnicoasignado: input.tecnicoAsignado } : {}),
-      ...(input.estado !== undefined ? { crf1_estado: input.estado } : {}),
-    });
-
-    await logHistorialEvent({
-      user,
-      sedeId: existing.ticket.sedeId,
-      entidad: "TicketMantenimiento",
-      entidadId: id,
-      tipo: "Actualización",
-      mensaje: "Ticket actualizado",
-      metadata: { ...input },
-    });
-
-    return (await this.getTicketDetail(user, id))?.ticket || null;
+      return unwrap(payload);
+    } catch {
+      return null;
+    }
   },
 };
 
 const resolveMantenimientoRepository = (): IMantenimientoRepository =>
-  isDemoMode() ? demoMantenimientoRepository : dataverseMantenimientoRepository;
+  isDemoMode() ? demoMantenimientoRepository : apiMantenimientoRepository;
 
 export const listTickets = async (user: AppUser, filters?: ListFilters): Promise<TicketMantenimiento[]> =>
   resolveMantenimientoRepository().listTickets(user, filters);

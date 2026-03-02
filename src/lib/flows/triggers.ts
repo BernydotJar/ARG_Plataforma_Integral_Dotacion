@@ -6,7 +6,7 @@ import type { AppUser } from "@/lib/types/app";
 
 export interface FlowExecutionResult {
   ok: boolean;
-  mode: "http" | "dataverse" | "stub";
+  mode: "http" | "api" | "stub";
   trackingId: string;
   message: string;
   response?: unknown;
@@ -73,7 +73,7 @@ const triggerFlow = async ({ user, sedeId, flowName, endpointUrl, payload }: Tri
     payload,
   });
 
-  const mode = getRuntimeModeLabel() === "demo" ? "stub" : "dataverse";
+  const mode = getRuntimeModeLabel() === "demo" ? "stub" : "api";
   return {
     ok: true,
     mode,
@@ -81,7 +81,7 @@ const triggerFlow = async ({ user, sedeId, flowName, endpointUrl, payload }: Tri
     message:
       mode === "stub"
         ? `Flow ${flowName} registrado en stub local (modo demo)`
-        : `Flow ${flowName} registrado como IntegrationRequest en Dataverse`,
+        : `Flow ${flowName} registrado como IntegrationRequest en backend API/Azure SQL`,
     response: integrationRequest,
   };
 };

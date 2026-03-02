@@ -1,56 +1,49 @@
 # ARGOS - Plataforma Integral
 
-Portal corporativo responsivo construido con **Next.js + TypeScript + Fluent UI** para reemplazar la capa UI de Power Pages, manteniendo:
+Portal corporativo responsivo construido con **Next.js + TypeScript + Fluent UI** para el frente web, conectado a un **backend .NET 8 Web API** (fuente de verdad en **Azure SQL Database**) y con orquestación de integraciones vía **Power Automate**.
 
-- **Dataverse** como sistema de registro (CRUD + scoping por sede)
-- **Power Automate Cloud Flows** para aprobaciones e integración SAP
-- **Microsoft Entra ID (MSAL)** para autenticación SSO
-- **Modo Demo** automático cuando faltan credenciales de Dataverse
+## 1. Arquitectura actual (pivot sin Dataverse)
 
-## 1. Alcance implementado (MVP)
+- **Frontend/BFF:** Next.js (App Router) + Route Handlers
+- **Backend de negocio:** .NET 8 Web API (externo a este repo)
+- **Persistencia:** Azure SQL Database (gestionada por backend)
+- **Autenticación:** Microsoft Entra ID / External ID (B2C)
+- **Integración:** Power Automate (aprobaciones + SAP)
+- **Fallback:** Modo demo in-memory cuando no existe `BACKEND_API_BASE_URL`
 
-- Login con Microsoft Entra ID (MSAL browser + validación server-side de `id_token`)
-- Sesión segura con cookie `httpOnly` firmada (`HS256`)
-- Navegación por rol: `SuperAdmin`, `AdminLocal`, `UsuarioPedidos`, `UsuarioFinal`, `OperarioBodega`, `InspectorCalidad`, `TecnicoMantenimiento`
-- Filtro/scoping por `Sede` en capa de datos
-- CRUD operativo para:
-  - `PedidoDotacion`
-  - `MovimientoInventario`
-  - `TicketMantenimiento`
-- Disparo de flows:
-  - Enviar pedido a aprobación
-  - Enviar ajuste de inventario a aprobación
-  - Enviar pedido a SAP
-  - Sincronizar estado SAP (manual / stub)
-- Registro de eventos en `HistorialEvento`
-- Pantallas completas:
-  - `/login`, `/`
-  - `/pedidos`, `/pedidos/nuevo`, `/pedidos/[id]`
-  - `/inventario`, `/inventario/movimientos`, `/inventario/ajuste`
-  - `/calidad`, `/calidad/nuevo`, `/calidad/[id]`
-  - `/mantenimiento`, `/mantenimiento/nuevo`, `/mantenimiento/[id]`
-  - `/admin/catalogos`, `/admin/usuarios-roles`
+## 2. Alcance MVP implementado en este repo
 
-## 2. Requisitos
+- Login corporativo con Entra ID + sesión segura
+- Login operario piloto (demo) con captcha opcional (Turnstile)
+- RBAC por roles y scoping por sede
+- Módulos de negocio:
+  - Pedidos
+  - Inventario
+  - Calidad
+  - Mantenimiento
+  - Administración (catálogos/roles)
+- CRUD operativo para Pedidos/Movimientos/Tickets (vía backend API o demo)
+- Adjuntos en detalle de pedidos (carga/listado/eliminación)
+- Disparo de flujos de aprobación/SAP con registro de integración
+
+## 3. Instalación y ejecución
+
+Requisitos:
 
 - Node.js 20+
 - npm 10+
 
-## 3. Instalación y ejecución
+Comandos:
 
 ```bash
 npm install
 npm run dev -- --port 3500
 ```
 
-Desarrollo local:
-
-- URL local recomendada: `http://localhost:3500`
-- Si `3000` está ocupado, mantener explícito `--port 3500`
-
-Producción local:
+Build:
 
 ```bash
+npm run lint
 npm run build
 npm run start
 ```
@@ -64,126 +57,104 @@ Crear `.env.local` en la raíz.
 | Variable | Requerida | Descripción |
 |---|---|---|
 | `NEXT_PUBLIC_APP_NAME` | No | Nombre visible de la app |
-| `APP_SESSION_SECRET` | Sí (prod) | Secreto para firmar cookie de sesión |
+| `APP_SESSION_SECRET` | Sí (prod) | Secreto para cookie de sesión |
 | `DEMO_MODE` | No | `true` para forzar modo demo |
-| `DEMO_OPERARIO_PASSWORD` | No | Contraseña para login operario en modo demo (default: `Operario2026!`) |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | No | Site key de Cloudflare Turnstile (habilita widget en login operario) |
-| `TURNSTILE_SECRET_KEY` | No | Secret key de Cloudflare Turnstile (valida token en backend) |
-| `DEFAULT_SEDES` | No | CSV de sedes por defecto (ej: `SEDE-CENTRAL,SEDE-NORTE`) |
+| `DEFAULT_SEDES` | No | CSV de sedes por defecto |
+| `DEMO_OPERARIO_PASSWORD` | No | Contraseña login operario demo |
 
-### 4.2 Entra ID / MSAL
+### 4.2 Entra ID / External ID
 
 | Variable | Requerida | Descripción |
 |---|---|---|
-| `NEXT_PUBLIC_ENTRA_TENANT_ID` | Sí (SSO) | Tenant ID de Entra |
-| `NEXT_PUBLIC_ENTRA_CLIENT_ID` | Sí (SSO) | Client ID de la app pública web |
-| `NEXT_PUBLIC_ENTRA_REDIRECT_URI` | No | Redirect explícito (si no, usa `http://localhost:3000/login`) |
-| `ENTRA_TENANT_ID` | Sí (SSO) | Tenant ID para validación server-side |
-| `ENTRA_CLIENT_ID` | Sí (SSO) | Audience esperada del `id_token` |
+| `NEXT_PUBLIC_ENTRA_TENANT_ID` | Sí (SSO) | Tenant ID Entra |
+| `NEXT_PUBLIC_ENTRA_CLIENT_ID` | Sí (SSO) | Client ID app pública |
+| `NEXT_PUBLIC_ENTRA_REDIRECT_URI` | No | Redirect explícito |
+| `ENTRA_TENANT_ID` | Sí (SSO) | Validación server-side |
+| `ENTRA_CLIENT_ID` | Sí (SSO) | Audience del id_token |
 
-### 4.3 Mapeo de grupos Entra -> roles app
+Mapeo opcional de grupos -> roles:
 
-| Variable |
-|---|
-| `ENTRA_GROUP_SUPERADMIN` |
-| `ENTRA_GROUP_ADMINLOCAL` |
-| `ENTRA_GROUP_USUARIOPEDIDOS` |
-| `ENTRA_GROUP_USUARIOFINAL` |
-| `ENTRA_GROUP_OPERARIOBODEGA` |
-| `ENTRA_GROUP_INSPECTORCALIDAD` |
-| `ENTRA_GROUP_TECNICOMANTENIMIENTO` |
+- `ENTRA_GROUP_SUPERADMIN`
+- `ENTRA_GROUP_ADMINLOCAL`
+- `ENTRA_GROUP_USUARIOPEDIDOS`
+- `ENTRA_GROUP_USUARIOFINAL`
+- `ENTRA_GROUP_OPERARIOBODEGA`
+- `ENTRA_GROUP_INSPECTORCALIDAD`
+- `ENTRA_GROUP_TECNICOMANTENIMIENTO`
 
-Si no llegan roles/grupos, se asigna `UsuarioFinal`.
-
-### 4.4 Dataverse
+### 4.3 Backend API (.NET 8 + Azure SQL)
 
 | Variable | Requerida | Descripción |
 |---|---|---|
-| `DATAVERSE_URL` | Sí (modo real) | URL org Dataverse (`https://<org>.crm.dynamics.com`) |
-| `DATAVERSE_TENANT_ID` | Sí (modo real) | Tenant del App Registration |
-| `DATAVERSE_CLIENT_ID` | Sí (modo real) | Client ID app confidencial |
-| `DATAVERSE_CLIENT_SECRET` | Sí (modo real) | Client secret app confidencial |
+| `BACKEND_API_BASE_URL` | Sí (modo real) | URL base del backend API |
+| `BACKEND_API_KEY` | No | Header `x-api-key` |
+| `BACKEND_API_BEARER_TOKEN` | No | Bearer token servicio-servicio |
+| `BACKEND_API_TIMEOUT_MS` | No | Timeout HTTP (default 10000) |
 
-Si falta cualquiera, el sistema entra en modo demo automáticamente.
+Si no existe `BACKEND_API_BASE_URL`, la app opera en **modo demo**.
 
-### 4.5 Flows (Power Automate)
-
-| Variable | Requerida | Descripción |
-|---|---|---|
-| `FLOW_TRIGGER_MODE` | No | `http` (preferido) o `dataverse` |
-| `FLOW_API_KEY` | No | Header `x-api-key` para endpoint HTTP |
-| `FLOW_BEARER_TOKEN` | No | `Authorization: Bearer ...` para endpoint HTTP |
-| `FLOW_APPROVAL_PEDIDO_URL` | No | Endpoint flow aprobación pedido |
-| `FLOW_APPROVAL_AJUSTE_URL` | No | Endpoint flow aprobación ajuste |
-| `FLOW_SAP_ENVIAR_PEDIDO_URL` | No | Endpoint flow SAP envío |
-| `FLOW_SAP_SYNC_STATUS_URL` | No | Endpoint flow SAP sync |
-
-Si no hay URL/config suficiente, el sistema registra `IntegrationRequest` (o stub en modo demo).
-
-### 4.6 Captcha (operario, opcional)
+### 4.4 Captcha operario (opcional)
 
 | Variable | Requerida | Descripción |
 |---|---|---|
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | No | Site key para renderizar captcha en la UI |
-| `TURNSTILE_SECRET_KEY` | No | Secret key para validar token en server |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | No | Render captcha en UI |
+| `TURNSTILE_SECRET_KEY` | No | Valida token en backend Next |
 
-Si ambas variables están configuradas, el login de operario exige completar captcha antes de crear sesión.
+### 4.5 Power Automate Flows
 
-## 5. Seguridad de flows (recomendado)
+| Variable | Requerida | Descripción |
+|---|---|---|
+| `FLOW_TRIGGER_MODE` | No | `http` (preferido) o `stub` |
+| `FLOW_API_KEY` | No | `x-api-key` para trigger HTTP |
+| `FLOW_BEARER_TOKEN` | No | Bearer para trigger HTTP |
+| `FLOW_APPROVAL_PEDIDO_URL` | No | Endpoint aprobación pedido |
+| `FLOW_APPROVAL_AJUSTE_URL` | No | Endpoint aprobación ajuste |
+| `FLOW_SAP_ENVIAR_PEDIDO_URL` | No | Endpoint SAP enviar pedido |
+| `FLOW_SAP_SYNC_STATUS_URL` | No | Endpoint SAP sync estado |
 
-### Opción A (preferida): HTTP trigger protegido
+## 5. Contratos esperados del Backend API
 
-1. Publicar flow con trigger HTTP.
-2. Proteger endpoint con:
-   - Azure AD (JWT bearer), o
-   - API key rotada + IP restrictions.
-3. Configurar `FLOW_*_URL` y credenciales (`FLOW_API_KEY` o `FLOW_BEARER_TOKEN`).
+Este frontend espera endpoints REST equivalentes a:
 
-### Opción B: patrón `IntegrationRequest` en Dataverse
+- `GET/POST /pedidos`
+- `GET/PATCH/DELETE /pedidos/{id}`
+- `GET/POST /pedidos/{id}/adjuntos`
+- `DELETE /pedidos/{id}/adjuntos/{attachmentId}`
+- `GET/POST /inventario/movimientos`
+- `PATCH /inventario/movimientos/{id}`
+- `GET /inventario/stock`
+- `GET/POST /mantenimiento/tickets`
+- `GET/PATCH /mantenimiento/tickets/{id}`
+- `GET/POST /calidad`
+- `GET /calidad/{id}`
+- `GET /admin/catalogos`
+- `GET/POST /admin/catalogos/centros-costo`
+- `GET/POST /admin/catalogos/kits`
+- `GET /admin/usuarios-roles`
+- `POST /integration/historial`
+- `POST /integration/requests`
 
-1. El portal crea fila `IntegrationRequest`.
-2. Flow en Power Automate se dispara por nueva fila.
-3. Flow procesa y actualiza estado + resultado en Dataverse.
+Admite respuesta directa o sobre `{ data: ... }`.
 
-## 6. Modo demo / seed
-
-- Si Dataverse no está configurado, se utiliza base mock en memoria con datos de ejemplo.
-- Permite navegar módulos completos y validar UX/flujo.
-- Login demo disponible en `/login` cuando no hay Entra configurado.
-
-## 7. Estructura principal
+## 6. Estructura principal
 
 ```txt
 src/
   app/
-    (portal)/...                # páginas de negocio
-    login/                      # login MSAL
-    api/...                     # route handlers (auth, CRUD, flows)
-  components/
-    layout/                     # shell corporativo, navegación
-    ui/                         # cabeceras y componentes comunes
-    admin/                      # vistas admin
-    providers/                  # Fluent Provider + Toaster
+    (portal)/...                 # páginas funcionales
+    api/...                      # BFF (auth, CRUD, flows)
+  components/                    # UI reutilizable
   lib/
-    auth/                       # sesión, roles, guards, msal client
-    config/                     # env server/client
-    dataverse/                  # tipos, cliente web api, repositorio, mock store
-    flows/                      # trigger service Power Automate
-    http/                       # cliente fetch + helpers route
+    auth/                        # sesión y autorización
+    backend/                     # cliente HTTP hacia .NET API
+    config/                      # env server/client
+    dataverse/                   # modelos + repositorios (carpeta legacy de nombre)
+    flows/                       # disparo de Power Automate
+    http/                        # fetch client browser
 ```
 
-## 8. Notas de Dataverse
+## 7. Notas de transición
 
-- Los nombres de entity set y campos están en:
-  - `src/lib/dataverse/schema.ts`
-  - mapeos por dominio en `src/lib/dataverse/repositories/*.ts`
-- Ajustar prefijos (`crf1_*`) según tu solución Dataverse real.
-
-## 9. Scripts
-
-```bash
-npm run dev
-npm run lint
-npm run build
-npm run start
-```
+- El nombre de carpeta `lib/dataverse` se mantiene temporalmente por compatibilidad, pero la ejecución real ya está orientada a **Backend API + Azure SQL**.
+- `src/lib/dataverse/client.ts` quedó como stub explícito (Dataverse deshabilitado).
+- Próximo paso recomendado: renombrar carpeta `dataverse` a `data`/`domain` para eliminar herencia de naming.

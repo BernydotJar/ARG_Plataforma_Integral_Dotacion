@@ -27,7 +27,7 @@ import type { DashboardCard, PendingItem } from "@/lib/types/app";
 type DashboardResponse = {
   cards: DashboardCard[];
   pendientes: PendingItem[];
-  runtimeMode: "demo" | "dataverse";
+  runtimeMode: "demo" | "api";
 };
 
 export default function HomePage() {
@@ -138,7 +138,7 @@ export default function HomePage() {
             <div className="module-card-title-row">
               <Text weight="semibold">Mis pendientes</Text>
               <Badge appearance={data.runtimeMode === "demo" ? "outline" : "filled"}>
-                Modo {data.runtimeMode === "demo" ? "Demo" : "Dataverse"}
+                Modo {data.runtimeMode === "demo" ? "Demo" : "API"}
               </Badge>
             </div>
             <Table>

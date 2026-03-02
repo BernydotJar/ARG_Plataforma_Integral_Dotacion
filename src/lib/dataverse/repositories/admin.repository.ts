@@ -1,10 +1,9 @@
 import "server-only";
 
-import { isDemoMode } from "@/lib/config/env";
 import { scopeBySede } from "@/lib/auth/roles";
-import { getDataverseClient } from "@/lib/dataverse/client";
+import { backendApiFetch } from "@/lib/backend/client";
+import { isDemoMode } from "@/lib/config/env";
 import { getMockDb } from "@/lib/dataverse/mock-store";
-import { dataverseEntitySet } from "@/lib/dataverse/schema";
 import type {
   CentroCosto,
   KitDotacion,
@@ -16,15 +15,8 @@ import { APP_ROLES } from "@/lib/types/app";
 import {
   createMockEntityId,
   getRequestedSede,
-  rowToCentroCosto,
-  rowToKit,
-  rowToKitItem,
   scopeMatchesFilters,
 } from "./common";
-import {
-  QUERY_TOP_DEFAULT,
-  QUERY_TOP_LARGE,
-} from "./constants";
 import { logHistorialEvent } from "./integration.repository";
 import type {
   CentroCostoCreateInput,
@@ -40,6 +32,13 @@ const toKitCollection = (
   ...kit,
   items: allItems.filter((entry) => entry.kitId === kit.id),
 }));
+
+const unwrap = <T>(payload: T | { data: T }): T => {
+  if (payload && typeof payload === "object" && "data" in payload) {
+    return (payload as { data: T }).data;
+  }
+  return payload as T;
+};
 
 const demoAdminRepository: IAdminRepository = {
   async listCatalogos(user: AppUser) {
@@ -187,131 +186,60 @@ const demoAdminRepository: IAdminRepository = {
   },
 };
 
-const dataverseAdminRepository: IAdminRepository = {
+const apiAdminRepository: IAdminRepository = {
   async listCatalogos(user: AppUser) {
-    const base = await demoAdminRepository.listCatalogos(user);
-    const centrosCosto = await this.listCentrosCosto(user);
-    const kits = await this.listKits(user);
+    void user;
+    const payload = await backendApiFetch<Awaited<ReturnType<IAdminRepository["listCatalogos"]>> | { data: Awaited<ReturnType<IAdminRepository["listCatalogos"]>> }>(
+      "/admin/catalogos",
+    );
 
-    return {
-      ...base,
-      centrosCosto,
-      kitsDotacion: kits,
-      kitDotacionItems: kits.flatMap((entry) => entry.items),
-    };
+    return unwrap(payload);
   },
 
   async listUserRoleCatalog(user: AppUser) {
-    return demoAdminRepository.listUserRoleCatalog(user);
+    void user;
+    const payload = await backendApiFetch<Awaited<ReturnType<IAdminRepository["listUserRoleCatalog"]>> | { data: Awaited<ReturnType<IAdminRepository["listUserRoleCatalog"]>> }>(
+      "/admin/usuarios-roles",
+    );
+
+    return unwrap(payload);
   },
 
   async listCentrosCosto(user: AppUser): Promise<CentroCosto[]> {
-    const client = getDataverseClient();
-    const rows = await client.list<Record<string, unknown>>(dataverseEntitySet.CentroCosto, {
-      top: QUERY_TOP_LARGE,
-      orderBy: "createdon desc",
-    });
-
-    return rows.map(rowToCentroCosto).filter((entry) => scopeMatchesFilters(entry, user));
+    void user;
+    const payload = await backendApiFetch<CentroCosto[] | { data: CentroCosto[] }>("/admin/catalogos/centros-costo");
+    return unwrap(payload);
   },
 
   async createCentroCosto(user: AppUser, input: CentroCostoCreateInput): Promise<CentroCosto> {
-    const client = getDataverseClient();
-    const sedeId = getRequestedSede(user, input.sedeId);
-
-    const created = await client.create<Record<string, unknown>>(dataverseEntitySet.CentroCosto, {
-      crf1_sedeid: sedeId,
-      crf1_codigo: input.codigo,
-      crf1_nombre: input.nombre,
-      crf1_estado: "Activo",
+    void user;
+    const payload = await backendApiFetch<CentroCosto | { data: CentroCosto }>("/admin/catalogos/centros-costo", {
+      method: "POST",
+      body: JSON.stringify(input),
     });
 
-    const centroCosto = rowToCentroCosto(created);
-
-    await logHistorialEvent({
-      user,
-      sedeId,
-      entidad: "CentroCosto",
-      entidadId: centroCosto.id,
-      tipo: "Creación",
-      mensaje: `Centro de costo ${centroCosto.codigo} creado`,
-      metadata: { codigo: centroCosto.codigo, nombre: centroCosto.nombre },
-    });
-
-    return centroCosto;
+    return unwrap(payload);
   },
 
   async listKits(user: AppUser): Promise<KitDotacionWithItems[]> {
-    const client = getDataverseClient();
-
-    const [kitRows, itemRows] = await Promise.all([
-      client.list<Record<string, unknown>>(dataverseEntitySet.KitDotacion, {
-        top: QUERY_TOP_DEFAULT,
-        orderBy: "createdon desc",
-      }),
-      client.list<Record<string, unknown>>(dataverseEntitySet.KitDotacionItem, {
-        top: QUERY_TOP_LARGE,
-        orderBy: "createdon desc",
-      }),
-    ]);
-
-    const kits = kitRows.map(rowToKit).filter((entry) => scopeMatchesFilters(entry, user));
-    const items = itemRows
-      .map((entry) => rowToKitItem(entry, String(entry.crf1_sedeid || "")))
-      .filter((entry) => scopeMatchesFilters(entry, user));
-
-    return toKitCollection(kits, items);
+    void user;
+    const payload = await backendApiFetch<KitDotacionWithItems[] | { data: KitDotacionWithItems[] }>("/admin/catalogos/kits");
+    return unwrap(payload);
   },
 
   async createKit(user: AppUser, input: KitDotacionCreateInput): Promise<KitDotacionWithItems> {
-    const client = getDataverseClient();
-    const sedeId = getRequestedSede(user, input.sedeId);
-
-    const createdKit = await client.create<Record<string, unknown>>(dataverseEntitySet.KitDotacion, {
-      crf1_sedeid: sedeId,
-      crf1_nombre: input.nombre,
-      crf1_genero: input.genero,
-      crf1_cargo: input.cargo,
-      crf1_ciclo: input.ciclo,
-      crf1_estado: "Activo",
+    void user;
+    const payload = await backendApiFetch<KitDotacionWithItems | { data: KitDotacionWithItems }>("/admin/catalogos/kits", {
+      method: "POST",
+      body: JSON.stringify(input),
     });
 
-    const kit = rowToKit(createdKit);
-
-    const items = await Promise.all(
-      input.items.map(async (entry) => {
-        const createdItem = await client.create<Record<string, unknown>>(dataverseEntitySet.KitDotacionItem, {
-          crf1_sedeid: sedeId,
-          crf1_kitid: kit.id,
-          crf1_itemnombre: entry.itemNombre,
-          crf1_cantidad: entry.cantidad,
-          crf1_obligatorio: entry.obligatorio,
-          crf1_estado: "Activo",
-        });
-
-        return rowToKitItem(createdItem, sedeId);
-      }),
-    );
-
-    await logHistorialEvent({
-      user,
-      sedeId,
-      entidad: "KitDotacion",
-      entidadId: kit.id,
-      tipo: "Creación",
-      mensaje: `Kit ${kit.nombre} creado con ${items.length} ítems`,
-      metadata: { cargo: kit.cargo, ciclo: kit.ciclo },
-    });
-
-    return {
-      ...kit,
-      items,
-    };
+    return unwrap(payload);
   },
 };
 
 const resolveAdminRepository = (): IAdminRepository =>
-  isDemoMode() ? demoAdminRepository : dataverseAdminRepository;
+  isDemoMode() ? demoAdminRepository : apiAdminRepository;
 
 export const listCatalogos = async (user: AppUser) =>
   resolveAdminRepository().listCatalogos(user);

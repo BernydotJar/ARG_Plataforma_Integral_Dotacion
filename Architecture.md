@@ -2,109 +2,92 @@
 
 ## 1. Objetivo arquitectónico
 
-Sustituir Power Pages por una UI moderna en Next.js, manteniendo Power Platform para datos y orquestación:
+Implementar un portal web enterprise para dotación, inventario, calidad y mantenimiento, eliminando dependencia de Dataverse y alineando la solución con:
 
-- UI/UX y API ligera en Next.js
-- Dataverse como sistema de registro
-- Power Automate para aprobación/SAP
+- Frontend/BFF en Next.js
+- Backend de negocio en .NET 8 Web API
+- Persistencia en Azure SQL Database
+- Orquestación de integraciones vía Power Automate y Azure Functions
 
 ## 2. Capas
 
-## 2.1 Frontend
+### 2.1 Frontend (Portal)
 
-- **Next.js App Router + TypeScript**
-- **Fluent UI v9** para look-and-feel corporativo Microsoft
-- Navegación por módulos en un único portal
-- Layout responsive con sidebar (desktop) + drawer (mobile)
+- Next.js App Router + TypeScript
+- Fluent UI v9
+- UX responsive (desktop/tablet/mobile)
+- Módulos funcionales integrados en un único shell
 
-## 2.2 AuthN/AuthZ
+### 2.2 BFF (Next Route Handlers)
 
-- Login con **MSAL Browser** (Entra ID)
-- `id_token` enviado al backend y validado con JWKS (issuer/audience)
-- Cookie de sesión `httpOnly` firmada (`HS256`)
-- Resolución de roles por:
-  - claim `roles`
-  - mapeo de grupos Entra (`ENTRA_GROUP_*`)
-- Scoping por `Sede` en claims (`sede` / `extension_Sede`) y enforcement en repositorio/API
+- Endpoints en `src/app/api`
+- Validación de payload (zod)
+- Control de sesión/cookies
+- RBAC y scoping por sede antes de invocar backend de negocio
 
-## 2.3 API Layer (Next Route Handlers)
+### 2.3 Backend de negocio (externo a este repo)
 
-- BFF (Backend for Frontend) en `src/app/api`
-- Guard de autenticación por endpoint (`requireApiUser`)
-- Guard de autorización por rol en endpoints sensibles
-- Contratos tipados y validación de payload con `zod`
+- .NET 8 Web API
+- Reglas de negocio: motor de kits, ventanas de bloqueo, auditoría, estados de flujo
+- Integraciones SAP/firmas/documental mediante servicios externos
 
-## 2.4 Data Access
+### 2.4 Datos
 
-- Cliente Dataverse Web API (`client_credentials`)
-- Repositorio con dos runtimes:
-  - `dataverse` (real)
-  - `demo` (mock in-memory)
-- CRUD MVP implementado para:
-  - `PedidoDotacion`
-  - `MovimientoInventario`
-  - `TicketMantenimiento`
-- Registro de auditoría en `HistorialEvento`
+- Azure SQL Database como sistema de registro
+- Row-level security y políticas de acceso por sede/rol implementadas en backend
+- Auditoría transaccional para operaciones críticas
 
-## 2.5 Orquestación (Power Automate)
+### 2.5 Integración
 
-Servicio de trigger desacoplado (`lib/flows/triggers.ts`) con dos estrategias:
+- Power Automate para aprobaciones y procesos SAP
+- Azure Functions para sincronización SFTP con SuccessFactors
+- Azure Blob Storage para staging documental
 
-1. **HTTP trigger** (preferido)
-   - Llamada directa a endpoint de flow
-   - Soporte `x-api-key` o bearer token
-2. **IntegrationRequest en Dataverse**
-   - Portal inserta solicitud
-   - Flow procesa evento desde Dataverse
+## 3. Seguridad
 
-Flows cubiertos:
+- Entra ID / External ID (B2C) para autenticación
+- MFA para perfiles operativos
+- Captcha opcional en login operario (Turnstile en este repo)
+- Secretos y credenciales vía Key Vault (objetivo de despliegue)
+- Recomendado: WAF (Front Door), rate limiting, correlation IDs
 
-- Aprobación Pedido Dotación
-- Aprobación Ajuste Inventario
-- SAP enviar pedido
-- SAP sync status
+## 4. Runtime en este repositorio
 
-## 3. Principales decisiones
+Los repositorios de dominio operan con dos estrategias:
 
-1. **BFF en Next**
-   - Evita exponer Dataverse/SAP directo desde browser.
-   - Centraliza seguridad y trazabilidad.
+1. `demo`: mock in-memory local
+2. `api`: consumo HTTP de backend .NET
 
-2. **MSAL + validación server-side**
-   - UI con experiencia SSO moderna.
-   - API solo confía en sesión emitida tras verificar token Entra.
+Selección de modo:
 
-3. **Modo demo como fallback nativo**
-   - Permite demo funcional sin bloquear por credenciales.
-   - Acelera validación de UX/proceso en pilotos.
+- `DEMO_MODE=true` => demo
+- Sin `BACKEND_API_BASE_URL` => demo
+- Con `BACKEND_API_BASE_URL` => api
 
-4. **SAP fuera de la app web**
-   - Mantiene lógica de integración en flows (no en frontend).
-   - Menor acoplamiento, menor riesgo de seguridad.
+## 5. Contratos backend esperados
 
-## 4. Seguridad
+El frontend espera endpoints REST para:
 
-- Sin acceso directo a SAP desde browser
-- Sesión firmada y `httpOnly`
-- Enforcements por rol y sede en API/repo
-- Sugerido para producción:
-  - rotación de secretos
-  - hardened cookie policy y SameSite por dominio
-  - validación estricta de scopes/claims
-  - observabilidad (logs + correlation IDs)
+- Pedidos + adjuntos
+- Inventario (movimientos/stock)
+- Mantenimiento (tickets)
+- Calidad (inspecciones)
+- Catálogos y administración de roles
+- Registro de integración e historial
 
-## 5. Escalabilidad y evolución
+El BFF soporta payload directo o envelope `{ data: ... }`.
 
-Siguientes pasos recomendados:
+## 6. Decisiones principales
 
-1. Pasar mock a persistencia real completa en Dataverse (mapeo final de campos)
-2. Incorporar colas/reintentos para integración SAP
-3. Embedding de Power BI por rol/sede
-4. Tests E2E de procesos críticos (pedido aprobación + SAP)
-5. Hardening de RBAC con App Roles de Entra + políticas por módulo
+1. Mantener BFF en Next para encapsular sesión, seguridad y trazabilidad.
+2. Centralizar reglas de negocio y persistencia en .NET + Azure SQL.
+3. Conservar modo demo para pruebas funcionales sin bloquear despliegues.
+4. Mantener SAP fuera del navegador y orquestar por flujos seguros.
 
-## 6. Limitaciones MVP
+## 7. Roadmap técnico inmediato
 
-- Mapeos de columnas Dataverse (`crf1_*`) pueden requerir ajuste a naming real
-- Adjuntos en pantallas están preparados pero no se implementó carga binaria completa
-- Administración de usuarios/roles usa dataset base de demostración
+1. Consolidar contrato OpenAPI entre frontend y backend .NET.
+2. Implementar observabilidad end-to-end (request-id, trazas, métricas).
+3. Migrar naming legacy `lib/dataverse` a `lib/domain`.
+4. Integrar pruebas E2E con backend real en ambiente QA.
+5. Aplicar hardening de seguridad productiva (WAF, KV, políticas cookies por dominio).

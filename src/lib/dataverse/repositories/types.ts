@@ -15,7 +15,7 @@ import type {
 } from "@/lib/dataverse/types";
 import type { AppUser, DashboardCard, PendingItem } from "@/lib/types/app";
 
-export type RepositoryRuntimeMode = "demo" | "dataverse";
+export type RepositoryRuntimeMode = "demo" | "api";
 
 export type ListFilters = {
   query?: string;

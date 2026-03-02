@@ -13,6 +13,11 @@ const toCsv = (value: string): string[] =>
     .map((entry) => entry.trim())
     .filter(Boolean);
 
+const toNumber = (value: string, fallback: number): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
 export const env = {
   appName: read("NEXT_PUBLIC_APP_NAME") || "ARGOS - Plataforma Integral",
   appSessionSecret: read("APP_SESSION_SECRET") || "argos-dev-session-secret-change-me",
@@ -26,11 +31,11 @@ export const env = {
     tenantId: read("ENTRA_TENANT_ID") || read("NEXT_PUBLIC_ENTRA_TENANT_ID"),
     clientId: read("ENTRA_CLIENT_ID") || read("NEXT_PUBLIC_ENTRA_CLIENT_ID"),
   },
-  dataverse: {
-    tenantId: read("DATAVERSE_TENANT_ID") || read("ENTRA_TENANT_ID") || read("NEXT_PUBLIC_ENTRA_TENANT_ID"),
-    clientId: read("DATAVERSE_CLIENT_ID"),
-    clientSecret: read("DATAVERSE_CLIENT_SECRET"),
-    url: read("DATAVERSE_URL"),
+  backend: {
+    baseUrl: read("BACKEND_API_BASE_URL"),
+    apiKey: read("BACKEND_API_KEY"),
+    bearerToken: read("BACKEND_API_BEARER_TOKEN"),
+    timeoutMs: toNumber(read("BACKEND_API_TIMEOUT_MS"), 10000),
   },
   flow: {
     mode: read("FLOW_TRIGGER_MODE") || "http",
@@ -53,12 +58,11 @@ export const env = {
   defaultSedes: toCsv(read("DEFAULT_SEDES") || "SEDE-CENTRAL"),
 };
 
-export const hasDataverseConfig = (): boolean =>
-  Boolean(env.dataverse.tenantId && env.dataverse.clientId && env.dataverse.clientSecret && env.dataverse.url);
+export const hasBackendApiConfig = (): boolean => Boolean(env.backend.baseUrl);
 
 export const isDemoMode = (): boolean => {
   if (env.demoModeForced) return true;
-  return !hasDataverseConfig();
+  return !hasBackendApiConfig();
 };
 
 export const isTurnstileConfigured = (): boolean =>
