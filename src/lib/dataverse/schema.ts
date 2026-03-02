@@ -27,6 +27,7 @@ export const dataverseEntitySet = {
   ActividadMantenimiento: "crf1_actividadmantenimientos",
   PlanPreventivo: "crf1_planpreventivos",
   IntegrationRequest: "crf1_integrationrequests",
+  Annotation: "annotations",
 } as const;
 
 export const dataverseField = {

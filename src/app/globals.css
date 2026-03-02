@@ -419,6 +419,14 @@ textarea:focus-visible,
   flex-wrap: wrap;
 }
 
+
+.file-input {
+  border: 1px dashed var(--neutral-300);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+  max-width: 320px;
+}
 .catalog-inline-list {
   display: flex;
   flex-direction: column;

@@ -226,6 +226,17 @@ export interface IntegrationRequest extends EntityBase {
   referencia?: string;
 }
 
+export interface EntityAttachment extends EntityBase {
+  entidad: string;
+  entidadId: string;
+  nombreArchivo: string;
+  mimeType: string;
+  tamanoBytes: number;
+  usuario: string;
+  fechaCarga: string;
+  contenidoBase64?: string;
+}
+
 export interface PedidoDetail {
   pedido: PedidoDotacion;
   detalles: PedidoDotacionDetalle[];

@@ -1,5 +1,6 @@
 import type {
   CentroCosto,
+  EntityAttachment,
   InspeccionCalidad,
   InspeccionDetail,
   IntegrationRequest,
@@ -39,6 +40,12 @@ export interface PedidoUpdateInput {
   observacion?: string;
   prioridad?: PedidoDotacion["prioridad"];
   estado?: NonNullable<PedidoDotacion["estado"]>;
+}
+
+export interface PedidoAttachmentCreateInput {
+  fileName: string;
+  mimeType: string;
+  contentBase64: string;
 }
 
 export interface MovimientoCreateInput {
@@ -123,6 +130,9 @@ export interface IPedidoRepository {
   list(user: AppUser, filters?: ListFilters): Promise<PedidoDotacion[]>;
   create(user: AppUser, input: PedidoCreateInput): Promise<PedidoDotacion>;
   getDetail(user: AppUser, id: string): Promise<PedidoDetail | null>;
+  listAttachments(user: AppUser, id: string): Promise<EntityAttachment[]>;
+  createAttachment(user: AppUser, id: string, input: PedidoAttachmentCreateInput): Promise<EntityAttachment>;
+  deleteAttachment(user: AppUser, id: string, attachmentId: string): Promise<boolean>;
   update(user: AppUser, id: string, input: PedidoUpdateInput): Promise<PedidoDotacion | null>;
   delete(user: AppUser, id: string): Promise<boolean>;
 }

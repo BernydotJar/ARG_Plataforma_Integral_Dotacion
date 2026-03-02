@@ -6,8 +6,11 @@ export {
 
 export {
   createPedido,
+  createPedidoAttachment,
   deletePedido,
+  deletePedidoAttachment,
   getPedidoDetail,
+  listPedidoAttachments,
   listPedidos,
   setPedidoStatus,
   updatePedido,
@@ -54,6 +57,7 @@ export type {
   KitDotacionWithItems,
   ListFilters,
   MovimientoCreateInput,
+  PedidoAttachmentCreateInput,
   PedidoCreateInput,
   PedidoUpdateInput,
   RepositoryRuntimeMode,

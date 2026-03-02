@@ -6,6 +6,7 @@ import type {
   CentroCosto,
   ChecklistCalidad,
   DefectoCalidad,
+  EntityAttachment,
   HistorialEvento,
   InspeccionCalidad,
   Inventario,
@@ -265,6 +266,25 @@ export const rowToActividad = (
   fechaActividad: String(row.crf1_fechaactividad || row.createdon || new Date().toISOString()),
   responsable: String(row.crf1_responsable || "N/A"),
   estado: String(row.crf1_estado || "Registrada"),
+  createdOn: String(row.createdon || new Date().toISOString()),
+  modifiedOn: String(row.modifiedon || new Date().toISOString()),
+});
+
+export const rowToAttachment = (
+  row: Record<string, unknown>,
+  defaults: { sedeId: string; entidad: string; entidadId: string },
+): EntityAttachment => ({
+  id: String(row.annotationid || row.crf1_attachmentid || row.id || ""),
+  sedeId: String(row.crf1_sedeid || row.sedeid || defaults.sedeId),
+  entidad: String(row.crf1_entidad || row.entidad || defaults.entidad),
+  entidadId: String(row.crf1_entidadid || row.entidadid || row._objectid_value || defaults.entidadId),
+  nombreArchivo: String(row.filename || row.crf1_nombrearchivo || row.nombrearchivo || "adjunto"),
+  mimeType: String(row.mimetype || row.crf1_mimetype || "application/octet-stream"),
+  tamanoBytes: Number(row.filesize || row.crf1_tamanobytes || row.tamanobytes || 0),
+  usuario: String(row.createdbyname || row.crf1_usuario || row.usuario || "Sistema"),
+  fechaCarga: String(row.createdon || row.crf1_fechacarga || row.fechacarga || new Date().toISOString()),
+  contenidoBase64: row.documentbody ? String(row.documentbody) : undefined,
+  estado: String(row.crf1_estado || row.estado || "Activo"),
   createdOn: String(row.createdon || new Date().toISOString()),
   modifiedOn: String(row.modifiedon || new Date().toISOString()),
 });

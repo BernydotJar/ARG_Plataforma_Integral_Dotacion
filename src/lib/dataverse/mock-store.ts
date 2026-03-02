@@ -7,6 +7,7 @@ import type {
   CriterioChecklist,
   DefectoCalidad,
   Empleado,
+  EntityAttachment,
   Equipo,
   HistorialEvento,
   InspeccionCalidad,
@@ -29,6 +30,7 @@ import type {
 } from "@/lib/dataverse/types";
 
 type MockDatabase = {
+  attachments: EntityAttachment[];
   sedes: Sede[];
   areas: Area[];
   bodegas: Bodega[];
@@ -470,7 +472,26 @@ const seedDatabase = (): MockDatabase => {
     },
   ];
 
+  const attachments: EntityAttachment[] = [
+    {
+      id: "att-001",
+      sedeId: sedeCentro.id,
+      entidad: "PedidoDotacion",
+      entidadId: pedidoInicial.id,
+      nombreArchivo: "guia-dotacion-demo.txt",
+      mimeType: "text/plain",
+      tamanoBytes: 48,
+      usuario: "Sistema",
+      fechaCarga: now,
+      contenidoBase64: "RG9jdW1lbnRvIGRlIGRlbW9zdHJhY2nDs24gcGFyYSBwZWRpZG8gZGUgZG90YWNpw7NuLg==",
+      estado: "Activo",
+      createdOn: now,
+      modifiedOn: now,
+    },
+  ];
+
   return {
+    attachments,
     sedes: [sedeCentro, sedeNorte],
     areas: [areaOperaciones, areaMantenimiento],
     bodegas: [bodegaPrincipal],
@@ -506,7 +527,24 @@ export const getMockDb = (): MockDatabase => {
     globalThis.__ARGOS_MOCK_DB__ = seedDatabase();
   }
 
+
+  if (!globalThis.__ARGOS_MOCK_DB__.attachments) {
+    globalThis.__ARGOS_MOCK_DB__.attachments = [];
+  }
   return globalThis.__ARGOS_MOCK_DB__;
+};
+
+export const createMockAttachment = (
+  data: Omit<EntityAttachment, "id" | "createdOn" | "modifiedOn" | "fechaCarga">,
+): EntityAttachment => {
+  const now = isoNow();
+  return {
+    id: newId("att"),
+    createdOn: now,
+    modifiedOn: now,
+    fechaCarga: now,
+    ...data,
+  };
 };
 
 export const createMockEvent = (
