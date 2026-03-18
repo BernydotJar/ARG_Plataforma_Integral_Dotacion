@@ -17,6 +17,7 @@ import { KeyboardEvent } from "react";
 import { PlantWorkerHero } from "@/components/home/PlantWorkerHero";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { dashboardCards, pendingItems } from "@/lib/mock-data";
+import { formatDateTimeGt } from "@/lib/format/date";
 
 export default function HomePage() {
   const router = useRouter();
@@ -83,7 +84,7 @@ export default function HomePage() {
                   </a>
                 </TableCell>
                 <TableCell>{item.estado}</TableCell>
-                <TableCell>{new Date(item.fecha).toLocaleString("es-GT")}</TableCell>
+                <TableCell>{formatDateTimeGt(item.fecha)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
