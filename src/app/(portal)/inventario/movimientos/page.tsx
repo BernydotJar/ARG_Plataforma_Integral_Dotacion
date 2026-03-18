@@ -30,6 +30,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
+import { formatDateTimeGt } from "@/lib/format/date";
 import type { MovimientoInventario } from "@/lib/dataverse/types";
 
 type MovimientoListResponse = {
@@ -232,7 +233,7 @@ export default function MovimientosPage() {
                   <TableCell>
                     <StatusBadge status={movimiento.estado} />
                   </TableCell>
-                  <TableCell>{new Date(movimiento.fecha).toLocaleString("es-CO")}</TableCell>
+                  <TableCell>{formatDateTimeGt(movimiento.fecha)}</TableCell>
                   <TableCell>
                     {movimiento.tipo === "Ajuste" && movimiento.estado === "PendienteAprobacion" ? (
                       <Button appearance="subtle" onClick={() => sendAdjustmentApproval(movimiento.id)}>

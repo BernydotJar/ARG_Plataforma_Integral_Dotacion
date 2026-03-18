@@ -27,6 +27,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { SsffSyncOverview, SsffSyncRun } from "@/lib/integrations/ssff";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
+import { formatDateTimeGt } from "@/lib/format/date";
 
 type OverviewResponse = {
   data: SsffSyncOverview;
@@ -56,7 +57,7 @@ const toStatusLabel = (status: SsffSyncRun["status"]): string => {
 
 const formatDate = (value?: string): string => {
   if (!value) return "-";
-  return new Date(value).toLocaleString("es-CO");
+  return formatDateTimeGt(value);
 };
 
 export function IntegracionesPageClient() {

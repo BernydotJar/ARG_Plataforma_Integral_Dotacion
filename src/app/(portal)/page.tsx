@@ -22,6 +22,7 @@ import { PlantWorkerHero } from "@/components/home/PlantWorkerHero";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
+import { formatDateTimeGt } from "@/lib/format/date";
 import type { DashboardCard, PendingItem } from "@/lib/types/app";
 
 type DashboardResponse = {
@@ -160,7 +161,7 @@ export default function HomePage() {
                       </Button>
                     </TableCell>
                     <TableCell>{item.estado}</TableCell>
-                    <TableCell>{new Date(item.fecha).toLocaleString("es-CO")}</TableCell>
+                    <TableCell>{formatDateTimeGt(item.fecha)}</TableCell>
                   </TableRow>
                 ))}
                 {data.pendientes.length === 0 ? (

@@ -23,6 +23,7 @@ import { useCallback, useEffect, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
+import { formatDateTimeGt } from "@/lib/format/date";
 import type { TicketDetail } from "@/lib/dataverse/types";
 
 type TicketDetailResponse = {
@@ -104,7 +105,7 @@ export default function TicketDetailPage() {
       <Card>
         <div className="module-card-title-row">
           <StatusBadge status={detail.ticket.estado} />
-          <Text>{new Date(detail.ticket.fechaReporte).toLocaleString("es-CO")}</Text>
+          <Text>{formatDateTimeGt(detail.ticket.fechaReporte)}</Text>
         </div>
         <Text>{detail.ticket.descripcion}</Text>
       </Card>
@@ -143,7 +144,7 @@ export default function TicketDetailPage() {
           <TableBody>
             {detail.actividades.map((activity) => (
               <TableRow key={activity.id}>
-                <TableCell>{new Date(activity.fechaActividad).toLocaleString("es-CO")}</TableCell>
+                <TableCell>{formatDateTimeGt(activity.fechaActividad)}</TableCell>
                 <TableCell>{activity.responsable}</TableCell>
                 <TableCell>{activity.descripcion}</TableCell>
               </TableRow>
@@ -171,7 +172,7 @@ export default function TicketDetailPage() {
           <TableBody>
             {detail.historial.map((event) => (
               <TableRow key={event.id}>
-                <TableCell>{new Date(event.fecha).toLocaleString("es-CO")}</TableCell>
+                <TableCell>{formatDateTimeGt(event.fecha)}</TableCell>
                 <TableCell>{event.tipo}</TableCell>
                 <TableCell>{event.mensaje}</TableCell>
                 <TableCell>{event.usuario}</TableCell>

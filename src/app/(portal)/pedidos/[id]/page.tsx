@@ -32,6 +32,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { EntityAttachment, PedidoDetail } from "@/lib/dataverse/types";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
+import { formatDateTimeGt } from "@/lib/format/date";
 
 type PedidoDetailResponse = {
   data: PedidoDetail;
@@ -325,7 +326,7 @@ export default function PedidoDetailPage() {
           <TableBody>
             {detail.historial.map((event) => (
               <TableRow key={event.id}>
-                <TableCell>{new Date(event.fecha).toLocaleString("es-CO")}</TableCell>
+                <TableCell>{formatDateTimeGt(event.fecha)}</TableCell>
                 <TableCell>{event.tipo}</TableCell>
                 <TableCell>{event.mensaje}</TableCell>
                 <TableCell>{event.usuario}</TableCell>
@@ -378,7 +379,7 @@ export default function PedidoDetailPage() {
                   <TableCell>{attachment.mimeType}</TableCell>
                   <TableCell>{formatBytes(attachment.tamanoBytes)}</TableCell>
                   <TableCell>{attachment.usuario}</TableCell>
-                  <TableCell>{new Date(attachment.fechaCarga).toLocaleString("es-CO")}</TableCell>
+                  <TableCell>{formatDateTimeGt(attachment.fechaCarga)}</TableCell>
                   <TableCell>
                     <div className="actions-row">
                       <Button
