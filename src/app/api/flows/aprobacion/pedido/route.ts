@@ -11,6 +11,8 @@ const schema = z.object({
   comentario: z.string().optional(),
 });
 
+const ALLOWED_SOURCE_STATUSES = new Set(["Borrador", "Rechazado"]);
+
 export async function POST(request: NextRequest) {
   try {
     const auth = await requireApiUser(request, ["SuperAdmin", "AdminLocal", "UsuarioPedidos"]);
@@ -21,6 +23,24 @@ export async function POST(request: NextRequest) {
 
     if (!pedido) {
       return jsonError("Pedido no encontrado", 404);
+    }
+
+    const currentStatus = pedido.pedido.estado || "Borrador";
+    if (currentStatus === "EnAprobacion") {
+      return jsonOk({
+        data: {
+          pedido: pedido.pedido,
+          flow: null,
+        },
+        message: "El pedido ya estaba en aprobación",
+      });
+    }
+
+    if (!ALLOWED_SOURCE_STATUSES.has(currentStatus)) {
+      return jsonError(
+        `Transición inválida: estado actual '${currentStatus}' no permite enviar a aprobación`,
+        409,
+      );
     }
 
     const flowResult = await triggerApprovalPedidoFlow(auth.user, pedido.pedido.sedeId, {

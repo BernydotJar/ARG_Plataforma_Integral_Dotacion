@@ -139,7 +139,7 @@ const apiMantenimientoRepository: IMantenimientoRepository = {
     return data.filter((entry) => scopeMatchesFilters(entry, user, filters));
   },
 
-  async createTicket(_user: AppUser, input: TicketCreateInput): Promise<TicketMantenimiento> {
+  async createTicket(user: AppUser, input: TicketCreateInput): Promise<TicketMantenimiento> {
     const payload = await backendApiFetch<TicketMantenimiento | { data: TicketMantenimiento }>(
       "/mantenimiento/tickets",
       {
@@ -148,19 +148,28 @@ const apiMantenimientoRepository: IMantenimientoRepository = {
       },
     );
 
-    return unwrap(payload);
+    const created = unwrap(payload);
+    if (!scopeMatchesFilters(created, user)) {
+      throw new Error("Ticket creado fuera del alcance de sedes permitido");
+    }
+
+    return created;
   },
 
-  async getTicketDetail(_user: AppUser, id: string): Promise<TicketDetail | null> {
+  async getTicketDetail(user: AppUser, id: string): Promise<TicketDetail | null> {
     try {
       const payload = await backendApiFetch<TicketDetail | { data: TicketDetail }>(`/mantenimiento/tickets/${id}`);
-      return unwrap(payload);
+      const detail = unwrap(payload);
+      return scopeMatchesFilters(detail.ticket, user) ? detail : null;
     } catch {
       return null;
     }
   },
 
-  async updateTicket(_user: AppUser, id: string, input: TicketUpdateInput): Promise<TicketMantenimiento | null> {
+  async updateTicket(user: AppUser, id: string, input: TicketUpdateInput): Promise<TicketMantenimiento | null> {
+    const detail = await this.getTicketDetail(user, id);
+    if (!detail) return null;
+
     try {
       const payload = await backendApiFetch<TicketMantenimiento | { data: TicketMantenimiento }>(
         `/mantenimiento/tickets/${id}`,
@@ -170,7 +179,8 @@ const apiMantenimientoRepository: IMantenimientoRepository = {
         },
       );
 
-      return unwrap(payload);
+      const updated = unwrap(payload);
+      return scopeMatchesFilters(updated, user) ? updated : null;
     } catch {
       return null;
     }

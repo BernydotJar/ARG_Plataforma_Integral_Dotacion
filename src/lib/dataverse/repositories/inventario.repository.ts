@@ -128,7 +128,7 @@ const apiInventarioRepository: IInventarioRepository = {
     return data.filter((entry) => scopeMatchesFilters(entry, user, filters));
   },
 
-  async createMovimiento(_user: AppUser, input: MovimientoCreateInput): Promise<MovimientoInventario> {
+  async createMovimiento(user: AppUser, input: MovimientoCreateInput): Promise<MovimientoInventario> {
     const payload = await backendApiFetch<MovimientoInventario | { data: MovimientoInventario }>(
       "/inventario/movimientos",
       {
@@ -137,10 +137,18 @@ const apiInventarioRepository: IInventarioRepository = {
       },
     );
 
-    return unwrap(payload);
+    const created = unwrap(payload);
+    if (!scopeMatchesFilters(created, user)) {
+      throw new Error("Movimiento creado fuera del alcance de sedes permitido");
+    }
+
+    return created;
   },
 
-  async updateMovimientoEstado(_user: AppUser, id: string, estado: NonNullable<MovimientoInventario["estado"]>): Promise<MovimientoInventario | null> {
+  async updateMovimientoEstado(user: AppUser, id: string, estado: NonNullable<MovimientoInventario["estado"]>): Promise<MovimientoInventario | null> {
+    const hasAccess = (await this.listMovimientos(user)).some((entry) => entry.id === id);
+    if (!hasAccess) return null;
+
     try {
       const payload = await backendApiFetch<MovimientoInventario | { data: MovimientoInventario }>(
         `/inventario/movimientos/${id}`,
@@ -150,7 +158,8 @@ const apiInventarioRepository: IInventarioRepository = {
         },
       );
 
-      return unwrap(payload);
+      const updated = unwrap(payload);
+      return scopeMatchesFilters(updated, user) ? updated : null;
     } catch {
       return null;
     }

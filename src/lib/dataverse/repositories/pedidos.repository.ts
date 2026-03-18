@@ -254,29 +254,48 @@ const apiPedidoRepository: IPedidoRepository = {
     return unwrap(payload);
   },
 
-  async getDetail(_user: AppUser, id: string): Promise<PedidoDetail | null> {
+  async getDetail(user: AppUser, id: string): Promise<PedidoDetail | null> {
     try {
       const payload = await backendApiFetch<PedidoDetail | { data: PedidoDetail }>(`/pedidos/${id}`);
-      return unwrap(payload);
+      const detail = unwrap(payload);
+      return scopeMatchesFilters(detail.pedido, user) ? detail : null;
     } catch {
       return null;
     }
   },
 
-  async listAttachments(_user: AppUser, id: string): Promise<EntityAttachment[]> {
+  async listAttachments(user: AppUser, id: string): Promise<EntityAttachment[]> {
+    const detail = await this.getDetail(user, id);
+    if (!detail) return [];
+
     const payload = await backendApiFetch<EntityAttachment[] | { data: EntityAttachment[] }>(`/pedidos/${id}/adjuntos`);
-    return unwrap(payload);
+    const attachments = unwrap(payload);
+    return attachments.filter((entry) => scopeMatchesFilters(entry, user));
   },
 
-  async createAttachment(_user: AppUser, id: string, input: PedidoAttachmentCreateInput): Promise<EntityAttachment> {
+  async createAttachment(user: AppUser, id: string, input: PedidoAttachmentCreateInput): Promise<EntityAttachment> {
+    const detail = await this.getDetail(user, id);
+    if (!detail) {
+      throw new Error("Pedido no encontrado o sin acceso para adjuntar");
+    }
+
     const payload = await backendApiFetch<EntityAttachment | { data: EntityAttachment }>(`/pedidos/${id}/adjuntos`, {
       method: "POST",
       body: JSON.stringify(input),
     });
-    return unwrap(payload);
+
+    const attachment = unwrap(payload);
+    if (!scopeMatchesFilters(attachment, user)) {
+      throw new Error("Adjunto creado fuera del alcance de sedes permitido");
+    }
+
+    return attachment;
   },
 
-  async deleteAttachment(_user: AppUser, id: string, attachmentId: string): Promise<boolean> {
+  async deleteAttachment(user: AppUser, id: string, attachmentId: string): Promise<boolean> {
+    const detail = await this.getDetail(user, id);
+    if (!detail) return false;
+
     const payload = await backendApiFetch<{ ok?: boolean } | { data: { ok?: boolean } }>(
       `/pedidos/${id}/adjuntos/${attachmentId}`,
       {
@@ -288,19 +307,27 @@ const apiPedidoRepository: IPedidoRepository = {
     return result.ok ?? true;
   },
 
-  async update(_user: AppUser, id: string, input: PedidoUpdateInput): Promise<PedidoDotacion | null> {
+  async update(user: AppUser, id: string, input: PedidoUpdateInput): Promise<PedidoDotacion | null> {
+    const detail = await this.getDetail(user, id);
+    if (!detail) return null;
+
     try {
       const payload = await backendApiFetch<PedidoDotacion | { data: PedidoDotacion }>(`/pedidos/${id}`, {
         method: "PATCH",
         body: JSON.stringify(input),
       });
-      return unwrap(payload);
+
+      const updated = unwrap(payload);
+      return scopeMatchesFilters(updated, user) ? updated : null;
     } catch {
       return null;
     }
   },
 
-  async delete(_user: AppUser, id: string): Promise<boolean> {
+  async delete(user: AppUser, id: string): Promise<boolean> {
+    const detail = await this.getDetail(user, id);
+    if (!detail) return false;
+
     const payload = await backendApiFetch<{ ok?: boolean } | { data: { ok?: boolean } }>(`/pedidos/${id}`, {
       method: "DELETE",
     });

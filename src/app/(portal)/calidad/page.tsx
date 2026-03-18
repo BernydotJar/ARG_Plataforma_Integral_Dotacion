@@ -30,6 +30,9 @@ type CalidadListResponse = {
 
 const TABLE_COLUMN_COUNT = 6;
 
+const formatResultado = (resultado: InspeccionCalidad["resultado"]): string =>
+  resultado === "NoConforme" ? "No conforme" : "Conforme";
+
 export default function CalidadPage() {
   const [list, setList] = useState<InspeccionCalidad[]>([]);
   const [query, setQuery] = useState("");
@@ -117,7 +120,7 @@ export default function CalidadPage() {
                   <TableCell>{entry.codigo}</TableCell>
                   <TableCell>{entry.inspector}</TableCell>
                   <TableCell>{entry.lote}</TableCell>
-                  <TableCell>{entry.resultado}</TableCell>
+                  <TableCell>{formatResultado(entry.resultado)}</TableCell>
                   <TableCell>
                     <StatusBadge status={entry.estado} />
                   </TableCell>

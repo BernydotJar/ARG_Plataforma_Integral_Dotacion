@@ -105,19 +105,25 @@ const apiCalidadRepository: ICalidadRepository = {
     return data.filter((entry) => scopeMatchesFilters(entry, user, filters));
   },
 
-  async createInspeccion(_user: AppUser, input: InspeccionCreateInput): Promise<InspeccionCalidad> {
+  async createInspeccion(user: AppUser, input: InspeccionCreateInput): Promise<InspeccionCalidad> {
     const payload = await backendApiFetch<InspeccionCalidad | { data: InspeccionCalidad }>("/calidad", {
       method: "POST",
       body: JSON.stringify(input),
     });
 
-    return unwrap(payload);
+    const created = unwrap(payload);
+    if (!scopeMatchesFilters(created, user)) {
+      throw new Error("Inspección creada fuera del alcance de sedes permitido");
+    }
+
+    return created;
   },
 
-  async getInspeccionDetail(_user: AppUser, id: string): Promise<InspeccionDetail | null> {
+  async getInspeccionDetail(user: AppUser, id: string): Promise<InspeccionDetail | null> {
     try {
       const payload = await backendApiFetch<InspeccionDetail | { data: InspeccionDetail }>(`/calidad/${id}`);
-      return unwrap(payload);
+      const detail = unwrap(payload);
+      return scopeMatchesFilters(detail.inspeccion, user) ? detail : null;
     } catch {
       return null;
     }

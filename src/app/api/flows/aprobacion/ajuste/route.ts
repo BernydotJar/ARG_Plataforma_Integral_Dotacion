@@ -11,6 +11,8 @@ const schema = z.object({
   comentario: z.string().optional(),
 });
 
+const ALLOWED_AJUSTE_STATUSES = new Set(["Registrado", "PendienteAprobacion"]);
+
 export async function POST(request: NextRequest) {
   try {
     const auth = await requireApiUser(request, ["SuperAdmin", "AdminLocal", "OperarioBodega"]);
@@ -21,6 +23,27 @@ export async function POST(request: NextRequest) {
 
     if (!movimiento) {
       return jsonError("Movimiento no encontrado", 404);
+    }
+
+    if (movimiento.tipo !== "Ajuste") {
+      return jsonError("Solo los movimientos de tipo Ajuste pueden enviarse a aprobación", 409);
+    }
+
+    if (movimiento.estado === "EnAprobacion") {
+      return jsonOk({
+        data: {
+          movimiento,
+          flow: null,
+        },
+        message: "El ajuste ya estaba en aprobación",
+      });
+    }
+
+    if (!ALLOWED_AJUSTE_STATUSES.has(movimiento.estado || "Registrado")) {
+      return jsonError(
+        `Transición inválida: estado actual '${movimiento.estado}' no permite enviar a aprobación`,
+        409,
+      );
     }
 
     const flowResult = await triggerApprovalAjusteFlow(auth.user, movimiento.sedeId, {

@@ -5,11 +5,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
 
-import { env } from "@/lib/config/env";
+import { CSRF_COOKIE_NAME, SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 import { normalizeRoles } from "@/lib/auth/roles";
+import { env } from "@/lib/config/env";
 import type { AppRole, AppUser } from "@/lib/types/app";
 
-export const SESSION_COOKIE_NAME = "argos_session";
+export { CSRF_COOKIE_NAME, SESSION_COOKIE_NAME };
+
 const SESSION_DURATION_SECONDS = 60 * 60 * 8;
 
 type EntraIdTokenClaims = JWTPayload & {
@@ -81,6 +83,7 @@ export const verifyEntraIdToken = async (idToken: string): Promise<EntraIdTokenC
 
 export const buildAppUserFromClaims = (claims: EntraIdTokenClaims): AppUser => {
   const roles = resolveRolesFromClaims(claims);
+  const sedeIds = resolveSedeScope(claims, roles);
 
   return {
     id: claims.oid || claims.sub || crypto.randomUUID(),
@@ -88,8 +91,8 @@ export const buildAppUserFromClaims = (claims: EntraIdTokenClaims): AppUser => {
     name: claims.name || claims.preferred_username || "Usuario ARGOS",
     email: claims.preferred_username || claims.email,
     roles,
-    sedeIds: resolveSedeScope(claims, roles),
-    preferredSedeId: resolveSedeScope(claims, roles)[0],
+    sedeIds,
+    preferredSedeId: sedeIds[0],
   };
 };
 
@@ -116,10 +119,20 @@ export const verifySessionToken = async (token: string): Promise<AppUser | null>
   }
 };
 
+export const createCsrfToken = (): string => crypto.randomUUID().replace(/-/g, "");
+
 export const getSessionCookieOptions = (expiresAt?: Date) => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax" as const,
+  path: "/",
+  expires: expiresAt,
+});
+
+export const getCsrfCookieOptions = (expiresAt?: Date) => ({
+  httpOnly: false,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict" as const,
   path: "/",
   expires: expiresAt,
 });

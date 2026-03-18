@@ -20,6 +20,11 @@ type TriggerInput = {
   payload: Record<string, unknown>;
 };
 
+const wait = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 const executeHttpFlow = async (url: string, payload: Record<string, unknown>): Promise<unknown> => {
   const response = await fetch(url, {
     method: "POST",
@@ -30,6 +35,7 @@ const executeHttpFlow = async (url: string, payload: Record<string, unknown>): P
     },
     body: JSON.stringify(payload),
     cache: "no-store",
+    signal: AbortSignal.timeout(env.flow.timeoutMs),
   });
 
   if (!response.ok) {
@@ -47,11 +53,29 @@ const executeHttpFlow = async (url: string, payload: Record<string, unknown>): P
   }
 };
 
+const executeHttpFlowWithRetry = async (url: string, payload: Record<string, unknown>): Promise<unknown> => {
+  const attempts = Math.max(env.flow.retryCount, 1);
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await executeHttpFlow(url, payload);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) {
+        await wait(env.flow.retryDelayMs * attempt);
+      }
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Flow HTTP error desconocido");
+};
+
 const triggerFlow = async ({ user, sedeId, flowName, endpointUrl, payload }: TriggerInput): Promise<FlowExecutionResult> => {
   const shouldCallHttp = env.flow.mode === "http" && endpointUrl;
 
   if (shouldCallHttp) {
-    const response = await executeHttpFlow(endpointUrl, payload);
+    const response = await executeHttpFlowWithRetry(endpointUrl, payload);
     const trackingId =
       (typeof response === "object" && response && "trackingId" in response
         ? String((response as { trackingId?: string }).trackingId)

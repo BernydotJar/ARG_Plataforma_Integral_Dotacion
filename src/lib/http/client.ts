@@ -1,5 +1,6 @@
 "use client";
 
+import { CSRF_COOKIE_NAME } from "@/lib/auth/constants";
 import type { ApiError } from "@/lib/types/app";
 
 export class ApiRequestError extends Error {
@@ -16,14 +17,33 @@ export class ApiRequestError extends Error {
   }
 }
 
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+const readCookie = (name: string): string | undefined => {
+  if (typeof document === "undefined") return undefined;
+
+  const cookie = document.cookie
+    .split(";")
+    .map((entry) => entry.trim())
+    .find((entry) => entry.startsWith(`${name}=`));
+
+  if (!cookie) return undefined;
+  return decodeURIComponent(cookie.slice(name.length + 1));
+};
+
 export const apiFetch = async <T>(
   input: RequestInfo,
   init: RequestInit = {},
 ): Promise<T> => {
+  const method = (init.method || "GET").toUpperCase();
+  const csrfToken = MUTATING_METHODS.has(method) ? readCookie(CSRF_COOKIE_NAME) : undefined;
+
   const response = await fetch(input, {
     ...init,
+    method,
     headers: {
       "Content-Type": "application/json",
+      ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
       ...(init.headers || {}),
     },
     credentials: "include",

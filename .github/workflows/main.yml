@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - dev
+      - pilot
   pull_request:
     branches:
       - main
       - dev
+      - pilot
   workflow_dispatch:
 
 permissions:
@@ -19,10 +21,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-lint:
-    name: Build and Lint
+  quality-gates:
+    name: Quality Gates
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,8 +38,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Lint
         run: npm run lint
 
       - name: Build
         run: npm run build
+
+      - name: Dependency Audit (High+)
+        continue-on-error: true
+        run: npm audit --audit-level=high

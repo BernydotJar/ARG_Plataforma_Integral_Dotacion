@@ -15,6 +15,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { hasAnyRole } from "@/lib/auth/roles";
+import { apiFetch } from "@/lib/http/client";
 import type { AppRole, AppUser } from "@/lib/types/app";
 
 import { navItems } from "./navigation";
@@ -77,9 +78,8 @@ export function PortalShell({ user, children }: PortalShellProps) {
     setIsLoggingOut(true);
 
     try {
-      await fetch("/api/auth/logout", {
+      await apiFetch<{ ok: boolean }>("/api/auth/logout", {
         method: "POST",
-        credentials: "include",
       });
     } finally {
       setIsLoggingOut(false);

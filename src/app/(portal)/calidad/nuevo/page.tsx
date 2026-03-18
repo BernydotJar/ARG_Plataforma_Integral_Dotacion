@@ -12,7 +12,7 @@ import {
   Textarea,
 } from "@fluentui/react-components";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/ui/PageHeader";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
@@ -23,16 +23,26 @@ type InspeccionCreateResponse = {
   };
 };
 
-const resultados = ["Conforme", "NoConforme"] as const;
+const resultados = [
+  { value: "Conforme", label: "Conforme" },
+  { value: "NoConforme", label: "No conforme" },
+] as const;
+
+type ResultadoValue = (typeof resultados)[number]["value"];
 
 export default function NuevaInspeccionPage() {
   const router = useRouter();
   const [inspector, setInspector] = useState("");
   const [lote, setLote] = useState("");
-  const [resultado, setResultado] = useState<(typeof resultados)[number]>("Conforme");
+  const [resultado, setResultado] = useState<ResultadoValue>("Conforme");
   const [observacion, setObservacion] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const selectedResultadoLabel = useMemo(
+    () => resultados.find((option) => option.value === resultado)?.label || resultado,
+    [resultado],
+  );
 
   const submit = async () => {
     setSaving(true);
@@ -73,10 +83,14 @@ export default function NuevaInspeccionPage() {
           <Input value={lote} onChange={(_, data) => setLote(data.value)} />
         </Field>
         <Field label="Resultado" required>
-          <Dropdown value={resultado} selectedOptions={[resultado]} onOptionSelect={(_, data) => setResultado(String(data.optionValue) as (typeof resultados)[number])}>
+          <Dropdown
+            value={selectedResultadoLabel}
+            selectedOptions={[resultado]}
+            onOptionSelect={(_, data) => setResultado(String(data.optionValue) as ResultadoValue)}
+          >
             {resultados.map((option) => (
-              <Option key={option} value={option}>
-                {option}
+              <Option key={option.value} value={option.value}>
+                {option.label}
               </Option>
             ))}
           </Dropdown>

@@ -17,7 +17,7 @@ import {
 } from "@fluentui/react-components";
 import { Add24Regular, Delete24Regular } from "@fluentui/react-icons";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { APP_TOASTER_ID } from "@/components/providers/AppProviders";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -36,6 +36,14 @@ type DetalleDraft = {
 };
 
 const prioridadOptions = ["Baja", "Media", "Alta"];
+const MIN_CANTIDAD = 1;
+const MAX_CANTIDAD = 500;
+
+const parseCantidad = (value: string): number => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.trunc(parsed);
+};
 
 export default function NuevoPedidoPage() {
   const router = useRouter();
@@ -47,6 +55,11 @@ export default function NuevoPedidoPage() {
   const [detalles, setDetalles] = useState<DetalleDraft[]>([{ itemNombre: "", talla: "Única", cantidad: 1 }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const hasInvalidCantidad = useMemo(
+    () => detalles.some((detail) => detail.cantidad < MIN_CANTIDAD || detail.cantidad > MAX_CANTIDAD),
+    [detalles],
+  );
 
   const updateDetalle = (idx: number, patch: Partial<DetalleDraft>) => {
     setDetalles((current) => current.map((entry, entryIdx) => (entryIdx === idx ? { ...entry, ...patch } : entry)));
@@ -66,8 +79,13 @@ export default function NuevoPedidoPage() {
       return false;
     }
 
-    if (detalles.length === 0 || detalles.some((detail) => !detail.itemNombre.trim() || detail.cantidad <= 0)) {
+    if (detalles.length === 0 || detalles.some((detail) => !detail.itemNombre.trim())) {
       setError("Debes agregar al menos un detalle válido");
+      return false;
+    }
+
+    if (hasInvalidCantidad) {
+      setError(`La cantidad por ítem debe estar entre ${MIN_CANTIDAD} y ${MAX_CANTIDAD}`);
       return false;
     }
 
@@ -146,33 +164,45 @@ export default function NuevoPedidoPage() {
         </div>
 
         <div className="stack gap-12">
-          {detalles.map((detalle, idx) => (
-            <div key={`detalle-${idx}`} className="detail-row">
-              <Field label="Ítem" required>
-                <Input
-                  value={detalle.itemNombre}
-                  onChange={(_, data) => updateDetalle(idx, { itemNombre: data.value })}
+          {detalles.map((detalle, idx) => {
+            const cantidadInvalida = detalle.cantidad < MIN_CANTIDAD || detalle.cantidad > MAX_CANTIDAD;
+
+            return (
+              <div key={`detalle-${idx}`} className="detail-row">
+                <Field label="Ítem" required>
+                  <Input
+                    value={detalle.itemNombre}
+                    onChange={(_, data) => updateDetalle(idx, { itemNombre: data.value })}
+                  />
+                </Field>
+                <Field label="Talla">
+                  <Input value={detalle.talla} onChange={(_, data) => updateDetalle(idx, { talla: data.value })} />
+                </Field>
+                <Field
+                  label="Cantidad"
+                  required
+                  validationState={cantidadInvalida ? "error" : "none"}
+                  validationMessage={cantidadInvalida ? `Debe estar entre ${MIN_CANTIDAD} y ${MAX_CANTIDAD}` : undefined}
+                >
+                  <Input
+                    type="number"
+                    min={MIN_CANTIDAD}
+                    max={MAX_CANTIDAD}
+                    step={1}
+                    value={String(detalle.cantidad)}
+                    onChange={(_, data) => updateDetalle(idx, { cantidad: parseCantidad(data.value) })}
+                  />
+                </Field>
+                <Button
+                  appearance="subtle"
+                  icon={<Delete24Regular />}
+                  disabled={detalles.length === 1}
+                  onClick={() => removeDetalle(idx)}
+                  aria-label="Eliminar ítem"
                 />
-              </Field>
-              <Field label="Talla">
-                <Input value={detalle.talla} onChange={(_, data) => updateDetalle(idx, { talla: data.value })} />
-              </Field>
-              <Field label="Cantidad" required>
-                <Input
-                  type="number"
-                  value={String(detalle.cantidad)}
-                  onChange={(_, data) => updateDetalle(idx, { cantidad: Number(data.value || 0) })}
-                />
-              </Field>
-              <Button
-                appearance="subtle"
-                icon={<Delete24Regular />}
-                disabled={detalles.length === 1}
-                onClick={() => removeDetalle(idx)}
-                aria-label="Eliminar ítem"
-              />
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </Card>
 
@@ -186,7 +216,7 @@ export default function NuevoPedidoPage() {
         <Button appearance="secondary" onClick={() => router.push("/pedidos")}>
           Cancelar
         </Button>
-        <Button appearance="primary" onClick={submit} disabled={saving}>
+        <Button appearance="primary" onClick={submit} disabled={saving || hasInvalidCantidad}>
           {saving ? <Spinner size="tiny" /> : "Crear pedido"}
         </Button>
       </div>

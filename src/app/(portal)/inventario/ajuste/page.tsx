@@ -13,7 +13,7 @@ import {
   ToastBody,
   ToastTitle,
 } from "@fluentui/react-components";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { APP_TOASTER_ID } from "@/components/providers/AppProviders";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -24,6 +24,9 @@ import type { MovimientoInventario } from "@/lib/dataverse/types";
 type AjusteResponse = {
   data: MovimientoInventario;
 };
+
+const MIN_CANTIDAD = 1;
+const MAX_CANTIDAD = 10000;
 
 export default function AjusteInventarioPage() {
   const { dispatchToast } = useToastController(APP_TOASTER_ID);
@@ -37,7 +40,15 @@ export default function AjusteInventarioPage() {
   const [lastAjuste, setLastAjuste] = useState<MovimientoInventario | null>(null);
   const [sendingApproval, setSendingApproval] = useState(false);
 
+  const cantidadValue = useMemo(() => Number(cantidad), [cantidad]);
+  const cantidadInvalida = !Number.isFinite(cantidadValue) || cantidadValue < MIN_CANTIDAD || cantidadValue > MAX_CANTIDAD;
+
   const createAjuste = async () => {
+    if (!itemNombre.trim() || !motivo.trim() || cantidadInvalida) {
+      setError(`Completa los campos obligatorios y usa una cantidad entre ${MIN_CANTIDAD} y ${MAX_CANTIDAD}.`);
+      return;
+    }
+
     setSaving(true);
     setError(null);
 
@@ -48,7 +59,7 @@ export default function AjusteInventarioPage() {
           itemNombre,
           bodegaNombre,
           ubicacionNombre,
-          cantidad: Number(cantidad),
+          cantidad: Math.trunc(cantidadValue),
           motivo,
         }),
       });
@@ -110,8 +121,20 @@ export default function AjusteInventarioPage() {
         <Field label="Ítem" required>
           <Input value={itemNombre} onChange={(_, data) => setItemNombre(data.value)} />
         </Field>
-        <Field label="Cantidad" required>
-          <Input type="number" value={cantidad} onChange={(_, data) => setCantidad(data.value)} />
+        <Field
+          label="Cantidad"
+          required
+          validationState={cantidadInvalida ? "error" : "none"}
+          validationMessage={cantidadInvalida ? `Debe estar entre ${MIN_CANTIDAD} y ${MAX_CANTIDAD}` : undefined}
+        >
+          <Input
+            type="number"
+            min={MIN_CANTIDAD}
+            max={MAX_CANTIDAD}
+            step={1}
+            value={cantidad}
+            onChange={(_, data) => setCantidad(data.value)}
+          />
         </Field>
         <Field label="Bodega" required>
           <Input value={bodegaNombre} onChange={(_, data) => setBodegaNombre(data.value)} />
@@ -124,7 +147,7 @@ export default function AjusteInventarioPage() {
         </Field>
 
         <div className="actions-row">
-          <Button appearance="primary" onClick={createAjuste} disabled={saving || !itemNombre || !motivo}>
+          <Button appearance="primary" onClick={createAjuste} disabled={saving || !itemNombre.trim() || !motivo.trim() || cantidadInvalida}>
             {saving ? <Spinner size="tiny" /> : "Registrar ajuste"}
           </Button>
         </div>

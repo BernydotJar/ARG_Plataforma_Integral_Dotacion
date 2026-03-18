@@ -22,6 +22,24 @@ export async function POST(request: NextRequest) {
       return jsonError("Pedido no encontrado", 404);
     }
 
+    const currentStatus = detail.pedido.estado || "Borrador";
+    if (currentStatus === "EnviadoSAP") {
+      return jsonOk({
+        data: {
+          pedido: detail.pedido,
+          flow: null,
+        },
+        message: "El pedido ya estaba enviado a SAP",
+      });
+    }
+
+    if (currentStatus !== "Aprobado") {
+      return jsonError(
+        `Transición inválida: estado actual '${currentStatus}' no permite enviar a SAP`,
+        409,
+      );
+    }
+
     const flowResult = await triggerSapEnviarPedidoFlow(auth.user, detail.pedido.sedeId, {
       pedidoId: detail.pedido.id,
       codigoPedido: detail.pedido.codigo,

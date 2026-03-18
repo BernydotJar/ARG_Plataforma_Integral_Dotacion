@@ -23,7 +23,7 @@ import {
   ToastTitle,
 } from "@fluentui/react-components";
 import { Box24Regular } from "@fluentui/react-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { APP_TOASTER_ID } from "@/components/providers/AppProviders";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -41,6 +41,8 @@ type MovimientoCreateResponse = {
 };
 
 const tipos = ["Ingreso", "Salida", "Ajuste"] as const;
+const MIN_CANTIDAD = 1;
+const MAX_CANTIDAD = 10000;
 
 export default function MovimientosPage() {
   const { dispatchToast } = useToastController(APP_TOASTER_ID);
@@ -55,6 +57,9 @@ export default function MovimientosPage() {
   const [cantidad, setCantidad] = useState("1");
   const [motivo, setMotivo] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const cantidadValue = useMemo(() => Number(cantidad), [cantidad]);
+  const cantidadInvalida = !Number.isFinite(cantidadValue) || cantidadValue < MIN_CANTIDAD || cantidadValue > MAX_CANTIDAD;
 
   const load = async () => {
     try {
@@ -74,6 +79,11 @@ export default function MovimientosPage() {
   }, []);
 
   const submit = async () => {
+    if (!itemNombre.trim() || cantidadInvalida) {
+      setError(`Completa los campos obligatorios y usa una cantidad entre ${MIN_CANTIDAD} y ${MAX_CANTIDAD}.`);
+      return;
+    }
+
     setSaving(true);
     setError(null);
 
@@ -85,7 +95,7 @@ export default function MovimientosPage() {
           itemNombre,
           bodegaNombre,
           ubicacionNombre,
-          cantidad: Number(cantidad),
+          cantidad: Math.trunc(cantidadValue),
           motivo,
         }),
       });
@@ -156,15 +166,27 @@ export default function MovimientosPage() {
         <Field label="Ubicación" required>
           <Input value={ubicacionNombre} onChange={(_, data) => setUbicacionNombre(data.value)} />
         </Field>
-        <Field label="Cantidad" required>
-          <Input type="number" value={cantidad} onChange={(_, data) => setCantidad(data.value)} />
+        <Field
+          label="Cantidad"
+          required
+          validationState={cantidadInvalida ? "error" : "none"}
+          validationMessage={cantidadInvalida ? `Debe estar entre ${MIN_CANTIDAD} y ${MAX_CANTIDAD}` : undefined}
+        >
+          <Input
+            type="number"
+            min={MIN_CANTIDAD}
+            max={MAX_CANTIDAD}
+            step={1}
+            value={cantidad}
+            onChange={(_, data) => setCantidad(data.value)}
+          />
         </Field>
         <Field label="Motivo">
           <Input value={motivo} onChange={(_, data) => setMotivo(data.value)} />
         </Field>
 
         <div className="actions-row">
-          <Button appearance="primary" onClick={submit} disabled={saving || !itemNombre}>
+          <Button appearance="primary" onClick={submit} disabled={saving || !itemNombre.trim() || cantidadInvalida}>
             {saving ? <Spinner size="tiny" /> : "Registrar movimiento"}
           </Button>
         </div>
