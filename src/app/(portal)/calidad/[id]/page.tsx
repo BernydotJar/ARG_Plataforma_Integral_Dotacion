@@ -2,6 +2,7 @@
 
 import {
   Badge,
+  Button,
   Card,
   Spinner,
   Table,
@@ -12,19 +13,21 @@ import {
   TableRow,
   Text,
 } from "@fluentui/react-components";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { apiFetch, ApiRequestError } from "@/lib/http/client";
-import { formatDateTimeGt } from "@/lib/format/date";
 import type { InspeccionDetail } from "@/lib/dataverse/types";
+import { formatDateTimeGt } from "@/lib/format/date";
+import { apiFetch, ApiRequestError } from "@/lib/http/client";
 
 type DetailResponse = {
   data: InspeccionDetail;
 };
+
+const formatResultado = (resultado: "Conforme" | "NoConforme"): string =>
+  resultado === "NoConforme" ? "No conforme" : "Conforme";
 
 export default function InspeccionDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -49,14 +52,20 @@ export default function InspeccionDetailPage() {
   }, [id]);
 
   if (loading) {
-    return <Spinner label="Cargando inspección..." />;
+    return (
+      <div className="centered-state">
+        <Spinner label="Cargando inspección..." />
+      </div>
+    );
   }
 
   if (!detail) {
     return (
       <Card>
         <Text className="error-text">{error || "Inspección no encontrada"}</Text>
-        <Link href="/calidad">Volver a calidad</Link>
+        <Button as="a" href="/calidad" appearance="secondary" className="touch-action-button">
+          Volver a calidad
+        </Button>
       </Card>
     );
   }
@@ -68,9 +77,17 @@ export default function InspeccionDetailPage() {
         description={`Lote ${detail.inspeccion.lote} | Inspector ${detail.inspeccion.inspector}`}
       />
 
+      {error ? (
+        <Card>
+          <Text className="error-text" aria-live="assertive">{error}</Text>
+        </Card>
+      ) : null}
+
       <Card>
         <div className="module-card-title-row">
-          <Badge appearance="filled">Resultado {detail.inspeccion.resultado}</Badge>
+          <Badge appearance={detail.inspeccion.resultado === "NoConforme" ? "filled" : "tint"} color={detail.inspeccion.resultado === "NoConforme" ? "danger" : "success"}>
+            Resultado {formatResultado(detail.inspeccion.resultado)}
+          </Badge>
           <StatusBadge status={detail.inspeccion.estado} />
         </div>
         <Text>{detail.inspeccion.observacion || "Sin observaciones"}</Text>
@@ -83,7 +100,8 @@ export default function InspeccionDetailPage() {
             Aún no hay checklist registrado para esta inspección.
           </Text>
         ) : (
-          <Table>
+          <div className="table-scroll">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHeaderCell>Criterio</TableHeaderCell>
@@ -101,6 +119,7 @@ export default function InspeccionDetailPage() {
               ))}
             </TableBody>
           </Table>
+          </div>
         )}
       </Card>
 
@@ -111,7 +130,8 @@ export default function InspeccionDetailPage() {
             No se han registrado defectos para esta inspección.
           </Text>
         ) : (
-          <Table>
+          <div className="table-scroll">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHeaderCell>Tipo</TableHeaderCell>
@@ -129,12 +149,14 @@ export default function InspeccionDetailPage() {
               ))}
             </TableBody>
           </Table>
+          </div>
         )}
       </Card>
 
       <Card>
         <Text weight="semibold">Timeline / Auditoría</Text>
-        <Table>
+        <div className="table-scroll">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Fecha</TableHeaderCell>
@@ -159,6 +181,7 @@ export default function InspeccionDetailPage() {
             ) : null}
           </TableBody>
         </Table>
+        </div>
       </Card>
     </div>
   );

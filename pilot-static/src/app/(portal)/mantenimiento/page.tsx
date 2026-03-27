@@ -47,7 +47,7 @@ export default function MantenimientoPage() {
         actionLabel="Nuevo ticket"
       />
 
-      <Card>
+      <Card data-tour="mantenimiento-busqueda">
         <Input
           aria-label="Buscar tickets de mantenimiento"
           value={query}
@@ -56,8 +56,9 @@ export default function MantenimientoPage() {
         />
       </Card>
 
-      <Card>
-        <Table>
+      <Card data-tour="mantenimiento-tabla">
+        <div className="table-scroll">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Código</TableHeaderCell>
@@ -79,7 +80,7 @@ export default function MantenimientoPage() {
                   <StatusBadge status={ticket.estado} />
                 </TableCell>
                 <TableCell>
-                  <Button as="a" href="#" appearance="subtle">
+                  <Button as="a" href="#" appearance="secondary" className="touch-action-button">
                     Ver detalle
                   </Button>
                 </TableCell>
@@ -110,6 +111,7 @@ export default function MantenimientoPage() {
             ) : null}
           </TableBody>
         </Table>
+        </div>
       </Card>
     </div>
   );

@@ -7,7 +7,9 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev:reset": "bash ./scripts/dev-reset.sh",
+    "dev:3500": "npm run dev:reset && next dev --webpack -p 3500"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.3.0",

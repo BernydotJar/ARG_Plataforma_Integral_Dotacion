@@ -1,8 +1,10 @@
 import {
+  ArrowSync24Regular,
   CheckmarkCircle24Regular,
   Box24Regular,
   ClipboardTask24Regular,
   DatabaseSearch24Regular,
+  Chat24Regular,
   Home24Regular,
   PeopleTeam24Regular,
   Wrench24Regular,
@@ -48,10 +50,21 @@ export const navItems: NavItem[] = [
     roles: ["SuperAdmin", "AdminLocal", "TecnicoMantenimiento"],
   },
   {
+    href: "/asistente-rag",
+    label: "Asistente RAG",
+    icon: <Chat24Regular />,
+  },
+  {
     href: "/admin/catalogos",
     label: "Admin Catálogos",
     icon: <DatabaseSearch24Regular />,
     roles: ["SuperAdmin", "AdminLocal"],
+  },
+  {
+    href: "/admin/integraciones",
+    label: "Integraciones",
+    icon: <ArrowSync24Regular />,
+    roles: ["SuperAdmin", "AdminLocal", "UsuarioPedidos"],
   },
   {
     href: "/admin/usuarios-roles",

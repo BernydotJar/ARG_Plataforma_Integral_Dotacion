@@ -23,7 +23,6 @@ import {
   Delete24Regular,
   Send24Regular,
 } from "@fluentui/react-icons";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -31,8 +30,8 @@ import { APP_TOASTER_ID } from "@/components/providers/AppProviders";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { EntityAttachment, PedidoDetail } from "@/lib/dataverse/types";
-import { apiFetch, ApiRequestError } from "@/lib/http/client";
 import { formatDateTimeGt } from "@/lib/format/date";
+import { apiFetch, ApiRequestError } from "@/lib/http/client";
 
 type PedidoDetailResponse = {
   data: PedidoDetail;
@@ -104,9 +103,13 @@ export default function PedidoDetailPage() {
     void Promise.all([loadDetail(), loadAttachments()]);
   }, [loadAttachments, loadDetail]);
 
-  const sendToApproval = async () => {
-    if (!detail) return;
+  const canSendApproval = detail?.pedido.estado === "Borrador" || detail?.pedido.estado === "Rechazado";
+  const canSendSap = detail?.pedido.estado === "Aprobado";
 
+  const sendToApproval = async () => {
+    if (!detail || !canSendApproval) return;
+
+    setError(null);
     setSendingApproval(true);
     try {
       await apiFetch("/api/flows/aprobacion/pedido", {
@@ -132,8 +135,9 @@ export default function PedidoDetailPage() {
   };
 
   const sendToSap = async () => {
-    if (!detail) return;
+    if (!detail || !canSendSap) return;
 
+    setError(null);
     setSendingSap(true);
     try {
       await apiFetch("/api/flows/sap/enviar-pedido", {
@@ -166,6 +170,7 @@ export default function PedidoDetailPage() {
       return;
     }
 
+    setError(null);
     setUploadingAttachment(true);
     try {
       const contentBase64 = await fileToBase64(selectedFile);
@@ -202,6 +207,7 @@ export default function PedidoDetailPage() {
   };
 
   const deleteAttachment = async (attachmentId: string) => {
+    setError(null);
     setDeletingAttachmentId(attachmentId);
     try {
       await apiFetch<{ ok: boolean }>(`/api/pedidos/${id}/adjuntos/${attachmentId}`, {
@@ -251,7 +257,9 @@ export default function PedidoDetailPage() {
     return (
       <Card>
         <Text className="error-text">{error || "Pedido no encontrado"}</Text>
-        <Link href="/pedidos">Volver a pedidos</Link>
+        <Button as="a" href="/pedidos" appearance="secondary" className="touch-action-button">
+          Volver a pedidos
+        </Button>
       </Card>
     );
   }
@@ -262,6 +270,12 @@ export default function PedidoDetailPage() {
         title={`Pedido ${detail.pedido.codigo}`}
         description={`${detail.pedido.empleadoNombre} | ${detail.pedido.areaNombre}`}
       />
+
+      {error ? (
+        <Card>
+          <Text className="error-text" aria-live="assertive">{error}</Text>
+        </Card>
+      ) : null}
 
       <Card>
         <div className="module-card-title-row">
@@ -274,7 +288,9 @@ export default function PedidoDetailPage() {
           <Button
             appearance="primary"
             icon={<Send24Regular />}
-            disabled={sendingApproval}
+            className="touch-action-button"
+            data-tour="pedido-enviar-aprobacion"
+            disabled={sendingApproval || !canSendApproval}
             onClick={sendToApproval}
           >
             {sendingApproval ? "Enviando..." : "Enviar a aprobación"}
@@ -282,17 +298,25 @@ export default function PedidoDetailPage() {
           <Button
             appearance="secondary"
             icon={<CloudArrowUp24Regular />}
-            disabled={sendingSap}
+            className="touch-action-button"
+            data-tour="pedido-enviar-sap"
+            disabled={sendingSap || !canSendSap}
             onClick={sendToSap}
           >
             {sendingSap ? "Enviando..." : "Enviar a SAP"}
           </Button>
         </div>
+        {!canSendApproval || !canSendSap ? (
+          <Text size={200} className="muted-text">
+            Flujo habilitado por estado: aprobación en {"Borrador/Rechazado"} y SAP en {"Aprobado"}.
+          </Text>
+        ) : null}
       </Card>
 
       <Card>
         <Text weight="semibold">Detalle de pedido</Text>
-        <Table>
+        <div className="table-scroll">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Ítem</TableHeaderCell>
@@ -310,11 +334,13 @@ export default function PedidoDetailPage() {
             ))}
           </TableBody>
         </Table>
+        </div>
       </Card>
 
-      <Card>
+      <Card data-tour="pedido-timeline">
         <Text weight="semibold">Timeline / Auditoría</Text>
-        <Table>
+        <div className="table-scroll">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Fecha</TableHeaderCell>
@@ -334,9 +360,10 @@ export default function PedidoDetailPage() {
             ))}
           </TableBody>
         </Table>
+        </div>
       </Card>
 
-      <Card>
+      <Card data-tour="pedido-adjuntos">
         <Text weight="semibold">Adjuntos</Text>
         <div className="actions-row">
           <input
@@ -358,10 +385,15 @@ export default function PedidoDetailPage() {
           Formatos permitidos: PDF, imágenes, TXT, DOCX, XLSX. Tamaño máximo: 5 MB.
         </Text>
 
-        {loadingAttachments ? <Spinner label="Cargando adjuntos..." /> : null}
+        {loadingAttachments ? (
+          <div className="centered-state">
+            <Spinner label="Cargando adjuntos..." />
+          </div>
+        ) : null}
 
         {!loadingAttachments ? (
-          <Table>
+          <div className="table-scroll">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHeaderCell>Archivo</TableHeaderCell>
@@ -383,16 +415,16 @@ export default function PedidoDetailPage() {
                   <TableCell>
                     <div className="actions-row">
                       <Button
-                        size="small"
-                        appearance="subtle"
+                        appearance="secondary"
+                        className="touch-action-button"
                         icon={<ArrowDownload24Regular />}
                         onClick={() => downloadAttachment(attachment)}
                       >
                         Descargar
                       </Button>
                       <Button
-                        size="small"
-                        appearance="subtle"
+                        appearance="secondary"
+                        className="touch-action-button"
                         icon={<Delete24Regular />}
                         disabled={deletingAttachmentId === attachment.id}
                         onClick={() => deleteAttachment(attachment.id)}
@@ -406,19 +438,20 @@ export default function PedidoDetailPage() {
 
               {attachments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6}>
-                    <Text size={200} className="muted-text">
-                      No hay adjuntos registrados para este pedido.
-                    </Text>
+                  <TableCell colSpan={6} className="table-empty-cell">
+                    <div className="centered-state">
+                      <Text size={200} className="muted-text">
+                        No hay adjuntos registrados para este pedido.
+                      </Text>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : null}
             </TableBody>
           </Table>
+          </div>
         ) : null}
       </Card>
-
-      {error ? <Text className="error-text">{error}</Text> : null}
     </div>
   );
 }

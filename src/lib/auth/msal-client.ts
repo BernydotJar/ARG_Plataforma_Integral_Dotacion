@@ -29,19 +29,22 @@ const getMsal = (): PublicClientApplication => {
   return msalApp;
 };
 
-export const loginWithEntra = async (): Promise<{ idToken: string; account: AccountInfo | null }> => {
+export const loginWithEntra = async (): Promise<void> => {
   const client = getMsal();
   await client.initialize();
-
-  const result = await client.loginPopup({
+  await client.loginRedirect({
     scopes: ["openid", "profile", "email"],
     prompt: "select_account",
   });
+};
 
-  return {
-    idToken: result.idToken,
-    account: result.account,
-  };
+export const handleMsalRedirectResult = async (): Promise<{ idToken: string; account: AccountInfo | null } | null> => {
+  if (!publicEnv.entraTenantId || !publicEnv.entraClientId) return null;
+  const client = getMsal();
+  await client.initialize();
+  const result = await client.handleRedirectPromise();
+  if (!result) return null;
+  return { idToken: result.idToken, account: result.account };
 };
 
 export const logoutFromEntra = async (): Promise<void> => {
@@ -49,8 +52,8 @@ export const logoutFromEntra = async (): Promise<void> => {
   await client.initialize();
   const account = client.getActiveAccount() || client.getAllAccounts()[0] || undefined;
 
-  await client.logoutPopup({
+  await client.logoutRedirect({
     account,
-    mainWindowRedirectUri: "/login",
+    postLogoutRedirectUri: "/login",
   });
 };

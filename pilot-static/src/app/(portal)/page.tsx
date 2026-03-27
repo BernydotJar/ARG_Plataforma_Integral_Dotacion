@@ -11,13 +11,25 @@ import {
   TableRow,
   Text,
 } from "@fluentui/react-components";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { KeyboardEvent } from "react";
 
-import { PlantWorkerHero } from "@/components/home/PlantWorkerHero";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { dashboardCards, pendingItems } from "@/lib/mock-data";
 import { formatDateTimeGt } from "@/lib/format/date";
+import { dashboardCards, pendingItems } from "@/lib/mock-data";
+
+const PlantWorkerHero = dynamic(
+  () => import("@/components/home/PlantWorkerHero").then((module) => module.PlantWorkerHero),
+  { ssr: false },
+);
+
+const HOME_CARD_TOUR_TARGET: Record<string, string> = {
+  "/pedidos": "home-card-pedidos",
+  "/inventario": "home-card-inventario",
+  "/calidad": "home-card-calidad",
+  "/mantenimiento": "home-card-mantenimiento",
+};
 
 export default function HomePage() {
   const router = useRouter();
@@ -39,13 +51,14 @@ export default function HomePage() {
 
       <PlantWorkerHero />
 
-      <div className="card-grid four-col">
+      <div className="card-grid four-col" data-tour="home-cards">
         {dashboardCards.map((card) => (
           <Card
             key={card.id}
             className="module-card dashboard-card-link"
             role="link"
             tabIndex={0}
+            data-tour={HOME_CARD_TOUR_TARGET[card.href]}
             onClick={() => router.push(card.href)}
             onKeyDown={onCardKeyDown(card.href)}
           >
@@ -60,7 +73,7 @@ export default function HomePage() {
         ))}
       </div>
 
-      <Card>
+      <Card data-tour="home-pendientes">
         <div className="module-card-title-row">
           <Text weight="semibold">Mis pendientes</Text>
           <Badge appearance="outline">Modo Demo</Badge>

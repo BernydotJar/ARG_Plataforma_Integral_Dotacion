@@ -16,15 +16,14 @@ import {
   TableRow,
   Text,
 } from "@fluentui/react-components";
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { apiFetch, ApiRequestError } from "@/lib/http/client";
-import { formatDateTimeGt } from "@/lib/format/date";
 import type { TicketDetail } from "@/lib/dataverse/types";
+import { formatDateTimeGt } from "@/lib/format/date";
+import { apiFetch, ApiRequestError } from "@/lib/http/client";
 
 type TicketDetailResponse = {
   data: TicketDetail;
@@ -59,8 +58,13 @@ export default function TicketDetailPage() {
     void load();
   }, [load]);
 
+  const hasChanges = useMemo(() => {
+    if (!detail) return false;
+    return estado !== detail.ticket.estado || tecnicoAsignado !== (detail.ticket.tecnicoAsignado || "");
+  }, [detail, estado, tecnicoAsignado]);
+
   const saveChanges = async () => {
-    if (!detail) return;
+    if (!detail || !hasChanges) return;
 
     setSaving(true);
     setError(null);
@@ -83,14 +87,20 @@ export default function TicketDetailPage() {
   };
 
   if (loading) {
-    return <Spinner label="Cargando ticket..." />;
+    return (
+      <div className="centered-state">
+        <Spinner label="Cargando ticket..." />
+      </div>
+    );
   }
 
   if (!detail) {
     return (
       <Card>
         <Text className="error-text">{error || "Ticket no encontrado"}</Text>
-        <Link href="/mantenimiento">Volver a mantenimiento</Link>
+        <Button as="a" href="/mantenimiento" appearance="secondary" className="touch-action-button">
+          Volver a mantenimiento
+        </Button>
       </Card>
     );
   }
@@ -101,6 +111,12 @@ export default function TicketDetailPage() {
         title={`Ticket ${detail.ticket.codigo}`}
         description={`${detail.ticket.equipoNombre} | Prioridad ${detail.ticket.prioridad}`}
       />
+
+      {error ? (
+        <Card>
+          <Text className="error-text" aria-live="assertive">{error}</Text>
+        </Card>
+      ) : null}
 
       <Card>
         <div className="module-card-title-row">
@@ -125,15 +141,19 @@ export default function TicketDetailPage() {
         </Field>
 
         <div className="actions-row">
-          <Button appearance="primary" onClick={saveChanges} disabled={saving}>
+          <Button appearance="primary" onClick={saveChanges} disabled={saving || !hasChanges}>
             {saving ? <Spinner size="tiny" /> : "Guardar cambios"}
           </Button>
+          {!hasChanges ? (
+            <Text size={200} className="muted-text">Sin cambios pendientes.</Text>
+          ) : null}
         </div>
       </Card>
 
       <Card>
         <Text weight="semibold">Actividades</Text>
-        <Table>
+        <div className="table-scroll">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Fecha</TableHeaderCell>
@@ -156,11 +176,13 @@ export default function TicketDetailPage() {
             ) : null}
           </TableBody>
         </Table>
+        </div>
       </Card>
 
       <Card>
         <Text weight="semibold">Timeline / Auditoría</Text>
-        <Table>
+        <div className="table-scroll">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Fecha</TableHeaderCell>
@@ -185,9 +207,8 @@ export default function TicketDetailPage() {
             ) : null}
           </TableBody>
         </Table>
+        </div>
       </Card>
-
-      {error ? <Text className="error-text">{error}</Text> : null}
     </div>
   );
 }

@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "dev:reset": "bash ../scripts/dev-reset.sh pilot-static",
+    "dev:3500": "npm run dev:reset && next dev -p 3500"
   },
   "dependencies": {
     "@fluentui/react-components": "^9.73.1",

@@ -74,7 +74,7 @@ export default function CalidadPage() {
         actionLabel="Nueva inspección"
       />
 
-      <Card>
+      <Card data-tour="calidad-busqueda">
         <Input
           aria-label="Buscar inspecciones de calidad"
           value={query}
@@ -93,7 +93,7 @@ export default function CalidadPage() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card data-tour="calidad-tabla">
         {loading ? (
           <Skeleton>
             <div className="skeleton-stack">
@@ -103,6 +103,7 @@ export default function CalidadPage() {
             </div>
           </Skeleton>
         ) : (
+          <div className="table-scroll">
           <Table>
             <TableHeader>
               <TableRow>
@@ -125,7 +126,7 @@ export default function CalidadPage() {
                     <StatusBadge status={entry.estado} />
                   </TableCell>
                   <TableCell>
-                    <Button as="a" href={`/calidad/${entry.id}`} appearance="subtle">
+                    <Button as="a" href={`/calidad/${entry.id}`} appearance="secondary" className="touch-action-button">
                       Ver detalle
                     </Button>
                   </TableCell>
@@ -156,6 +157,7 @@ export default function CalidadPage() {
               ) : null}
             </TableBody>
           </Table>
+        </div>
         )}
       </Card>
     </div>

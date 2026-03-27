@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { APP_TOASTER_ID } from "@/components/providers/AppProviders";
-import { loginWithEntra } from "@/lib/auth/msal-client";
+import { handleMsalRedirectResult, loginWithEntra } from "@/lib/auth/msal-client";
 import { isEntraConfigured, isTurnstileEnabled, publicEnv } from "@/lib/config/public-env";
 import { apiFetch, ApiRequestError } from "@/lib/http/client";
 
@@ -47,6 +47,30 @@ export default function LoginPage() {
   const captchaWidgetIdRef = useRef<string | null>(null);
 
   const captchaEnabled = isTurnstileEnabled();
+
+  // Handle MSAL redirect result (runs after Microsoft redirects back to /login)
+  useEffect(() => {
+    const processMsalRedirect = async () => {
+      try {
+        const result = await handleMsalRedirectResult();
+        if (!result) return;
+
+        await apiFetch<{ user: { id: string } }>("/api/auth/session", {
+          method: "POST",
+          body: JSON.stringify({ idToken: result.idToken }),
+        });
+
+        router.push("/");
+        router.refresh();
+      } catch (err) {
+        const message = err instanceof ApiRequestError ? err.message : "Error al autenticar con Microsoft";
+        setError(message);
+        setCheckingSession(false);
+      }
+    };
+
+    void processMsalRedirect();
+  }, [router]);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -108,27 +132,12 @@ export default function LoginPage() {
   const handleEntraLogin = async () => {
     setBusy(true);
     setError(null);
-
     try {
-      const { idToken } = await loginWithEntra();
-      await apiFetch<{ user: { id: string } }>("/api/auth/session", {
-        method: "POST",
-        body: JSON.stringify({ idToken }),
-      });
-
-      router.push("/");
-      router.refresh();
+      await loginWithEntra();
+      // Page will navigate away to Microsoft login — nothing to do here
     } catch (err) {
       const message = err instanceof ApiRequestError ? err.message : "Error al autenticar con Entra ID";
       setError(message);
-      dispatchToast(
-        <Toast>
-          <ToastTitle>Error de autenticación</ToastTitle>
-          <ToastBody>{message}</ToastBody>
-        </Toast>,
-        { intent: "error" },
-      );
-    } finally {
       setBusy(false);
     }
   };
@@ -235,12 +244,12 @@ export default function LoginPage() {
         {!checkingSession ? (
           <>
             <Button appearance="primary" disabled={busy || !isEntraConfigured()} onClick={handleEntraLogin}>
-              {busy ? "Ingresando..." : "Iniciar sesión con Microsoft"}
+              {busy ? "Redirigiendo a Microsoft..." : "Iniciar sesión con Microsoft"}
             </Button>
 
             {!isEntraConfigured() ? (
               <Text size={200} className="muted-text">
-                Configura `NEXT_PUBLIC_ENTRA_TENANT_ID` y `NEXT_PUBLIC_ENTRA_CLIENT_ID` para habilitar SSO.
+                Inicio de sesión corporativo temporalmente no disponible en este entorno de demostración. Para esta presentación, usa ingreso operario o modo demo administrativo.
               </Text>
             ) : null}
 

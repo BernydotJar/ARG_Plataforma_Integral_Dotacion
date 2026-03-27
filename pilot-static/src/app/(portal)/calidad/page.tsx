@@ -45,7 +45,7 @@ export default function CalidadPage() {
         actionLabel="Nueva inspección"
       />
 
-      <Card>
+      <Card data-tour="calidad-busqueda">
         <Input
           aria-label="Buscar inspecciones de calidad"
           value={query}
@@ -54,8 +54,9 @@ export default function CalidadPage() {
         />
       </Card>
 
-      <Card>
-        <Table>
+      <Card data-tour="calidad-tabla">
+        <div className="table-scroll">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Código</TableHeaderCell>
@@ -79,7 +80,7 @@ export default function CalidadPage() {
                   <StatusBadge status={entry.estado} />
                 </TableCell>
                 <TableCell>
-                  <Button as="a" href="#" appearance="subtle">
+                  <Button as="a" href="#" appearance="secondary" className="touch-action-button">
                     Ver detalle
                   </Button>
                 </TableCell>
@@ -110,6 +111,7 @@ export default function CalidadPage() {
             ) : null}
           </TableBody>
         </Table>
+        </div>
       </Card>
     </div>
   );

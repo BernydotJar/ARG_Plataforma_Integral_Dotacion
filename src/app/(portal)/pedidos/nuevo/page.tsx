@@ -194,6 +194,7 @@ export default function NuevoPedidoPage() {
                   />
                 </Field>
                 <Button
+                  className="touch-icon-button"
                   appearance="subtle"
                   icon={<Delete24Regular />}
                   disabled={detalles.length === 1}

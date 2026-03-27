@@ -310,6 +310,7 @@ export function CatalogosPageClient() {
               </div>
             </Skeleton>
           ) : (
+            <div className="table-scroll">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -340,6 +341,7 @@ export function CatalogosPageClient() {
                 ) : null}
               </TableBody>
             </Table>
+            </div>
           )}
         </Card>
 
@@ -429,6 +431,7 @@ export function CatalogosPageClient() {
               </div>
             </Skeleton>
           ) : (
+            <div className="table-scroll">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -461,6 +464,7 @@ export function CatalogosPageClient() {
                 ) : null}
               </TableBody>
             </Table>
+            </div>
           )}
         </Card>
       </div>
@@ -482,7 +486,8 @@ export function CatalogosPageClient() {
             </div>
           </Skeleton>
         ) : (
-          <Table>
+          <div className="table-scroll">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHeaderCell>Catálogo</TableHeaderCell>
@@ -512,6 +517,7 @@ export function CatalogosPageClient() {
               ) : null}
             </TableBody>
           </Table>
+            </div>
         )}
       </Card>
     </div>

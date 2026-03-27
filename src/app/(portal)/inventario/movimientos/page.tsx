@@ -213,7 +213,8 @@ export default function MovimientosPage() {
             </div>
           </Skeleton>
         ) : (
-          <Table>
+          <div className="table-scroll">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHeaderCell>Tipo</TableHeaderCell>
@@ -236,7 +237,7 @@ export default function MovimientosPage() {
                   <TableCell>{formatDateTimeGt(movimiento.fecha)}</TableCell>
                   <TableCell>
                     {movimiento.tipo === "Ajuste" && movimiento.estado === "PendienteAprobacion" ? (
-                      <Button appearance="subtle" onClick={() => sendAdjustmentApproval(movimiento.id)}>
+                      <Button appearance="secondary" className="touch-action-button" onClick={() => sendAdjustmentApproval(movimiento.id)}>
                         Enviar aprobación
                       </Button>
                     ) : (
@@ -259,6 +260,7 @@ export default function MovimientosPage() {
               ) : null}
             </TableBody>
           </Table>
+          </div>
         )}
       </Card>
     </div>

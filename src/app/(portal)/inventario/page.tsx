@@ -75,6 +75,7 @@ export default function InventarioPage() {
           className="module-card dashboard-card-link"
           role="link"
           tabIndex={0}
+          data-tour="inventario-card-movimientos"
           onClick={() => router.push("/inventario/movimientos")}
           onKeyDown={onModuleKeyDown("/inventario/movimientos")}
         >
@@ -85,6 +86,7 @@ export default function InventarioPage() {
           className="module-card dashboard-card-link"
           role="link"
           tabIndex={0}
+          data-tour="inventario-card-ajuste"
           onClick={() => router.push("/inventario/ajuste")}
           onKeyDown={onModuleKeyDown("/inventario/ajuste")}
         >
@@ -103,7 +105,7 @@ export default function InventarioPage() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card data-tour="inventario-stock-tabla">
         <div className="module-card-title-row">
           <Text weight="semibold">Stock actual</Text>
           <Badge appearance="filled">Total unidades: {totalStock}</Badge>
@@ -118,6 +120,7 @@ export default function InventarioPage() {
             </div>
           </Skeleton>
         ) : (
+          <div className="table-scroll">
           <Table>
             <TableHeader>
               <TableRow>
@@ -157,6 +160,7 @@ export default function InventarioPage() {
               ) : null}
             </TableBody>
           </Table>
+        </div>
         )}
       </Card>
     </div>

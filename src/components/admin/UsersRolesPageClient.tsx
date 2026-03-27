@@ -19,6 +19,13 @@ type UsersRolesResponse = {
   };
 };
 
+const rfqProfiles = [
+  "SuperAdmin",
+  "AdminLocal",
+  "UsuarioPedidos",
+  "UsuarioFinal (Colaborador)",
+];
+
 export function UsersRolesPageClient() {
   const [data, setData] = useState<UsersRolesResponse["data"] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,6 +59,20 @@ export function UsersRolesPageClient() {
 
       {data ? (
         <>
+          <Card data-tour="usuarios-perfiles-rfq">
+            <Text weight="semibold">Perfiles clave del RFQ</Text>
+            <div className="badge-wrap">
+              {rfqProfiles.map((role) => (
+                <Badge key={role} appearance="tint" color="informative">
+                  {role}
+                </Badge>
+              ))}
+            </div>
+            <Text size={200} className="muted-text">
+              Vista ejecutiva para validar el modelo RBAC solicitado por negocio.
+            </Text>
+          </Card>
+
           <Card>
             <Text weight="semibold">Roles disponibles</Text>
             <div className="badge-wrap">
@@ -63,27 +84,29 @@ export function UsersRolesPageClient() {
             </div>
           </Card>
 
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHeaderCell>Usuario</TableHeaderCell>
-                  <TableHeaderCell>Correo</TableHeaderCell>
-                  <TableHeaderCell>Roles</TableHeaderCell>
-                  <TableHeaderCell>Sedes</TableHeaderCell>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.sampleUsers.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell>{entry.nombre}</TableCell>
-                    <TableCell>{entry.correo}</TableCell>
-                    <TableCell>{entry.roles.join(", ")}</TableCell>
-                    <TableCell>{entry.sedes.join(", ")}</TableCell>
+          <Card data-tour="usuarios-matriz-rbac">
+            <div className="table-scroll">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHeaderCell>Usuario</TableHeaderCell>
+                    <TableHeaderCell>Correo</TableHeaderCell>
+                    <TableHeaderCell>Roles</TableHeaderCell>
+                    <TableHeaderCell>Sedes</TableHeaderCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {data.sampleUsers.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell>{entry.nombre}</TableCell>
+                      <TableCell>{entry.correo}</TableCell>
+                      <TableCell>{entry.roles.join(", ")}</TableCell>
+                      <TableCell>{entry.sedes.join(", ")}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </Card>
         </>
       ) : null}

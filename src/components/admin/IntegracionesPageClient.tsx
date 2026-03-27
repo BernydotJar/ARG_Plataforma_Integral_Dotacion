@@ -25,9 +25,9 @@ import { useCallback, useEffect, useState } from "react";
 import { APP_TOASTER_ID } from "@/components/providers/AppProviders";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
-import type { SsffSyncOverview, SsffSyncRun } from "@/lib/integrations/ssff";
-import { apiFetch, ApiRequestError } from "@/lib/http/client";
 import { formatDateTimeGt } from "@/lib/format/date";
+import { apiFetch, ApiRequestError } from "@/lib/http/client";
+import type { SsffSyncOverview, SsffSyncRun } from "@/lib/integrations/ssff";
 
 type OverviewResponse = {
   data: SsffSyncOverview;
@@ -124,10 +124,16 @@ export function IntegracionesPageClient() {
         description="Monitoreo y ejecución manual de sincronización con SuccessFactors (SSFF)"
       />
 
-      <Card>
+      <Card data-tour="integraciones-estado">
         <div className="module-card-title-row">
           <Text weight="semibold">Estado SSFF</Text>
           <Badge appearance="outline">Backend API</Badge>
+        </div>
+
+        <div className="badge-wrap" data-tour="integraciones-placeholders">
+          <Badge appearance="outline">SFTP SuccessFactors</Badge>
+          <Badge appearance="outline">SAP</Badge>
+          <Badge appearance="outline">Power Automate</Badge>
         </div>
 
         {loading ? <Spinner label="Consultando integración SSFF..." /> : null}
@@ -158,47 +164,49 @@ export function IntegracionesPageClient() {
               </Button>
             </div>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHeaderCell>ID corrida</TableHeaderCell>
-                  <TableHeaderCell>Estado</TableHeaderCell>
-                  <TableHeaderCell>Inicio</TableHeaderCell>
-                  <TableHeaderCell>Fin</TableHeaderCell>
-                  <TableHeaderCell>Altas/Bajas/Cambios</TableHeaderCell>
-                  <TableHeaderCell>Errores</TableHeaderCell>
-                  <TableHeaderCell>Origen</TableHeaderCell>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {overview.recentRuns.map((run) => (
-                  <TableRow key={run.id}>
-                    <TableCell>{run.id}</TableCell>
-                    <TableCell>
-                      <Badge appearance={toBadgeAppearance(run.status)}>{toStatusLabel(run.status)}</Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(run.startedAt)}</TableCell>
-                    <TableCell>{formatDate(run.finishedAt)}</TableCell>
-                    <TableCell>{`${run.altas}/${run.bajas}/${run.cambios}`}</TableCell>
-                    <TableCell>{run.errores}</TableCell>
-                    <TableCell>{run.source}</TableCell>
-                  </TableRow>
-                ))}
-
-                {overview.recentRuns.length === 0 ? (
+            <div className="table-scroll">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="table-empty-cell">
-                      <EmptyState
-                        compact
-                        icon={<ArrowSync24Regular fontSize={28} />}
-                        title="Sin ejecuciones recientes"
-                        description="Cuando el job SSFF se ejecute, sus corridas aparecerán aquí."
-                      />
-                    </TableCell>
+                    <TableHeaderCell>ID corrida</TableHeaderCell>
+                    <TableHeaderCell>Estado</TableHeaderCell>
+                    <TableHeaderCell>Inicio</TableHeaderCell>
+                    <TableHeaderCell>Fin</TableHeaderCell>
+                    <TableHeaderCell>Altas/Bajas/Cambios</TableHeaderCell>
+                    <TableHeaderCell>Errores</TableHeaderCell>
+                    <TableHeaderCell>Origen</TableHeaderCell>
                   </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {overview.recentRuns.map((run) => (
+                    <TableRow key={run.id}>
+                      <TableCell>{run.id}</TableCell>
+                      <TableCell>
+                        <Badge appearance={toBadgeAppearance(run.status)}>{toStatusLabel(run.status)}</Badge>
+                      </TableCell>
+                      <TableCell>{formatDate(run.startedAt)}</TableCell>
+                      <TableCell>{formatDate(run.finishedAt)}</TableCell>
+                      <TableCell>{`${run.altas}/${run.bajas}/${run.cambios}`}</TableCell>
+                      <TableCell>{run.errores}</TableCell>
+                      <TableCell>{run.source}</TableCell>
+                    </TableRow>
+                  ))}
+
+                  {overview.recentRuns.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="table-empty-cell">
+                        <EmptyState
+                          compact
+                          icon={<ArrowSync24Regular fontSize={28} />}
+                          title="Sin ejecuciones recientes"
+                          description="Cuando el job SSFF se ejecute, sus corridas aparecerán aquí."
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                </TableBody>
+              </Table>
+            </div>
           </>
         ) : null}
 

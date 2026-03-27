@@ -4,6 +4,7 @@ import {
   CheckmarkCircle24Regular,
   ClipboardTask24Regular,
   DatabaseSearch24Regular,
+  Chat24Regular,
   Home24Regular,
   PeopleTeam24Regular,
   Wrench24Regular,
@@ -47,6 +48,11 @@ export const navItems: NavItem[] = [
     label: "Mantenimiento",
     icon: <Wrench24Regular />,
     roles: ["SuperAdmin", "AdminLocal", "TecnicoMantenimiento"],
+  },
+  {
+    href: "/asistente-rag",
+    label: "Asistente RAG",
+    icon: <Chat24Regular />,
   },
   {
     href: "/admin/catalogos",

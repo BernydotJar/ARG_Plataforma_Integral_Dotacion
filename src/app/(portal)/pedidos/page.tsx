@@ -82,7 +82,7 @@ export default function PedidosPage() {
         actionLabel="Nuevo pedido"
       />
 
-      <Card>
+      <Card data-tour="pedidos-filtros">
         <div className="filter-row">
           <Input
             aria-label="Buscar pedidos por código, empleado o área"
@@ -118,7 +118,7 @@ export default function PedidosPage() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card data-tour="pedidos-tabla">
         {loading ? (
           <Skeleton>
             <div className="skeleton-stack">
@@ -128,6 +128,7 @@ export default function PedidosPage() {
             </div>
           </Skeleton>
         ) : (
+          <div className="table-scroll">
           <Table>
             <TableHeader>
               <TableRow>
@@ -150,7 +151,7 @@ export default function PedidosPage() {
                     <StatusBadge status={pedido.estado} />
                   </TableCell>
                   <TableCell>
-                    <Button as="a" href={`/pedidos/${pedido.id}`} appearance="subtle">
+                    <Button as="a" href={`/pedidos/${pedido.id}`} appearance="secondary" className="touch-action-button">
                       Ver detalle
                     </Button>
                   </TableCell>
@@ -181,6 +182,7 @@ export default function PedidosPage() {
               ) : null}
             </TableBody>
           </Table>
+        </div>
         )}
       </Card>
     </div>

@@ -4,16 +4,23 @@ import {
   Badge,
   Button,
   Divider,
+  Menu,
+  MenuItem,
+  MenuList,
+  MenuPopover,
+  MenuTrigger,
   OverlayDrawer,
   Text,
   Tooltip,
 } from "@fluentui/react-components";
 import { Dismiss24Regular, Navigation24Regular, SignOut24Regular } from "@fluentui/react-icons";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { logoutFromEntra } from "@/lib/auth/msal-client";
 import { hasAnyRole } from "@/lib/auth/roles";
 import { apiFetch } from "@/lib/http/client";
 import type { AppRole, AppUser } from "@/lib/types/app";
@@ -24,6 +31,8 @@ interface PortalShellProps {
   user: AppUser;
   children: React.ReactNode;
 }
+
+type TourVariant = "original" | "glass";
 
 const isRouteActive = (pathname: string, href: string): boolean => {
   if (href === "/") return pathname === "/";
@@ -40,6 +49,21 @@ const ROLE_DISPLAY_NAMES: Record<AppRole, string> = {
   TecnicoMantenimiento: "Técnico de Mantenimiento",
 };
 
+const NAV_TOUR_TARGET_BY_ROUTE: Record<string, string> = {
+  "/": "nav-inicio",
+  "/pedidos": "nav-pedidos",
+  "/inventario": "nav-inventario",
+  "/calidad": "nav-calidad",
+  "/mantenimiento": "nav-mantenimiento",
+  "/admin/integraciones": "nav-integraciones",
+  "/admin/usuarios-roles": "nav-admin-usuarios",
+  "/asistente-rag": "nav-rag",
+};
+
+const AppTour = dynamic(() => import("@/components/tour/AppTour").then((module) => module.AppTour), {
+  ssr: false,
+});
+
 const formatSedeName = (sedeId: string): string =>
   sedeId
     .toLowerCase()
@@ -51,6 +75,9 @@ export function PortalShell({ user, children }: PortalShellProps) {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [tourRunKey, setTourRunKey] = useState(0);
+  const [tourVariant, setTourVariant] = useState<TourVariant>("original");
 
   const allowedItems = useMemo(
     () => navItems.filter((item) => !item.roles || hasAnyRole(user, item.roles)),
@@ -74,18 +101,37 @@ export function PortalShell({ user, children }: PortalShellProps) {
 
   const closeDrawer = () => setDrawerOpen(false);
 
+  const startTour = (variant: TourVariant) => {
+    setTourVariant(variant);
+    setTourRunKey((value) => value + 1);
+    setTourOpen(true);
+  };
+
+  const clearOfflineCache = () => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.controller?.postMessage({ type: "ARGOS_CLEAR_CACHE" });
+  };
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
+    clearOfflineCache();
 
     try {
-      await apiFetch<{ ok: boolean }>("/api/auth/logout", {
-        method: "POST",
-      });
-    } finally {
-      setIsLoggingOut(false);
-      router.push("/login");
-      router.refresh();
+      await apiFetch<{ ok: boolean }>("/api/auth/logout", { method: "POST" });
+
+      // If the user logged in via Microsoft SSO, sign them out from Entra too.
+      // logoutFromEntra navigates away so no further code runs after it.
+      if (user.tenantId) {
+        await logoutFromEntra();
+        return;
+      }
+    } catch {
+      // Best-effort — always redirect to login
     }
+
+    setIsLoggingOut(false);
+    router.push("/login");
+    router.refresh();
   };
 
   const renderNav = (onItemClick?: () => void) => (
@@ -95,6 +141,7 @@ export function PortalShell({ user, children }: PortalShellProps) {
           key={item.href}
           href={item.href}
           className={`portal-nav-link ${isRouteActive(pathname, item.href) ? "active" : ""}`}
+          data-tour={NAV_TOUR_TARGET_BY_ROUTE[item.href]}
           onClick={onItemClick}
         >
           <span aria-hidden="true">{item.icon}</span>
@@ -106,6 +153,7 @@ export function PortalShell({ user, children }: PortalShellProps) {
 
   return (
     <div className="portal-shell">
+      <a className="skip-link" href="#main-content">Saltar al contenido principal</a>
       <OverlayDrawer
         position="start"
         open={drawerOpen}
@@ -114,7 +162,7 @@ export function PortalShell({ user, children }: PortalShellProps) {
       >
         <div className="portal-drawer-header">
           <Text weight="semibold">Navegación</Text>
-          <Button appearance="subtle" icon={<Dismiss24Regular />} onClick={closeDrawer} aria-label="Cerrar menú" />
+          <Button className="touch-icon-button" appearance="subtle" icon={<Dismiss24Regular />} onClick={closeDrawer} aria-label="Cerrar menú" />
         </div>
         {renderNav(closeDrawer)}
       </OverlayDrawer>
@@ -140,13 +188,13 @@ export function PortalShell({ user, children }: PortalShellProps) {
       </aside>
 
       <div className="portal-main-wrap">
-        <header className="portal-topbar">
+        <header className="portal-topbar" data-tour="topbar">
           <div className="portal-topbar-left">
             <Button
               appearance="subtle"
               icon={<Navigation24Regular />}
               onClick={() => setDrawerOpen(true)}
-              className="only-mobile"
+              className="only-mobile touch-icon-button"
               aria-label="Abrir menú"
             />
             <div>
@@ -160,11 +208,29 @@ export function PortalShell({ user, children }: PortalShellProps) {
           </div>
 
           <div className="portal-topbar-right">
-            <Badge appearance="tint" color="informative">
+            <Menu positioning="below-end">
+              <MenuTrigger disableButtonEnhancement>
+                <Button
+                  appearance="subtle"
+                  className="touch-action-button"
+                  data-tour="tour-toggle"
+                >
+                  Tour
+                </Button>
+              </MenuTrigger>
+              <MenuPopover>
+                <MenuList>
+                  <MenuItem onClick={() => startTour("original")}>Tour original</MenuItem>
+                  <MenuItem onClick={() => startTour("glass")}>Tour glass (sin traslape)</MenuItem>
+                </MenuList>
+              </MenuPopover>
+            </Menu>
+            <Badge appearance="tint" color="informative" className="portal-role-badge">
               {roleLabel}
             </Badge>
             <Tooltip content="Cerrar sesión" relationship="label">
               <Button
+                className="touch-icon-button"
                 appearance="subtle"
                 icon={<SignOut24Regular />}
                 disabled={isLoggingOut}
@@ -177,8 +243,18 @@ export function PortalShell({ user, children }: PortalShellProps) {
 
         <Divider />
 
-        <main className="portal-main">{children}</main>
+        <main id="main-content" className="portal-main" tabIndex={-1}>{children}</main>
       </div>
+
+      {tourOpen ? (
+        <AppTour
+          key={tourRunKey}
+          pathname={pathname}
+          userKey={user.email}
+          variant={tourVariant}
+          onClose={() => setTourOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

@@ -160,3 +160,11 @@ src/
 - El nombre de carpeta `lib/dataverse` se mantiene temporalmente por compatibilidad, pero la ejecución real ya está orientada a **Backend API + Azure SQL**.
 - `src/lib/dataverse/client.ts` quedó como stub explícito (Dataverse deshabilitado).
 - Próximo paso recomendado: renombrar carpeta `dataverse` a `data`/`domain` para eliminar herencia de naming.
+
+## 8. Asistente RAG demo
+
+- Ruta: `/asistente-rag`
+- API (portal dinámico): `POST /api/rag/chat`
+- Motor/local KB: `src/lib/rag/*`
+- Versión estática (Pages): `pilot-static/src/app/(portal)/asistente-rag/page.tsx`
+- Guía de preguntas soportadas: `Documentación/RAG_Agente_Demo_Preguntas.md`
