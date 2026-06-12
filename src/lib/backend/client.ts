@@ -1,6 +1,7 @@
 import "server-only";
 
 import { env } from "@/lib/config/env";
+import { logger } from "@/lib/observability/logger";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -59,6 +60,7 @@ export const backendApiFetch = async <T>(
       signal: AbortSignal.timeout(env.backend.timeoutMs || DEFAULT_TIMEOUT_MS),
     });
   } catch (error) {
+    logger.error("backend api unreachable", error, { path, correlationId });
     throw new BackendApiError(
       `No se pudo conectar al backend API (corr: ${correlationId})`,
       502,
@@ -72,6 +74,13 @@ export const backendApiFetch = async <T>(
     const backendRequestId = response.headers.get("x-request-id") || undefined;
     const text = await response.text();
     const details = backendRequestId ? `[backend-ref:${backendRequestId}] ${text}` : text;
+
+    logger.error("backend api error response", {
+      path,
+      status: response.status,
+      correlationId,
+      backendRequestId,
+    });
 
     throw new BackendApiError(
       `Backend API error ${response.status} (corr: ${correlationId})`,

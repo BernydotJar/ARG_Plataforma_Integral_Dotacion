@@ -16,6 +16,8 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // Genera .next/standalone para despliegue en contenedores (Azure App Service / Container Apps).
+  output: "standalone",
   async headers() {
     return [
       {

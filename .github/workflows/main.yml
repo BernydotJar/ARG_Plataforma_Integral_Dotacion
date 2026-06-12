@@ -44,9 +44,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Unit Tests
+        run: npm test
+
       - name: Build
         run: npm run build
 
       - name: Dependency Audit (High+)
-        continue-on-error: true
         run: npm audit --audit-level=high

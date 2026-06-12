@@ -30,6 +30,7 @@ export const env = {
   nodeEnv: resolvedNodeEnv,
   appOrigin: read("APP_ORIGIN"),
   appSessionSecret: read("APP_SESSION_SECRET") || DEFAULT_SESSION_SECRET,
+  sessionDurationHours: toNumber(read("SESSION_DURATION_HOURS"), 8),
   demoModeForced: toBoolean(read("DEMO_MODE"), false),
   demoLoginEnabled: toBoolean(read("DEMO_LOGIN_ENABLED"), false),
   demoOperarioPassword: read("DEMO_OPERARIO_PASSWORD") || DEFAULT_DEMO_OPERARIO_PASSWORD,
@@ -84,6 +85,11 @@ export const isDemoMode = (): boolean => {
   return !hasBackendApiConfig();
 };
 
+// Durante `next build` NODE_ENV siempre es "production", aunque el build se haga
+// en una máquina de desarrollo o en CI sin variables de runtime. La validación
+// estricta aplica al arrancar el servidor, no al compilar.
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+
 const validateEnvironment = (): void => {
   const hasDefaultSecret = env.appSessionSecret === DEFAULT_SESSION_SECRET;
   const weakSecret = env.appSessionSecret.length < MIN_SESSION_SECRET_LENGTH;
@@ -105,7 +111,9 @@ const validateEnvironment = (): void => {
   }
 };
 
-validateEnvironment();
+if (!isBuildPhase) {
+  validateEnvironment();
+}
 
 export const isTurnstileConfigured = (): boolean =>
   Boolean(env.turnstile.siteKey && env.turnstile.secretKey);

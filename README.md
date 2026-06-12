@@ -40,25 +40,39 @@ npm install
 npm run dev -- --port 3500
 ```
 
-Build:
+Verificación y build (mismos gates que corre CI):
 
 ```bash
-npm run lint
-npm run build
-npm run start
+npm run typecheck   # tipos (tsc --noEmit)
+npm run lint        # ESLint
+npm test            # unit tests (vitest)
+npm run build       # build de producción (genera además .next/standalone)
+npm run start       # servidor de producción
 ```
+
+Docker (imagen standalone, lista para Azure):
+
+```bash
+docker build -t argos-portal .
+docker run -p 3000:3000 --env-file .env.local argos-portal
+```
+
+Health check (sin autenticación, para probes): `GET /api/health`.
 
 ## 4. Variables de entorno
 
-Crear `.env.local` en la raíz.
+Crear `.env.local` en la raíz (partir de `.env.example`).
 
 ### 4.1 Base
 
 | Variable | Requerida | Descripción |
 |---|---|---|
 | `NEXT_PUBLIC_APP_NAME` | No | Nombre visible de la app |
-| `APP_SESSION_SECRET` | Sí (prod) | Secreto para cookie de sesión |
-| `DEMO_MODE` | No | `true` para forzar modo demo |
+| `APP_SESSION_SECRET` | Sí (prod) | Secreto para cookie de sesión (≥32 chars) |
+| `SESSION_DURATION_HOURS` | No | Duración de la sesión (default 8) |
+| `LOG_LEVEL` | No | Nivel mínimo de log: `debug`/`info`/`warn`/`error` |
+| `APP_ORIGIN` | Sí (prod) | Origen público para validación CSRF de origen |
+| `DEMO_MODE` | No | `true` para forzar modo demo (bloqueado en producción) |
 | `DEFAULT_SEDES` | No | CSV de sedes por defecto |
 | `DEMO_OPERARIO_PASSWORD` | No | Contraseña login operario demo |
 
@@ -168,3 +182,23 @@ src/
 - Motor/local KB: `src/lib/rag/*`
 - Versión estática (Pages): `pilot-static/src/app/(portal)/asistente-rag/page.tsx`
 - Guía de preguntas soportadas: `Documentación/RAG_Agente_Demo_Preguntas.md`
+
+## 9. Documentación operativa
+
+| Documento | Contenido |
+|---|---|
+| [docs/DESPLIEGUE_AZURE.md](docs/DESPLIEGUE_AZURE.md) | Despliegue en Azure (App Service/Container Apps), Key Vault, Entra ID, health probes, checklist de producción |
+| [docs/OPERACIONES.md](docs/OPERACIONES.md) | Runbook: health check, logs estructurados, correlación de errores, troubleshooting de auth |
+| [docs/SEGURIDAD.md](docs/SEGURIDAD.md) | Postura de seguridad: auth, RBAC, CSRF, cabeceras, secretos, mejoras futuras |
+| [Architecture.md](Architecture.md) | Decisiones de arquitectura |
+
+## 10. Pruebas
+
+- Runner: **Vitest** (`vitest.config.ts`; los imports de `server-only` se stubean en `src/test/stubs/`).
+- Cobertura actual: lógica de auth (sesión JWT, RBAC, CSRF/origen, rate limiting) y helpers HTTP del BFF.
+- Convención: archivos `*.test.ts` junto al módulo probado, en español.
+
+```bash
+npm test          # una corrida
+npm run test:watch
+```

@@ -72,7 +72,9 @@ textarea:focus-visible,
   outline-offset: 2px;
 }
 
-.app-provider {
+/* FluentProvider replica sus clases en los portales (data-portal-node) de
+   Dropdown/Toast; sin esta exclusión el portal cubre la pantalla completa */
+.app-provider:not([data-portal-node]) {
   min-height: 100vh;
 }
 

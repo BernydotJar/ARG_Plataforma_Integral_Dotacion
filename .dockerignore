@@ -1,0 +1,22 @@
+node_modules
+.next
+out
+coverage
+.git
+.github
+.vscode
+.env*
+!.env.example
+*.tsbuildinfo
+npm-debug.log*
+
+# Sub-proyectos y material no necesario para la imagen
+pilot-static
+WebCustom_Solution
+Documentación
+docs
+scripts
+*.md
+*.docx
+*.pdf
+*.py

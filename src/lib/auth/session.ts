@@ -12,7 +12,7 @@ import type { AppRole, AppUser } from "@/lib/types/app";
 
 export { CSRF_COOKIE_NAME, SESSION_COOKIE_NAME };
 
-const SESSION_DURATION_SECONDS = 60 * 60 * 8;
+const SESSION_DURATION_SECONDS = 60 * 60 * env.sessionDurationHours;
 
 type EntraIdTokenClaims = JWTPayload & {
   name?: string;
