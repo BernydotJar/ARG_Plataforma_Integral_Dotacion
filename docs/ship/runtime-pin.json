@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/BernydotJar/Graph-harness-sdlc.git",
+  "revision": "f8bb28ec0933f54df5ff2e0d2c06a731471ec47e",
+  "version": "0.2.0",
+  "runtime": "graph_harness",
+  "kernel_modified": false
+}

@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { requireApiUser } from "@/lib/auth/api-auth";
+import { ORDER_MUTATE_ROLES, ORDER_READ_ROLES } from "@/lib/auth/order-permissions";
 import { createPedido, listPedidos } from "@/lib/dataverse/repository";
 import { jsonError, jsonOk } from "@/lib/http/route";
 
@@ -22,7 +23,7 @@ const createPedidoSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireApiUser(request);
+    const auth = await requireApiUser(request, ORDER_READ_ROLES);
     if ("response" in auth) return auth.response;
 
     const searchParams = new URL(request.url).searchParams;
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireApiUser(request, ["SuperAdmin", "AdminLocal", "UsuarioPedidos", "UsuarioFinal"]);
+    const auth = await requireApiUser(request, ORDER_MUTATE_ROLES);
     if ("response" in auth) return auth.response;
 
     const payload = createPedidoSchema.parse(await request.json());

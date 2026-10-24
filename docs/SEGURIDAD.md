@@ -39,7 +39,7 @@ Doble control en todo POST/PUT/PATCH/DELETE:
 
 - `.env*` está en `.gitignore` (solo `.env.example` con placeholders se versiona). Verificado: ningún archivo env existe en el historial de git.
 - Producción: secretos vía Azure Key Vault con Managed Identity (ver [DESPLIEGUE_AZURE.md](DESPLIEGUE_AZURE.md) §2.3).
-- Salvaguardas de arranque (runtime, no build): rechaza secreto de sesión débil/por defecto, password de operario por defecto, y `DEMO_MODE=true` en producción.
+- Salvaguardas de arranque (runtime, no build): rechaza secreto de sesión débil/por defecto y contraseña de operario por defecto fuera de demo. En producción también rechaza `DEMO_MODE=true`, `DEMO_LOGIN_ENABLED=true` y ausencia de backend persistente. Este es un control transitorio hasta aprobar y construir el almacenamiento SQL.
 
 ## 7. Dependencias y CI
 
@@ -54,3 +54,7 @@ Doble control en todo POST/PUT/PATCH/DELETE:
 3. **Rate limiting distribuido** (el actual es in-memory por instancia; con múltiples réplicas considerar Azure Front Door/APIM o un store compartido).
 4. **Paginación server-side** en listados grandes para mitigar respuestas no acotadas.
 5. **Trazas OpenTelemetry** end-to-end (hoy: correlation IDs + logs estructurados).
+
+## Seguridad del alcance septiembre 2026
+
+Las rutas de pedidos y adjuntos limitan la lectura a `SuperAdmin`, `AdminLocal` y `UsuarioPedidos`, y las mutaciones a `SuperAdmin` y `AdminLocal`. `UsuarioFinal` no tiene acceso a pedidos; los permisos deben revalidarse si SUMMA aprueba una experiencia de usuario final. Véanse las pruebas negativas de `src/app/api/pedidos/permissions.test.ts`.

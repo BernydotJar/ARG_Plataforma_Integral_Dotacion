@@ -1,0 +1,18 @@
+{
+  "scope_updated": {
+    "sha256": "e81e8fedf42629e025f78c9a5769e8cc57362bad5a9c54d78ae5dc844c956443",
+    "pages": 12,
+    "date": "2026-09"
+  },
+  "scope_top_level_old_is_duplicate": true,
+  "scope_original_historical": {
+    "sha256": "e5368795bbda655e61355adeb90c9e6264aaec29dee8c046677ae4e53b5bc37e",
+    "pages": 24
+  },
+  "source_documents_not_copied_into_repo": true,
+  "release_decision": "NO-GO",
+  "baseline_caveat": "External backend integration and persistence unverified",
+  "commercial_baseline_status": "UPDATED_DATTICS_FINAL_DELIVERABLE_NOT_IDENTIFIED",
+  "legacy_proposals_are_not_a_substitute_for_2026_09_FINAL": "Do not treat older Power Platform or WebCustom RFP proposals as approved updated contract",
+  "formal_q_and_a_status": "No conclusive signed confirmation was verified from the inspected Q&A files"
+}

@@ -29,7 +29,7 @@ export const navItems: NavItem[] = [
     href: "/pedidos",
     label: "Dotación / Pedidos",
     icon: <ClipboardTask24Regular />,
-    roles: ["SuperAdmin", "AdminLocal", "UsuarioPedidos", "UsuarioFinal"],
+    roles: ["SuperAdmin", "AdminLocal", "UsuarioPedidos"],
   },
   {
     href: "/inventario",

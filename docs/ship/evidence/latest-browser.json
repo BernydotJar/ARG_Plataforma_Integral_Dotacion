@@ -1,0 +1,21 @@
+{
+  "runId": "qa-2026-10-24T05-45-13-051Z",
+  "environment": "isolated next dev, synthetic demo, no enterprise integrations",
+  "sourceSha": "c1bf983ae7707e92d8510ff185d5e5347d6d8370",
+  "platform": "linux",
+  "engine": "Playwright Chromium headless",
+  "assertions": [
+    {
+      "label": "runner",
+      "result": "FAIL",
+      "message": "Next dev did not become ready within 135 seconds"
+    }
+  ],
+  "viewports": [],
+  "integrationsReal": false,
+  "result": "FAIL",
+  "artifacts": {
+    "localRoot": "artifacts/qa/qa-2026-10-24T05-45-13-051Z",
+    "countViewports": 0
+  }
+}

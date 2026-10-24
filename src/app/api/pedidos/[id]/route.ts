@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { requireApiUser } from "@/lib/auth/api-auth";
+import { ORDER_MUTATE_ROLES, ORDER_READ_ROLES } from "@/lib/auth/order-permissions";
 import { deletePedido, getPedidoDetail, updatePedido } from "@/lib/dataverse/repository";
 import { PEDIDO_STATUSES } from "@/lib/dataverse/types";
 import { jsonError, jsonOk } from "@/lib/http/route";
@@ -20,7 +21,7 @@ type RouteContext = {
 
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const auth = await requireApiUser(request);
+    const auth = await requireApiUser(request, ORDER_READ_ROLES);
     if ("response" in auth) return auth.response;
 
     const { id } = await context.params;
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
-    const auth = await requireApiUser(request, ["SuperAdmin", "AdminLocal", "UsuarioPedidos"]);
+    const auth = await requireApiUser(request, ORDER_MUTATE_ROLES);
     if ("response" in auth) return auth.response;
 
     const { id } = await context.params;
@@ -61,7 +62,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const auth = await requireApiUser(request, ["SuperAdmin", "AdminLocal"]);
+    const auth = await requireApiUser(request, ORDER_MUTATE_ROLES);
     if ("response" in auth) return auth.response;
 
     const { id } = await context.params;

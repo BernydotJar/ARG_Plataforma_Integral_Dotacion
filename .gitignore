@@ -48,3 +48,6 @@ next-env.d.ts
 pilot-static/node_modules
 pilot-static/.next
 pilot-static/out
+
+# Isolated QA screenshots, traces and runtime logs (persist on workstation; CI uploads separately)
+/artifacts/qa/

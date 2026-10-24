@@ -1,0 +1,895 @@
+{
+  "source": "Original RFQ Annex 04; applicability must be reconciled with September 2026 scope",
+  "items": [
+    {
+      "id": "NF-ROW-005",
+      "source_row": 5,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-006",
+      "source_row": 6,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-007",
+      "source_row": 7,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-008",
+      "source_row": 8,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-009",
+      "source_row": 9,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-010",
+      "source_row": 10,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-011",
+      "source_row": 11,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-012",
+      "source_row": 12,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-013",
+      "source_row": 13,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-014",
+      "source_row": 14,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-015",
+      "source_row": 15,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-016",
+      "source_row": 16,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-017",
+      "source_row": 17,
+      "section": "Arquitectura General",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-019",
+      "source_row": 19,
+      "section": "Redes",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-020",
+      "source_row": 20,
+      "section": "Redes",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-021",
+      "source_row": 21,
+      "section": "Redes",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-022",
+      "source_row": 22,
+      "section": "Redes",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-023",
+      "source_row": 23,
+      "section": "Redes",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-024",
+      "source_row": 24,
+      "section": "Redes",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-025",
+      "source_row": 25,
+      "section": "Redes",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-026",
+      "source_row": 26,
+      "section": "Redes",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-028",
+      "source_row": 28,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-029",
+      "source_row": 29,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-030",
+      "source_row": 30,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-031",
+      "source_row": 31,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-032",
+      "source_row": 32,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-033",
+      "source_row": 33,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-034",
+      "source_row": 34,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-035",
+      "source_row": 35,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-036",
+      "source_row": 36,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-037",
+      "source_row": 37,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-038",
+      "source_row": 38,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-039",
+      "source_row": 39,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-040",
+      "source_row": 40,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-041",
+      "source_row": 41,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-042",
+      "source_row": 42,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-043",
+      "source_row": 43,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-044",
+      "source_row": 44,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-045",
+      "source_row": 45,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-046",
+      "source_row": 46,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-047",
+      "source_row": 47,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-048",
+      "source_row": 48,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-049",
+      "source_row": 49,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-050",
+      "source_row": 50,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-051",
+      "source_row": 51,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-052",
+      "source_row": 52,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-053",
+      "source_row": 53,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_SCOPE_VALIDATION_SAAS",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-054",
+      "source_row": 54,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-055",
+      "source_row": 55,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-056",
+      "source_row": 56,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-057",
+      "source_row": 57,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-058",
+      "source_row": 58,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-059",
+      "source_row": 59,
+      "section": "Seguridad",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-061",
+      "source_row": 61,
+      "section": "Integraciones",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-062",
+      "source_row": 62,
+      "section": "Integraciones",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-063",
+      "source_row": 63,
+      "section": "Integraciones",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-064",
+      "source_row": 64,
+      "section": "Integraciones",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-065",
+      "source_row": 65,
+      "section": "Integraciones",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-066",
+      "source_row": 66,
+      "section": "Integraciones",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-067",
+      "source_row": 67,
+      "section": "Integraciones",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-068",
+      "source_row": 68,
+      "section": "Integraciones",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-069",
+      "source_row": 69,
+      "section": "Integraciones",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-071",
+      "source_row": 71,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-072",
+      "source_row": 72,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-073",
+      "source_row": 73,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-074",
+      "source_row": 74,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-075",
+      "source_row": 75,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-076",
+      "source_row": 76,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-077",
+      "source_row": 77,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-078",
+      "source_row": 78,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-079",
+      "source_row": 79,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-080",
+      "source_row": 80,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-081",
+      "source_row": 81,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-082",
+      "source_row": 82,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-083",
+      "source_row": 83,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-084",
+      "source_row": 84,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-085",
+      "source_row": 85,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-086",
+      "source_row": 86,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-087",
+      "source_row": 87,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-088",
+      "source_row": 88,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-089",
+      "source_row": 89,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-090",
+      "source_row": 90,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-091",
+      "source_row": 91,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-092",
+      "source_row": 92,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-093",
+      "source_row": 93,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-094",
+      "source_row": 94,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-095",
+      "source_row": 95,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-096",
+      "source_row": 96,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    },
+    {
+      "id": "NF-ROW-097",
+      "source_row": 97,
+      "section": "Datos",
+      "applicability": "REQUIRES_TECHNICAL_VALIDATION",
+      "implementation": null,
+      "test": null,
+      "evidence": null,
+      "status": "PENDING_VALIDATION"
+    }
+  ]
+}

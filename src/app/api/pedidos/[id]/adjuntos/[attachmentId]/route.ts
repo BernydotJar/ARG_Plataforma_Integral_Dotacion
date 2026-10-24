@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { requireApiUser } from "@/lib/auth/api-auth";
+import { ORDER_MUTATE_ROLES } from "@/lib/auth/order-permissions";
 import { deletePedidoAttachment, getPedidoDetail } from "@/lib/dataverse/repository";
 import { jsonError, jsonOk } from "@/lib/http/route";
 
@@ -13,7 +14,7 @@ type RouteContext = {
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const auth = await requireApiUser(request, ["SuperAdmin", "AdminLocal", "UsuarioPedidos"]);
+    const auth = await requireApiUser(request, ORDER_MUTATE_ROLES);
     if ("response" in auth) return auth.response;
 
     const { id, attachmentId } = await context.params;
