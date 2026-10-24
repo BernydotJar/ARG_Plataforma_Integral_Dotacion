@@ -24,9 +24,9 @@ describe("normalizeRoles", () => {
     expect(normalizeRoles(["UsuarioPedidos", "usuariopedidos"])).toEqual(["UsuarioPedidos"]);
   });
 
-  it("asigna UsuarioFinal cuando no hay roles válidos", () => {
-    expect(normalizeRoles([])).toEqual(["UsuarioFinal"]);
-    expect(normalizeRoles(["NoExiste"])).toEqual(["UsuarioFinal"]);
+  it("no inventa roles cuando no hay autorizaciones válidas", () => {
+    expect(normalizeRoles([])).toEqual([]);
+    expect(normalizeRoles(["NoExiste"])).toEqual([]);
   });
 });
 

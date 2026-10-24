@@ -195,6 +195,58 @@
       }
     },
     {
+      "id": "SEC-003",
+      "kind": "security",
+      "title": "Rechazar identidades sin roles y sedes corporativas verificables",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "identity-security-engineering",
+      "allowed_paths": [
+        "src/lib/auth/roles.ts",
+        "src/lib/auth/roles.test.ts",
+        "src/lib/auth/session.ts",
+        "src/lib/auth/session.test.ts",
+        "src/lib/auth/api-auth.ts",
+        "src/lib/auth/api-auth.test.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-01",
+          "RF-10",
+          "RF-34"
+        ],
+        "objective": "No crear sesiones corporativas con roles o sedes implícitas; la identidad debe ser estable",
+        "acceptance_criteria": [
+          "Sin roles reconocidos la sesión Entra se rechaza",
+          "Sin sedes no SuperAdmin se rechaza",
+          "No se aceptan tokens propios con roles o sedes vacíos",
+          "No se fabrica identidad aleatoria para un token Entra sin OID/SUB"
+        ],
+        "required_tests": [
+          "unit-test",
+          "negative-test",
+          "typecheck",
+          "lint",
+          "production-build",
+          "dependency-audit"
+        ],
+        "expected_evidence": [
+          "source-sha",
+          "test-and-scan-artifacts"
+        ],
+        "priority": "P0",
+        "blockers": []
+      }
+    },
+    {
       "id": "ADR-001",
       "kind": "architecture",
       "title": "Evaluacion modular-monolith vs backend externo",

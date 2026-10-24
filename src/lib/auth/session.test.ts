@@ -35,6 +35,21 @@ describe("signSessionToken / verifySessionToken", () => {
   it("rechaza tokens arbitrarios", async () => {
     expect(await verifySessionToken("no-es-un-jwt")).toBeNull();
   });
+
+  it("rechaza un token firmado sin roles", async () => {
+    const token = await signSessionToken(buildUser({ roles: [] }));
+    expect(await verifySessionToken(token)).toBeNull();
+  });
+
+  it("rechaza un token firmado sin sedes", async () => {
+    const token = await signSessionToken(buildUser({ sedeIds: [] }));
+    expect(await verifySessionToken(token)).toBeNull();
+  });
+
+  it("rechaza un token firmado con AdminLocal y sede global", async () => {
+    const token = await signSessionToken(buildUser({ roles: ["AdminLocal"], sedeIds: ["*"] }));
+    expect(await verifySessionToken(token)).toBeNull();
+  });
 });
 
 describe("buildAppUserFromClaims", () => {
@@ -45,6 +60,7 @@ describe("buildAppUserFromClaims", () => {
       name: "Ana Pérez",
       preferred_username: "ana.perez@empresa.com",
       roles: ["AdminLocal"],
+      sede: "SEDE-CENTRAL",
     });
 
     expect(user.id).toBe("oid-123");
@@ -75,21 +91,32 @@ describe("buildAppUserFromClaims", () => {
     expect(user.preferredSedeId).toBe("SEDE-NORTE");
   });
 
-  it("usa sedes por defecto cuando no hay claims de sede", () => {
-    const user = buildAppUserFromClaims({
+  it("rechaza usuarios administrativos sin asignación de sedes", () => {
+    expect(() => buildAppUserFromClaims({
       oid: "oid-2",
       roles: ["UsuarioPedidos"],
-    });
-
-    expect(user.sedeIds).toEqual(["SEDE-CENTRAL"]);
+    })).toThrow(/sin sede autorizada/);
   });
 
-  it("degrada a UsuarioFinal cuando los roles no son reconocidos", () => {
-    const user = buildAppUserFromClaims({
+  it("rechaza roles desconocidos sin otorgar UsuarioFinal", () => {
+    expect(() => buildAppUserFromClaims({
       oid: "oid-3",
       roles: ["RolInexistente"],
-    });
+      sede: "SEDE-CENTRAL",
+    })).toThrow(/sin un rol autorizado/);
+  });
 
-    expect(user.roles).toEqual(["UsuarioFinal"]);
+  it("rechaza AdminLocal con wildcard sin SuperAdmin", () => {
+    expect(() => buildAppUserFromClaims({
+      oid: "oid-4",
+      roles: ["AdminLocal"],
+      sede: "*",
+    })).toThrow(/acceso global implícito/);
+  });
+
+  it("rechaza identidad sin OID ni SUB", () => {
+    expect(() => buildAppUserFromClaims({
+      roles: ["SuperAdmin"],
+    })).toThrow(/identificador estable/);
   });
 });
