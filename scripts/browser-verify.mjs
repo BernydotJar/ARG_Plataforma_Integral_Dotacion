@@ -4,6 +4,7 @@
 // Isolated Chromium QA: synthetic-only, no authenticated personal browser sessions.
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn, execFileSync } from "node:child_process";
@@ -19,10 +20,15 @@ fs.mkdirSync(outDir, { recursive: true });
 fs.mkdirSync(path.dirname(summaryPath), { recursive: true });
 
 const sha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+const trackedDiff = execFileSync("git", ["diff", "--name-only"], { cwd: root, encoding: "utf8" }).trim();
+const lockfileSha = createHash("sha256").update(fs.readFileSync(path.join(root, "package-lock.json"))).digest("hex");
 const result = {
   runId,
   environment: "isolated next dev, synthetic demo, no enterprise integrations",
   sourceSha: sha,
+  sourceShaIsExact: trackedDiff.length === 0,
+  workingTreeDirty: trackedDiff.length > 0,
+  lockfileSha256: lockfileSha,
   platform: process.platform,
   engine: "Playwright Chromium headless",
   assertions: [],
@@ -123,8 +129,16 @@ async function verifyViewport(name, width, height) {
     logFailure(name, err);
     try { await page.screenshot({ path: path.join(outDir, name + "-failure.png"), fullPage: true }); } catch {}
   } finally {
-    await context.tracing.stop({ path: path.join(outDir, name + "-trace.zip") });
-    await context.close();
+    try {
+      await context.tracing.stop({ path: path.join(outDir, name + "-trace.zip") });
+    } catch (err) {
+      logFailure(name + ": trace collection", err);
+    }
+    try {
+      await context.close();
+    } catch (err) {
+      logFailure(name + ": context cleanup", err);
+    }
   }
 }
 

@@ -1,0 +1,8 @@
+
+> argos-portal@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.4.3 (webpack)
+✓ Running next.config.ts took 157ms
+
+  Creating an optimized production build ...

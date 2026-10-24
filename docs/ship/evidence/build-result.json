@@ -1,0 +1,12 @@
+{
+  "result": "BLOCKED",
+  "command": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--max-old-space-size=2048 timeout 110 npm run build",
+  "exit_code": 124,
+  "observation": "Next.js 16.4.3 webpack reported Creating an optimized production build without finishing in controlled limit",
+  "classification": "QA_WORKSTATION_RESOURCE_EXHAUSTION_SUSPECTED_NOT_PROVEN",
+  "environment": "shared Cloud Sandbox dev-main",
+  "verification_pending": [
+    "Full build on adequately resourced isolated worker",
+    "Build output at the final source SHA"
+  ]
+}

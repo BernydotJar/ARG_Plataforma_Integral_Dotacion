@@ -21,3 +21,14 @@ No paid resources, real employee communications, personal data, or production ch
 are authorized by these notes. The top-level original RFQ is historical; the September
 2026 35-RF scope is the development baseline. The original technical annex contains
 SaaS-specific questionnaire rows that require applicability review, not a multitenancy mandate.
+
+## Verified QA execution environment blocker (2026-10-24 UTC)
+
+The shared Cloud Sandbox dev-main workstation had ~7.7 GiB RAM, exhausted 1 GiB swap
+and sustained load averages above 50 during Next.js compilation. The original
+and upgraded production builds did not finish within an explicit time budget.
+Isolated Chromium reached the QA health endpoint and wrote a trace but did not
+load /login within 25 seconds; the actual Browser Gate remains FAIL. Evidence:
+`evidence/build-result.json`, `evidence/browser-result.json`,
+`evidence/latest-browser.json`. The retry should use an isolated executor
+with sufficient capacity; do not clear other projects or terminate unrelated services.

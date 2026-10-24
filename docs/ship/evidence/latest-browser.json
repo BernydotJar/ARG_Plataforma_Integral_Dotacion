@@ -1,21 +1,41 @@
 {
-  "runId": "qa-2026-10-24T05-45-13-051Z",
+  "runId": "qa-2026-10-24T05-59-28-804Z",
   "environment": "isolated next dev, synthetic demo, no enterprise integrations",
-  "sourceSha": "c1bf983ae7707e92d8510ff185d5e5347d6d8370",
+  "sourceSha": "d4bdf26d6cd26776632cdafaa8a7e4e2708f1c81",
   "platform": "linux",
   "engine": "Playwright Chromium headless",
   "assertions": [
     {
+      "label": "health advertises controlled demo mode",
+      "result": "PASS"
+    },
+    {
+      "label": "no real backend claimed in isolated QA",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440",
+      "result": "FAIL",
+      "message": "page.goto: Timeout 25000ms exceeded.\nCall log:\n  - navigating to \"http://127.0.0.1:36197/login\", waiting until \"domcontentloaded\"\n"
+    },
+    {
       "label": "runner",
       "result": "FAIL",
-      "message": "Next dev did not become ready within 135 seconds"
+      "message": "browserContext.close: Target page, context or browser has been closed"
     }
   ],
-  "viewports": [],
+  "viewports": [
+    {
+      "name": "desktop-1440",
+      "width": 1440,
+      "height": 900,
+      "result": "FAIL"
+    }
+  ],
   "integrationsReal": false,
   "result": "FAIL",
   "artifacts": {
-    "localRoot": "artifacts/qa/qa-2026-10-24T05-45-13-051Z",
-    "countViewports": 0
+    "localRoot": "artifacts/qa/qa-2026-10-24T05-59-28-804Z",
+    "countViewports": 1
   }
 }
