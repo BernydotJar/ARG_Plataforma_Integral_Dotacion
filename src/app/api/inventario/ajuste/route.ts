@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { requireApiUser } from "@/lib/auth/api-auth";
+import { INVENTORY_ROLES } from "@/lib/auth/inventory-permissions";
 import { createMovimiento } from "@/lib/dataverse/repository";
 import { jsonError, jsonOk } from "@/lib/http/route";
 
@@ -16,7 +17,7 @@ const createAjusteSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireApiUser(request, ["SuperAdmin", "AdminLocal", "OperarioBodega"]);
+    const auth = await requireApiUser(request, INVENTORY_ROLES);
     if ("response" in auth) return auth.response;
 
     const payload = createAjusteSchema.parse(await request.json());

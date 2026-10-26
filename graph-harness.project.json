@@ -247,6 +247,60 @@
       }
     },
     {
+      "id": "SEC-004",
+      "kind": "security",
+      "title": "Restringir inventario y movimientos a roles administrativos del alcance vigente",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "security-engineering",
+      "allowed_paths": [
+        "src/lib/auth/inventory-permissions.ts",
+        "src/app/api/inventario/",
+        "src/app/api/inventario/inventory-permissions.test.ts",
+        "src/components/layout/navigation.tsx"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-15",
+          "RF-17",
+          "RF-19"
+        ],
+        "objective": "Impedir lectura y escritura de inventario a UsuarioFinal, UsuarioPedidos y rol OperarioBodega legado",
+        "acceptance_criteria": [
+          "Solo SuperAdmin y AdminLocal pueden consultar inventario y movimientos",
+          "Los mismos roles realizan movimientos y ajustes autorizados",
+          "La verificación de rol es server-side anterior a cualquier acceso al backend",
+          "La segregación por sede requiere pruebas separadas de datos reales"
+        ],
+        "required_tests": [
+          "unit-test",
+          "negative-test",
+          "typecheck",
+          "lint",
+          "production-build",
+          "dependency-audit"
+        ],
+        "expected_evidence": [
+          "logs of negative HTTP route tests",
+          "lint",
+          "TypeScript",
+          "unit tests",
+          "build",
+          "audit"
+        ],
+        "priority": "P0",
+        "blockers": []
+      }
+    },
+    {
       "id": "ADR-001",
       "kind": "architecture",
       "title": "Evaluacion modular-monolith vs backend externo",

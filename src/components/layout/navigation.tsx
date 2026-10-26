@@ -35,7 +35,7 @@ export const navItems: NavItem[] = [
     href: "/inventario",
     label: "Inventario",
     icon: <Box24Regular />,
-    roles: ["SuperAdmin", "AdminLocal", "OperarioBodega"],
+    roles: ["SuperAdmin", "AdminLocal"],
   },
   {
     href: "/calidad",

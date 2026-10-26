@@ -1,6 +1,6 @@
 # Postura de Seguridad — ARGOS Plataforma Integral
 
-Resumen del modelo de seguridad implementado en el portal (frontend/BFF). El backend .NET aplica sus propios controles además de estos.
+Resumen del modelo de seguridad implementado en el portal (frontend/BFF). La seguridad del backend transaccional definitivo requiere integración y validación independiente; el backend .NET histórico no está en este repositorio.
 
 ## 1. Autenticación
 
@@ -13,7 +13,7 @@ Resumen del modelo de seguridad implementado en el portal (frontend/BFF). El bac
 ## 2. Autorización (RBAC + alcance por sede)
 
 - Roles: `SuperAdmin`, `AdminLocal`, `UsuarioPedidos`, `UsuarioFinal`, `OperarioBodega`, `InspectorCalidad`, `TecnicoMantenimiento` (`src/lib/types/app.ts`).
-- Mapeo desde claims `roles` o grupos Entra (`ENTRA_GROUP_*`). Roles desconocidos degradan a `UsuarioFinal` (mínimo privilegio).
+- Mapeo desde claims `roles` o grupos Entra (`ENTRA_GROUP_*`). Los roles desconocidos o ausentes se rechazan; las sedes deben estar asignadas explícitamente, salvo acceso global de `SuperAdmin`.
 - Todas las rutas de API pasan por `requireApiUser()` (`src/lib/auth/api-auth.ts`): sesión válida + rol permitido.
 - Datos filtrados por sede (`scopeBySede`); `SuperAdmin` recibe comodín `*`.
 
@@ -44,8 +44,8 @@ Doble control en todo POST/PUT/PATCH/DELETE:
 ## 7. Dependencias y CI
 
 - CI bloquea el merge si fallan typecheck, lint, unit tests, build o `npm audit --audit-level=high`.
-- Next.js se mantiene en la línea 16.2.x (la 16.1.x acumulaba advisories de middleware bypass, cache poisoning y XSS, corregidos en 16.2.9).
-- Pendiente conocido: advisory *moderate* de `postcss` embebido en Next (sin fix upstream aún; no bloquea el gate high+).
+- Next.js usa la línea 16.4.x y el build reproducible emplea el compilador predeterminado Turbopack.
+- El último `npm audit` ejecutado en QA reportó cero vulnerabilidades; el resultado debe repetirse sobre cada SHA candidato de release.
 
 ## 8. Mejoras futuras recomendadas
 
@@ -58,3 +58,11 @@ Doble control en todo POST/PUT/PATCH/DELETE:
 ## Seguridad del alcance septiembre 2026
 
 Las rutas de pedidos y adjuntos limitan la lectura a `SuperAdmin`, `AdminLocal` y `UsuarioPedidos`, y las mutaciones a `SuperAdmin` y `AdminLocal`. `UsuarioFinal` no tiene acceso a pedidos; los permisos deben revalidarse si SUMMA aprueba una experiencia de usuario final. Véanse las pruebas negativas de `src/app/api/pedidos/permissions.test.ts`.
+
+## Control explícito de roles de inventario (RF-15/17/19)
+
+- Las APIs `/api/inventario/*` autorizan exclusivamente a `SuperAdmin` y `AdminLocal`.
+- `UsuarioFinal`, `UsuarioPedidos` y el rol heredado `OperarioBodega` no pueden leer ni mutar inventario.
+- `src/app/api/inventario/inventory-permissions.test.ts` valida rutas negativas con sesiones y tokens CSRF sintéticos.
+- La segregación de sedes y la concurrencia SQL son gates independientes: no se han acreditado por esta restricción de roles.
+- El acceso demo de operarios solo puede aparecer en la UI cuando se declara `NEXT_PUBLIC_OPERARIO_LOGIN_ENABLED=true` y sigue sujeto al control del backend. Los botones demo administrativos requieren `NEXT_PUBLIC_DEMO_LOGIN_ENABLED=true`, sin habilitación productiva.

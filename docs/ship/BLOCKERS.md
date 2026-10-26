@@ -32,3 +32,10 @@ load /login within 25 seconds; the actual Browser Gate remains FAIL. Evidence:
 `evidence/build-result.json`, `evidence/browser-result.json`,
 `evidence/latest-browser.json`. The retry should use an isolated executor
 with sufficient capacity; do not clear other projects or terminate unrelated services.
+
+## Actualización verificada en entorno QA — 26 octubre 2026
+
+- `npm run build` concluyó con Turbopack al retirar el flag legado `--webpack`.
+- Playwright navegó el build de producción con `next start` en un servidor aislado; no está acreditado el empaquetado standalone para Azure.
+- El servidor de QA utiliza URL de backend sintética no disponible; ninguna integración empresarial E2E se considera operativa.
+- Las suites negativas de identidad, pedidos e inventario se ejecutaron con actores sintéticos, sin permisos corporativos reales.
