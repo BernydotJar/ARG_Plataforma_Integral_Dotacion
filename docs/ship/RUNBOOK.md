@@ -27,3 +27,14 @@ separate human authorization regardless of CI result.
 The QA browser strategy is isolated headless Playwright Chromium first.
 No browser E2E success is claimed until assertions, traces, screenshots,
 run ID, source SHA, and environment are captured.
+
+## QA production-build browser routine
+
+Build first using `npm run build` (Turbopack on Next.js 16.4.x), then run
+`CHROMIUM_BIN=/usr/bin/chromium npm run test:e2e` on the workstation.
+The browser runner uses `next start` on a compiled build, not `next dev`,
+and synthetic JWTs plus an unreachable loopback API endpoint.
+It writes screenshots, Playwright traces and JSON to ignored `artifacts/qa/`;
+`docs/ship/evidence/qa-manifest.json` records file hashes. This does not
+verify corporate SSO, real backend, transactional operations, or standalone
+Azure container packaging. Those remain separate acceptance gates.

@@ -1,6 +1,8 @@
 {
   "result": "PASS",
-  "audit_vulnerabilities": {
+  "command": "npm audit --audit-level=high",
+  "source_sha": "d89e9b7a144ce1b7c65ebe607da7515ebad5e53a",
+  "vulnerabilities": {
     "info": 0,
     "low": 0,
     "moderate": 0,
@@ -8,12 +10,5 @@
     "critical": 0,
     "total": 0
   },
-  "dependencies": {
-    "prod": 108,
-    "dev": 404,
-    "optional": 90,
-    "peer": 0,
-    "peerOptional": 0,
-    "total": 550
-  }
+  "note": "Audit results apply to installed locked dependencies at evidence SHA."
 }

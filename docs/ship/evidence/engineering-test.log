@@ -2,21 +2,24 @@
 > argos-portal@0.1.0 test
 > vitest run
 
-[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
   - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
-Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
 
-[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/workspace/projects/ARG_Plataforma_Integral_Dotacion[39m
+ RUN  v4.1.12 /workspace/projects/ARG_Plataforma_Integral_Dotacion
 
- [32m✓[39m src/lib/auth/roles.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 9[2mms[22m[39m
- [32m✓[39m src/lib/config/env.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 106[2mms[22m[39m
- [32m✓[39m src/lib/auth/rate-limit.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 27[2mms[22m[39m
- [32m✓[39m src/lib/http/route.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 15[2mms[22m[39m
- [32m✓[39m src/lib/auth/session.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 14[2mms[22m[39m
- [32m✓[39m src/lib/auth/api-auth.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 30[2mms[22m[39m
- [32m✓[39m src/app/api/pedidos/permissions.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ ✓ src/lib/auth/sede-scope.test.ts (11 tests) 4ms
+ ✓ src/lib/config/env.test.ts (7 tests) 47ms
+ ✓ src/lib/auth/rate-limit.test.ts (5 tests) 7ms
+ ✓ src/lib/auth/roles.test.ts (10 tests) 5ms
+ ✓ src/lib/http/route.test.ts (5 tests) 7ms
+ ✓ src/lib/auth/session.test.ts (13 tests) 12ms
+ ✓ src/lib/auth/api-auth.test.ts (9 tests) 19ms
+ ✓ src/app/api/pedidos/permissions.test.ts (6 tests) 17ms
+ ✓ src/app/api/sede-authorization.test.ts (6 tests) 26ms
+ ✓ src/app/api/inventario/inventory-permissions.test.ts (19 tests) 22ms
 
-[2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
-[2m      Tests [22m [1m[32m50 passed[39m[22m[90m (50)[39m
-[2m   Start at [22m 06:03:06
-[2m   Duration [22m 1.64s[2m (transform 1.26s, setup 0ms, import 3.49s, tests 223ms, environment 1ms)[22m
+ Test Files  10 passed (10)
+      Tests  91 passed (91)
+   Start at  20:12:13
+   Duration  1.23s (transform 1.17s, setup 0ms, import 3.84s, tests 165ms, environment 1ms)

@@ -1,0 +1,73 @@
+{
+  "run_id": "qa-2026-10-26T20-12-42-427Z",
+  "source_sha": "d89e9b7a144ce1b7c65ebe607da7515ebad5e53a",
+  "source_sha_is_exact": true,
+  "assertions_pass": 59,
+  "assertions_fail": 0,
+  "viewports": [
+    {
+      "name": "desktop-1440",
+      "width": 1440,
+      "height": 900,
+      "result": "PASS"
+    },
+    {
+      "name": "tablet-768",
+      "width": 768,
+      "height": 1024,
+      "result": "PASS"
+    },
+    {
+      "name": "mobile-390",
+      "width": 390,
+      "height": 844,
+      "result": "PASS"
+    }
+  ],
+  "scope": "login, anonymous requests, role denial, and out-of-sede POST denial; NOT an end-to-end employee dotacion workflow",
+  "environment": "isolated Next.js production build served by next start, unreachable synthetic backend adapter, no enterprise integrations",
+  "external_integrations_real": false,
+  "screenshots_traces": "Local ignored artifacts/qa; CI workflow uploads on remote runs",
+  "artifacts": [
+    {
+      "path": "artifacts/qa/qa-2026-10-26T20-12-42-427Z/desktop-1440-trace.zip",
+      "sha256": "191ef1125d282a53f1c68f734370911874a0df4329b80b04b6a8256c09a6296a",
+      "bytes": 208470
+    },
+    {
+      "path": "artifacts/qa/qa-2026-10-26T20-12-42-427Z/desktop-1440.png",
+      "sha256": "c00e779633d287b405de1eb089b2510068d80e20f2ceef64f136bc3c2690dabf",
+      "bytes": 206811
+    },
+    {
+      "path": "artifacts/qa/qa-2026-10-26T20-12-42-427Z/mobile-390-trace.zip",
+      "sha256": "3e4ea44de446f2622d6e4d8f5411881ddf9027f8841fb744831c0b063b2c14e0",
+      "bytes": 243826
+    },
+    {
+      "path": "artifacts/qa/qa-2026-10-26T20-12-42-427Z/mobile-390.png",
+      "sha256": "39ecda2da0bb34f8cee0a5f658397308a91c8ff121ac98ff800afaacab7012e8",
+      "bytes": 109098
+    },
+    {
+      "path": "artifacts/qa/qa-2026-10-26T20-12-42-427Z/result.json",
+      "sha256": "b3b7bae9f16da57469c76bff9c2f3d5a67c071343695dd93553f5fa035ab5948",
+      "bytes": 7627
+    },
+    {
+      "path": "artifacts/qa/qa-2026-10-26T20-12-42-427Z/server.log",
+      "sha256": "7a3118c994c6fdfab515c37792931c3718ec6b82b544f6cd8fec260e1a436e1c",
+      "bytes": 276
+    },
+    {
+      "path": "artifacts/qa/qa-2026-10-26T20-12-42-427Z/tablet-768-trace.zip",
+      "sha256": "1896c5e53f87fc238419651f3552835c6112b02ccdfaffe4e4bba1b45c25febb",
+      "bytes": 204869
+    },
+    {
+      "path": "artifacts/qa/qa-2026-10-26T20-12-42-427Z/tablet-768.png",
+      "sha256": "63692026057e90f868e58eedcef5943b5be9acde3b61f93057a565de3f492e3a",
+      "bytes": 153134
+    }
+  ]
+}

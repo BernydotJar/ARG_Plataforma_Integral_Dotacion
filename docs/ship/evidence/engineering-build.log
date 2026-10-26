@@ -1,8 +1,73 @@
 
 > argos-portal@0.1.0 build
-> next build --webpack
+> next build
 
-▲ Next.js 16.4.3 (webpack)
-✓ Running next.config.ts took 157ms
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 87ms
 
   Creating an optimized production build ...
+✓ Compiled successfully in 9.3s
+  Running TypeScript ...
+  Finished TypeScript in 3.9s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/41) ...
+  Generating static pages using 11 workers (10/41)
+  Generating static pages using 11 workers (20/41)
+  Generating static pages using 11 workers (30/41)
+✓ Generating static pages using 11 workers (41/41) in 1104ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /admin/catalogos
+├ ƒ /admin/integraciones
+├ ƒ /admin/usuarios-roles
+├ ƒ /api/admin/catalogos
+├ ƒ /api/admin/catalogos/centros-costo
+├ ƒ /api/admin/catalogos/kits
+├ ƒ /api/admin/usuarios-roles
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/session
+├ ƒ /api/auth/session/demo
+├ ƒ /api/auth/session/operario
+├ ƒ /api/calidad
+├ ƒ /api/calidad/[id]
+├ ƒ /api/dashboard
+├ ƒ /api/flows/aprobacion/ajuste
+├ ƒ /api/flows/aprobacion/pedido
+├ ƒ /api/flows/sap/enviar-pedido
+├ ƒ /api/flows/sap/sync-status
+├ ƒ /api/health
+├ ƒ /api/integraciones/ssff/estado
+├ ƒ /api/integraciones/ssff/sync
+├ ƒ /api/inventario/ajuste
+├ ƒ /api/inventario/movimientos
+├ ƒ /api/inventario/movimientos/[id]
+├ ƒ /api/inventario/stock
+├ ƒ /api/mantenimiento/tickets
+├ ƒ /api/mantenimiento/tickets/[id]
+├ ƒ /api/pedidos
+├ ƒ /api/pedidos/[id]
+├ ƒ /api/pedidos/[id]/adjuntos
+├ ƒ /api/pedidos/[id]/adjuntos/[attachmentId]
+├ ƒ /api/rag/chat
+├ ƒ /asistente-rag
+├ ƒ /calidad
+├ ƒ /calidad/[id]
+├ ƒ /calidad/nuevo
+├ ƒ /inventario
+├ ƒ /inventario/ajuste
+├ ƒ /inventario/movimientos
+├ ○ /login
+├ ○ /manifest.webmanifest
+├ ƒ /mantenimiento
+├ ƒ /mantenimiento/[id]
+├ ƒ /mantenimiento/nuevo
+├ ƒ /pedidos
+├ ƒ /pedidos/[id]
+└ ƒ /pedidos/nuevo
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
