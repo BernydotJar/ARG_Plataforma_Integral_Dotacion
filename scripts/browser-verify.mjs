@@ -23,13 +23,16 @@ fs.mkdirSync(path.dirname(summaryPath), { recursive: true });
 
 const sha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
 const trackedDiff = execFileSync("git", ["diff", "--name-only"], { cwd: root, encoding: "utf8" }).trim();
+const dirtySource = trackedDiff.split("\n").filter((file) =>
+  file && file !== "graph-harness.events.jsonl" && !file.startsWith("docs/ship/evidence/")
+);
 const lockfileSha = createHash("sha256").update(fs.readFileSync(path.join(root, "package-lock.json"))).digest("hex");
 const result = {
   runId,
   environment: "isolated Next.js production build served by next start, unreachable synthetic backend adapter, no enterprise integrations",
   backendIsSyntheticStub: true,
   sourceSha: sha,
-  sourceShaIsExact: trackedDiff.length === 0,
+  sourceShaIsExact: dirtySource.length === 0,
   workingTreeDirty: trackedDiff.length > 0,
   lockfileSha256: lockfileSha,
   platform: process.platform,
