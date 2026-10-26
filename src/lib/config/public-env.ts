@@ -4,6 +4,8 @@ export const publicEnv = {
   entraClientId: process.env.NEXT_PUBLIC_ENTRA_CLIENT_ID || "",
   entraRedirectUri: process.env.NEXT_PUBLIC_ENTRA_REDIRECT_URI || "",
   turnstileSiteKey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "",
+  demoLoginEnabled: process.env.NEXT_PUBLIC_DEMO_LOGIN_ENABLED === "true",
+  operarioLoginEnabled: process.env.NEXT_PUBLIC_OPERARIO_LOGIN_ENABLED === "true",
 };
 
 export const isEntraConfigured = (): boolean =>

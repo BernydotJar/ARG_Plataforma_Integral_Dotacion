@@ -46,7 +46,9 @@ export default function LoginPage() {
   const captchaContainerRef = useRef<HTMLDivElement | null>(null);
   const captchaWidgetIdRef = useRef<string | null>(null);
 
-  const captchaEnabled = isTurnstileEnabled();
+  const demoLoginVisible = publicEnv.demoLoginEnabled;
+  const operarioLoginVisible = publicEnv.operarioLoginEnabled;
+  const captchaEnabled = operarioLoginVisible && isTurnstileEnabled();
 
   // Handle MSAL redirect result (runs after Microsoft redirects back to /login)
   useEffect(() => {
@@ -228,7 +230,7 @@ export default function LoginPage() {
           Plataforma Integral
         </Text>
         <Text className="muted-text-on-dark" block>
-          Portal corporativo para operación de Dotación, Inventario, Calidad y Mantenimiento.
+          Portal corporativo para la gestión de dotación e inventario.
         </Text>
       </div>
 
@@ -236,7 +238,7 @@ export default function LoginPage() {
         <CardHeader
           image={<LockClosed24Regular fontSize={22} />}
           header={<Text weight="semibold">Inicio de sesión</Text>}
-          description={<Text>Accede con SSO corporativo o con credenciales de operario (piloto).</Text>}
+          description={<Text>Accede con tu identidad corporativa Microsoft.</Text>}
         />
 
         {checkingSession ? <Spinner label="Validando sesión..." /> : null}
@@ -249,15 +251,17 @@ export default function LoginPage() {
 
             {!isEntraConfigured() ? (
               <Text size={200} className="muted-text">
-                Inicio de sesión corporativo temporalmente no disponible en este entorno de demostración. Para esta presentación, usa ingreso operario o modo demo administrativo.
+                Inicio de sesión corporativo no configurado para este entorno. Solicita acceso al administrador.
               </Text>
             ) : null}
 
-            <Divider />
+            {operarioLoginVisible ? (
+              <>
+                <Divider />
 
-            <Text weight="semibold" size={300}>
-              Ingreso operario (piloto)
-            </Text>
+                <Text weight="semibold" size={300}>
+                  Ingreso operario (piloto)
+                </Text>
             <Field label="Identificación" required>
               <Input
                 value={identificacion}
@@ -291,11 +295,17 @@ export default function LoginPage() {
               {busy ? "Validando..." : "Ingresar como operario"}
             </Button>
 
-            <Divider />
+              </>
+            ) : null}
 
-            <Button appearance="subtle" disabled={busy} onClick={handleDemoAccess}>
-              Entrar en modo demo administrativo
-            </Button>
+            {demoLoginVisible ? (
+              <>
+                <Divider />
+                <Button appearance="subtle" disabled={busy} onClick={handleDemoAccess}>
+                  Entrar en modo demo administrativo
+                </Button>
+              </>
+            ) : null}
           </>
         ) : null}
 
