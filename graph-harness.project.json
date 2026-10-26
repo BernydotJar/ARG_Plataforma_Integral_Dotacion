@@ -301,6 +301,65 @@
       }
     },
     {
+      "id": "SEC-005",
+      "kind": "security",
+      "title": "Validar autorización de sede antes de escribir en APIs y adaptadores",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "security-engineering",
+      "allowed_paths": [
+        "src/lib/auth/sede-scope.ts",
+        "src/lib/auth/sede-scope.test.ts",
+        "src/lib/dataverse/repositories/common.ts",
+        "src/lib/dataverse/repositories/pedidos.repository.ts",
+        "src/lib/dataverse/repositories/inventario.repository.ts",
+        "src/app/api/pedidos/route.ts",
+        "src/app/api/inventario/",
+        "src/app/api/sede-authorization.test.ts",
+        "scripts/browser-verify.mjs",
+        "docs/SEGURIDAD.md"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-11",
+          "RF-21",
+          "RF-34"
+        ],
+        "objective": "Rechazo BOLA antes de escrituras de pedidos e inventario en sedes no asignadas",
+        "acceptance_criteria": [
+          "Ningún POST usa sede no autorizada",
+          "El backend recibe sede normalizada solo tras autorización",
+          "SuperAdmin no crea registros en sede * ni sin sede real",
+          "Se rechaza ausencia o ambigüedad de sede sin usar fallback de entorno"
+        ],
+        "required_tests": [
+          "unit",
+          "negative API tests",
+          "negative browser HTTP",
+          "typecheck",
+          "lint",
+          "production build",
+          "dependency audit"
+        ],
+        "expected_evidence": [
+          "unit-test",
+          "negative-test",
+          "playwright-e2e",
+          "production-build"
+        ],
+        "priority": "P0",
+        "blockers": []
+      }
+    },
+    {
       "id": "ADR-001",
       "kind": "architecture",
       "title": "Evaluacion modular-monolith vs backend externo",

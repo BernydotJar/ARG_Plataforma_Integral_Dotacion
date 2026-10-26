@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { requireApiUser } from "@/lib/auth/api-auth";
+import { resolveWriteSede, SedeAccessError } from "@/lib/auth/sede-scope";
 import { ORDER_MUTATE_ROLES, ORDER_READ_ROLES } from "@/lib/auth/order-permissions";
 import { createPedido, listPedidos } from "@/lib/dataverse/repository";
 import { jsonError, jsonOk } from "@/lib/http/route";
@@ -45,10 +46,14 @@ export async function POST(request: NextRequest) {
     if ("response" in auth) return auth.response;
 
     const payload = createPedidoSchema.parse(await request.json());
-    const pedido = await createPedido(auth.user, payload);
+    const sedeId = resolveWriteSede(auth.user, payload.sedeId);
+    const pedido = await createPedido(auth.user, { ...payload, sedeId });
 
     return jsonOk({ data: pedido }, { status: 201 });
   } catch (error) {
+    if (error instanceof SedeAccessError) {
+      return jsonError("Sede no autorizada", 403);
+    }
     if (error instanceof z.ZodError) {
       return jsonError("Datos inválidos para crear pedido", 400, error.message);
     }

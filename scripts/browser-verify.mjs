@@ -195,6 +195,44 @@ async function verifyViewport(name, width, height) {
     check(legacyMovement.status() === 403 && (await legacyMovement.json()).error === "No autorizado",
       name + ": legacy OperarioBodega denied inventory mutation");
 
+    await setQaSession(context, "AdminLocal", ["sede-centro"]);
+    const foreignOrder = await context.request.post(baseUrl + "/api/pedidos", {
+      headers: { origin: baseUrl, "x-csrf-token": "qa-synthetic-csrf" },
+      data: {
+        sedeId: "sede-norte",
+        empleadoNombre: "Persona QA Sintética",
+        areaNombre: "Área de pruebas",
+        prioridad: "Media",
+        detalles: [{ itemNombre: "Camisa", talla: "M", cantidad: 1 }],
+      },
+    });
+    check(foreignOrder.status() === 403 && (await foreignOrder.json()).error === "Sede no autorizada",
+      name + ": AdminLocal cross-site order rejected before remote backend");
+
+    const foreignStockMovement = await context.request.post(baseUrl + "/api/inventario/movimientos", {
+      headers: { origin: baseUrl, "x-csrf-token": "qa-synthetic-csrf" },
+      data: {
+        sedeId: "sede-norte", tipo: "Ingreso", itemNombre: "Camisa",
+        bodegaNombre: "Bodega QA", ubicacionNombre: "Estante QA", cantidad: 2,
+      },
+    });
+    check(foreignStockMovement.status() === 403 &&
+      (await foreignStockMovement.json()).error === "Sede no autorizada",
+      name + ": AdminLocal cross-site inventory mutation rejected before remote backend");
+
+    await setQaSession(context, "SuperAdmin", ["*"]);
+    const noSedeAdmin = await context.request.post(baseUrl + "/api/pedidos", {
+      headers: { origin: baseUrl, "x-csrf-token": "qa-synthetic-csrf" },
+      data: {
+        empleadoNombre: "Persona QA Sintética",
+        areaNombre: "Área de pruebas",
+        prioridad: "Media",
+        detalles: [{ itemNombre: "Camisa", talla: "M", cantidad: 1 }],
+      },
+    });
+    check(noSedeAdmin.status() === 403 && (await noSedeAdmin.json()).error === "Sede no autorizada",
+      name + ": SuperAdmin must explicitly target a real site for writing");
+
     await setQaSession(context, "AdminLocal", ["*"]);
     const unauthorizedWildcard = await context.request.get(baseUrl + "/api/pedidos");
     check(unauthorizedWildcard.status() === 401,

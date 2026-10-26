@@ -246,12 +246,17 @@ const apiPedidoRepository: IPedidoRepository = {
     return data.filter((entry) => scopeMatchesFilters(entry, user, filters));
   },
 
-  async create(_user: AppUser, input: PedidoCreateInput): Promise<PedidoDotacion> {
+  async create(user: AppUser, input: PedidoCreateInput): Promise<PedidoDotacion> {
+    const sedeId = getRequestedSede(user, input.sedeId);
     const payload = await backendApiFetch<PedidoDotacion | { data: PedidoDotacion }>("/pedidos", {
       method: "POST",
-      body: JSON.stringify(input),
+      body: JSON.stringify({ ...input, sedeId }),
     });
-    return unwrap(payload);
+    const created = unwrap(payload);
+    if (!scopeMatchesFilters(created, user)) {
+      throw new Error("Pedido creado fuera del alcance de sedes permitido");
+    }
+    return created;
   },
 
   async getDetail(user: AppUser, id: string): Promise<PedidoDetail | null> {

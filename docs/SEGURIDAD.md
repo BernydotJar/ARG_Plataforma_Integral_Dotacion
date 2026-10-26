@@ -66,3 +66,17 @@ Las rutas de pedidos y adjuntos limitan la lectura a `SuperAdmin`, `AdminLocal` 
 - `src/app/api/inventario/inventory-permissions.test.ts` valida rutas negativas con sesiones y tokens CSRF sintéticos.
 - La segregación de sedes y la concurrencia SQL son gates independientes: no se han acreditado por esta restricción de roles.
 - El acceso demo de operarios solo puede aparecer en la UI cuando se declara `NEXT_PUBLIC_OPERARIO_LOGIN_ENABLED=true` y sigue sujeto al control del backend. Los botones demo administrativos requieren `NEXT_PUBLIC_DEMO_LOGIN_ENABLED=true`, sin habilitación productiva.
+
+## Autorización por sede antes de escribir (SEC-005)
+
+El servidor valida la sede antes de crear pedidos o movimientos y normaliza la sede
+antes de enviar solicitudes al adaptador externo. Un `AdminLocal` no puede especificar
+otra sede; `SuperAdmin` debe seleccionar una sede real y no puede escribir en `*`.
+No se utilizan `DEFAULT_SEDES` ni sedes sintéticas como fallback de autorización.
+La validación aplica tanto al modo de QA como al adaptador de API.
+
+Pruebas: `src/lib/auth/sede-scope.test.ts`,
+`src/app/api/sede-authorization.test.ts`, y Playwright HTTP con sesiones firmadas
+sintéticamente. El backend final debe repetir autorización server-side y controles
+transaccionales; este incremento solo garantiza que el BFF no envíe operaciones
+intencionadamente fuera del ámbito del usuario.

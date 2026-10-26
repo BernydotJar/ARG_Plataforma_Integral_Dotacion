@@ -129,11 +129,12 @@ const apiInventarioRepository: IInventarioRepository = {
   },
 
   async createMovimiento(user: AppUser, input: MovimientoCreateInput): Promise<MovimientoInventario> {
+    const sedeId = getRequestedSede(user, input.sedeId);
     const payload = await backendApiFetch<MovimientoInventario | { data: MovimientoInventario }>(
       "/inventario/movimientos",
       {
         method: "POST",
-        body: JSON.stringify(input),
+        body: JSON.stringify({ ...input, sedeId }),
       },
     );
 
