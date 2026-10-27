@@ -415,6 +415,64 @@
       }
     },
     {
+      "id": "DOMAIN-SOLPED-001",
+      "kind": "domain-contract",
+      "title": "Selección determinista SOLPED y exclusión de entregas anticipadas",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001",
+        "SEC-005"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dotacion/solped-eligibility.ts",
+        "src/lib/dotacion/solped-eligibility.test.ts",
+        "src/lib/dotacion/solped-eligibility.integration.test.ts",
+        "docs/ship/rf-traceability.md",
+        "docs/ship/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-19",
+          "RF-22"
+        ],
+        "objective": "Seleccionar candidatos nacionales a SOLPED sin elegibilidad semestral ausente ni entregas anticipadas del mismo ciclo",
+        "acceptance_criteria": [
+          "Solo UsuarioPedidos puede seleccionar candidatos para archivo SOLPED",
+          "No incluir inactivos, colaboradores sin indicador semestral o cubiertos por entrega anticipada del ciclo",
+          "Duplicados e indicadores faltantes bloquean exportación con motivo needs_review",
+          "La exclusión por entrega anticipada solo aplica al ciclo cubierto, no a todos los periodos futuros",
+          "Orden de resultados determinista independiente del orden de entrada"
+        ],
+        "required_tests": [
+          "unit tests of domain eligibility",
+          "integration-level test with synthetic selection-to-export gate",
+          "TypeScript ESLint build and dependency audit"
+        ],
+        "expected_evidence": [
+          "unit-test",
+          "integration-test",
+          "domain-check",
+          "typecheck",
+          "lint",
+          "production-build",
+          "dependency-audit"
+        ],
+        "priority": "P0",
+        "blockers": [],
+        "limitation": "This is eligibility pre-filter only; the real SAP flat-file layout and corporate integration remain unverified",
+        "downstream_blockers": [
+          "APPROVED_SAP_SOLPED_FLAT_FILE_LAYOUT_FOR_REAL_EXPORT"
+        ]
+      }
+    },
+    {
       "id": "ADR-001",
       "kind": "architecture",
       "title": "Evaluacion modular-monolith vs backend externo",
@@ -1560,7 +1618,10 @@
         "implementation_candidate": "src/lib/dataverse/repositories/inventario.repository.ts",
         "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
         "test_status": "NOT_RUN",
-        "blockers": []
+        "blockers": [],
+        "contract_nodes": [
+          "DOMAIN-SOLPED-001"
+        ]
       }
     },
     {
@@ -1712,6 +1773,9 @@
         "test_status": "NOT_RUN",
         "blockers": [
           "APPROVED_SOLPED_LAYOUT"
+        ],
+        "contract_nodes": [
+          "DOMAIN-SOLPED-001"
         ]
       }
     },
