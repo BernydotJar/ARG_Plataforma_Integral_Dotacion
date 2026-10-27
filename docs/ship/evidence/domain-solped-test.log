@@ -1,0 +1,29 @@
+
+> argos-portal@0.1.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.12 /workspace/projects/ARG_Plataforma_Integral_Dotacion
+
+ ✓ src/lib/dotacion/solped-eligibility.test.ts (12 tests) 4ms
+ ✓ src/lib/config/env.test.ts (7 tests) 20ms
+ ✓ src/lib/auth/rate-limit.test.ts (5 tests) 4ms
+ ✓ src/lib/dotacion/cycle-policy.integration.test.ts (5 tests) 5ms
+ ✓ src/lib/dotacion/cycle-policy.test.ts (18 tests) 7ms
+ ✓ src/lib/http/route.test.ts (5 tests) 6ms
+ ✓ src/lib/auth/roles.test.ts (10 tests) 3ms
+ ✓ src/lib/auth/sede-scope.test.ts (11 tests) 3ms
+ ✓ src/lib/dotacion/solped-eligibility.integration.test.ts (4 tests) 3ms
+ ✓ src/lib/auth/session.test.ts (13 tests) 8ms
+ ✓ src/lib/auth/api-auth.test.ts (9 tests) 11ms
+ ✓ src/app/api/pedidos/permissions.test.ts (6 tests) 11ms
+ ✓ src/app/api/sede-authorization.test.ts (6 tests) 16ms
+ ✓ src/app/api/inventario/inventory-permissions.test.ts (19 tests) 16ms
+
+ Test Files  14 passed (14)
+      Tests  130 passed (130)
+   Start at  22:55:17
+   Duration  849ms (transform 1.48s, setup 0ms, import 3.61s, tests 116ms, environment 1ms)
