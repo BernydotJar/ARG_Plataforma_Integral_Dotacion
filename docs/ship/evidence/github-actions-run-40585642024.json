@@ -1,0 +1,54 @@
+{
+  "result": "PASS",
+  "classification": "REMOTE_CI_EXECUTION",
+  "repository": "BernydotJar/ARG_Plataforma_Integral_Dotacion",
+  "pr": 1,
+  "workflow_run_id": 40585642024,
+  "workflow_name": "CI",
+  "workflow_status": "completed",
+  "workflow_conclusion": "success",
+  "tested_source_sha": "3eb629cc4d5a70d005f07d2c4c34ad9de75fdff5",
+  "verified_with": "GitHub Actions API (workflow runs, run jobs, run artifacts)",
+  "jobs": [
+    {
+      "id": 122476183539,
+      "name": "Quality Gates",
+      "status": "completed",
+      "conclusion": "success",
+      "checked_steps": [
+        "Validate Graph Harness SHIP consumer contract",
+        "Install dependencies",
+        "Typecheck",
+        "Lint",
+        "Unit Tests",
+        "Build",
+        "Dependency Audit (High+)"
+      ]
+    },
+    {
+      "id": 122476790053,
+      "name": "Browser-driven QA (isolated Chromium)",
+      "status": "completed",
+      "conclusion": "success",
+      "checked_steps": [
+        "Install locked dependencies",
+        "Install isolated Chromium and system dependencies",
+        "Build standalone QA server",
+        "Execute UI, security and responsive assertions",
+        "Preserve screenshots, traces, JSON and server logs"
+      ]
+    }
+  ],
+  "qa_artifact": {
+    "id": 12771127212,
+    "name": "argos-browser-qa-40585642024",
+    "size_bytes": 978874,
+    "expired": false,
+    "expires_at_utc": "2026-11-10T21:20:34Z"
+  },
+  "scope_limitations": [
+    "Remote QA validates login and negative authorization on a synthetic non-corporate backend stub",
+    "No Azure SQL transaction, SFTP ingestion, SAP SOLPED acceptance, Microsoft Graph delivery, or legal signature verification",
+    "Does not establish deployment-packaging acceptance on Azure or production approval"
+  ]
+}

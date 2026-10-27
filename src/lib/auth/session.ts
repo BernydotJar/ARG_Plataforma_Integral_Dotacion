@@ -58,7 +58,8 @@ const resolveSedeScope = (claims: EntraIdTokenClaims, roles: AppRole[]): string[
     return Array.from(new Set(fromClaim));
   }
 
-  return env.defaultSedes;
+  // Never infer administrative authorization from a default site name.
+  return [];
 };
 
 export const verifyEntraIdToken = async (idToken: string): Promise<EntraIdTokenClaims> => {
@@ -83,10 +84,23 @@ export const verifyEntraIdToken = async (idToken: string): Promise<EntraIdTokenC
 
 export const buildAppUserFromClaims = (claims: EntraIdTokenClaims): AppUser => {
   const roles = resolveRolesFromClaims(claims);
+  if (roles.length === 0) {
+    throw new Error("Identidad corporativa sin un rol autorizado");
+  }
   const sedeIds = resolveSedeScope(claims, roles);
+  if (sedeIds.length === 0) {
+    throw new Error("Identidad corporativa sin sede autorizada");
+  }
+  if (roles.includes("AdminLocal") && !roles.includes("SuperAdmin") && sedeIds.includes("*")) {
+    throw new Error("Administrador Local no puede tener acceso global implícito");
+  }
+  const identity = claims.oid || claims.sub;
+  if (typeof identity !== "string" || !identity.trim()) {
+    throw new Error("Token de identidad sin identificador estable");
+  }
 
   return {
-    id: claims.oid || claims.sub || crypto.randomUUID(),
+    id: identity,
     tenantId: claims.tid,
     name: claims.name || claims.preferred_username || "Usuario ARGOS",
     email: claims.preferred_username || claims.email,
@@ -112,7 +126,13 @@ export const verifySessionToken = async (token: string): Promise<AppUser | null>
   try {
     const { payload } = await jwtVerify(token, getSessionSecret());
     const user = (payload as JWTPayload & { user?: AppUser }).user;
-    if (!user) return null;
+    if (!user || typeof user.id !== "string" || !user.id.trim()) return null;
+    if (!Array.isArray(user.roles) || user.roles.length === 0 ||
+        normalizeRoles(user.roles).length !== user.roles.length) return null;
+    if (!Array.isArray(user.sedeIds) || user.sedeIds.length === 0 ||
+        user.sedeIds.some((sedeId) => typeof sedeId !== "string" || !sedeId.trim())) return null;
+    if (user.roles.includes("AdminLocal") && !user.roles.includes("SuperAdmin") &&
+        user.sedeIds.includes("*")) return null;
     return user;
   } catch {
     return null;

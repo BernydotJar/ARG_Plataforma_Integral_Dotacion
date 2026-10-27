@@ -10,7 +10,7 @@ export const normalizeRoles = (roles: string[]): AppRole[] => {
     .map((role) => APP_ROLES.find((allowedRole) => allowedRole.toLowerCase() === role.toLowerCase()))
     .filter((role): role is AppRole => Boolean(role));
 
-  return mapped.length ? Array.from(new Set(mapped)) : ["UsuarioFinal"];
+  return Array.from(new Set(mapped));
 };
 
 export const canAccessSede = (user: AppUser, sedeId: string): boolean => {

@@ -1,0 +1,37 @@
+{
+  "result": "FAIL",
+  "runId": "qa-2026-10-24T05-59-28-804Z",
+  "engine": "Playwright Chromium headless",
+  "environment": "isolated next dev, synthetic demo, no enterprise integrations",
+  "assertions": [
+    {
+      "label": "health advertises controlled demo mode",
+      "result": "PASS"
+    },
+    {
+      "label": "no real backend claimed in isolated QA",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440",
+      "result": "FAIL",
+      "message": "page.goto: Timeout 25000ms exceeded.\nCall log:\n  - navigating to \"http://127.0.0.1:36197/login\", waiting until \"domcontentloaded\"\n"
+    },
+    {
+      "label": "runner",
+      "result": "FAIL",
+      "message": "browserContext.close: Target page, context or browser has been closed"
+    }
+  ],
+  "viewports": [
+    {
+      "name": "desktop-1440",
+      "width": 1440,
+      "height": 900,
+      "result": "FAIL"
+    }
+  ],
+  "is_full_product_e2e": false,
+  "actual_traces_path": "artifacts/qa/qa-2026-10-24T05-59-28-804Z",
+  "explanation": "Health check passed, but /login timed out in overloaded shared QA host; no user flow verification success"
+}

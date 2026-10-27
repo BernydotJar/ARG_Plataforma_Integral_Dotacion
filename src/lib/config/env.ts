@@ -109,6 +109,19 @@ const validateEnvironment = (): void => {
   if (isProduction && env.demoModeForced) {
     throw new Error("DEMO_MODE=true no está permitido en producción");
   }
+
+  // Nunca usar el almacenamiento in-memory como fallback en producción.
+  // Hasta que exista una implementación SQL aprobada, el backend API es obligatorio.
+  if (isProduction && !hasBackendApiConfig()) {
+    throw new Error(
+      "Producción requiere un backend persistente: BACKEND_API_BASE_URL no está configurado",
+    );
+  }
+
+  // Deshabilitar de forma explícita las rutas de acceso demo incluso con backend real.
+  if (isProduction && env.demoLoginEnabled) {
+    throw new Error("DEMO_LOGIN_ENABLED=true no está permitido en producción");
+  }
 };
 
 if (!isBuildPhase) {

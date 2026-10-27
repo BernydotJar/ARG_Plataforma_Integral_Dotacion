@@ -1,0 +1,275 @@
+{
+  "runId": "qa-2026-10-26T20-12-42-427Z",
+  "environment": "isolated Next.js production build served by next start, unreachable synthetic backend adapter, no enterprise integrations",
+  "backendIsSyntheticStub": true,
+  "sourceSha": "d89e9b7a144ce1b7c65ebe607da7515ebad5e53a",
+  "sourceShaIsExact": true,
+  "workingTreeDirty": true,
+  "lockfileSha256": "833c86cd5d575e572a15956700048dd6a0eea617e696bf4a65694a509bddf5d9",
+  "platform": "linux",
+  "engine": "Playwright Chromium headless",
+  "assertions": [
+    {
+      "label": "production build starts without in-memory demo mode",
+      "result": "PASS"
+    },
+    {
+      "label": "synthetic adapter URL configured (not a real backend)",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: login HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: accessible Argos heading",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: SSO disabled when not configured",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: no horizontal viewport overflow (0px)",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: anonymous order API request denied",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: demo admin action hidden from production UI",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: unapproved operario login hidden from production UI",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: demo API blocked server-side in production",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: rejected login did not create session",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: UsuarioFinal denied order read by RBAC, not by missing session",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: UsuarioFinal denied order mutation with valid CSRF",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: UsuarioFinal denied inventory read by RBAC",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: UsuarioPedidos denied inventory read",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: UsuarioPedidos cannot mutate order with valid CSRF",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: legacy OperarioBodega denied inventory mutation",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: AdminLocal cross-site order rejected before remote backend",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: AdminLocal cross-site inventory mutation rejected before remote backend",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: SuperAdmin must explicitly target a real site for writing",
+      "result": "PASS"
+    },
+    {
+      "label": "desktop-1440: AdminLocal global wildcard token rejected before authorization",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: login HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: accessible Argos heading",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: SSO disabled when not configured",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: no horizontal viewport overflow (0px)",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: anonymous order API request denied",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: demo admin action hidden from production UI",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: unapproved operario login hidden from production UI",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: demo API blocked server-side in production",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: rejected login did not create session",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: UsuarioFinal denied order read by RBAC, not by missing session",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: UsuarioFinal denied order mutation with valid CSRF",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: UsuarioFinal denied inventory read by RBAC",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: UsuarioPedidos denied inventory read",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: UsuarioPedidos cannot mutate order with valid CSRF",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: legacy OperarioBodega denied inventory mutation",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: AdminLocal cross-site order rejected before remote backend",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: AdminLocal cross-site inventory mutation rejected before remote backend",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: SuperAdmin must explicitly target a real site for writing",
+      "result": "PASS"
+    },
+    {
+      "label": "tablet-768: AdminLocal global wildcard token rejected before authorization",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: login HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: accessible Argos heading",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: SSO disabled when not configured",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: no horizontal viewport overflow (0px)",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: anonymous order API request denied",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: demo admin action hidden from production UI",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: unapproved operario login hidden from production UI",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: demo API blocked server-side in production",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: rejected login did not create session",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: UsuarioFinal denied order read by RBAC, not by missing session",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: UsuarioFinal denied order mutation with valid CSRF",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: UsuarioFinal denied inventory read by RBAC",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: UsuarioPedidos denied inventory read",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: UsuarioPedidos cannot mutate order with valid CSRF",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: legacy OperarioBodega denied inventory mutation",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: AdminLocal cross-site order rejected before remote backend",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: AdminLocal cross-site inventory mutation rejected before remote backend",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: SuperAdmin must explicitly target a real site for writing",
+      "result": "PASS"
+    },
+    {
+      "label": "mobile-390: AdminLocal global wildcard token rejected before authorization",
+      "result": "PASS"
+    }
+  ],
+  "viewports": [
+    {
+      "name": "desktop-1440",
+      "width": 1440,
+      "height": 900,
+      "result": "PASS"
+    },
+    {
+      "name": "tablet-768",
+      "width": 768,
+      "height": 1024,
+      "result": "PASS"
+    },
+    {
+      "name": "mobile-390",
+      "width": 390,
+      "height": 844,
+      "result": "PASS"
+    }
+  ],
+  "integrationsReal": false,
+  "result": "PASS",
+  "artifacts": {
+    "localRoot": "artifacts/qa/qa-2026-10-26T20-12-42-427Z",
+    "countViewports": 3
+  }
+}

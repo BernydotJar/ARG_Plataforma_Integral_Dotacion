@@ -1,0 +1,2530 @@
+{
+  "schema_version": "graph-harness.project.v1",
+  "project_id": "ARGOS-DOTACION-COLOMBIA-2026",
+  "mode": "SHIP",
+  "gate_definitions": [
+    {
+      "id": "gate.traceability",
+      "required_evidence_kinds": [
+        "graph-validation",
+        "traceability-validation"
+      ],
+      "blocking": true
+    },
+    {
+      "id": "gate.engineering",
+      "required_evidence_kinds": [
+        "unit-test",
+        "typecheck",
+        "lint",
+        "production-build",
+        "dependency-audit"
+      ],
+      "blocking": true
+    },
+    {
+      "id": "gate.security",
+      "required_evidence_kinds": [
+        "negative-test"
+      ],
+      "blocking": true
+    },
+    {
+      "id": "gate.architecture",
+      "required_evidence_kinds": [
+        "architecture-acceptance"
+      ],
+      "blocking": true
+    },
+    {
+      "id": "gate.functional",
+      "required_evidence_kinds": [
+        "integration-test",
+        "domain-check"
+      ],
+      "blocking": true
+    },
+    {
+      "id": "gate.browser",
+      "required_evidence_kinds": [
+        "playwright-e2e"
+      ],
+      "blocking": true
+    },
+    {
+      "id": "gate.operational",
+      "required_evidence_kinds": [
+        "operational-test"
+      ],
+      "blocking": true
+    },
+    {
+      "id": "gate.release",
+      "required_evidence_kinds": [
+        "uat-signoff",
+        "human-prod-approval"
+      ],
+      "blocking": true
+    }
+  ],
+  "nodes": [
+    {
+      "id": "BOOT-001",
+      "kind": "foundation",
+      "title": "Grafo SHIP y conciliacion de 35 RF",
+      "status": "spec_ready",
+      "depends_on": [],
+      "capability": "governance",
+      "allowed_paths": [
+        "graph-harness.project.json",
+        "graph-harness.events.jsonl",
+        "docs/ship/",
+        "scripts/verify_ship_graph.py"
+      ],
+      "gates": {
+        "done": [
+          "gate.traceability"
+        ]
+      },
+      "metadata": {
+        "requirements": [],
+        "objective": "Grafo SHIP y conciliacion de 35 RF",
+        "acceptance_criteria": [
+          "Implementacion real y validacion independiente del nodo"
+        ],
+        "required_tests": [
+          "Evidencias de todas las categorias exigidas por sus gates"
+        ],
+        "expected_evidence": [
+          "gate.traceability"
+        ],
+        "priority": "P0",
+        "blockers": []
+      }
+    },
+    {
+      "id": "SEC-001",
+      "kind": "security",
+      "title": "Bloquear demo y backend in-memory en produccion",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "security-engineering",
+      "allowed_paths": [
+        "src/lib/config/env.ts",
+        "src/lib/config/env.test.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-01",
+          "RF-02",
+          "RF-03",
+          "RF-04"
+        ],
+        "objective": "Bloquear demo y backend in-memory en produccion",
+        "acceptance_criteria": [
+          "Implementacion real y validacion independiente del nodo"
+        ],
+        "required_tests": [
+          "Evidencias de todas las categorias exigidas por sus gates"
+        ],
+        "expected_evidence": [
+          "gate.engineering",
+          "gate.security"
+        ],
+        "priority": "P0",
+        "blockers": []
+      }
+    },
+    {
+      "id": "SEC-002",
+      "kind": "security",
+      "title": "Negar pedidos a usuarios fuera de roles operativos vigentes",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "security-engineering",
+      "allowed_paths": [
+        "src/lib/auth/order-permissions.ts",
+        "src/app/api/pedidos/",
+        "src/app/(portal)/pedidos/",
+        "src/components/layout/navigation.tsx",
+        "src/lib/auth/order-permissions.test.ts",
+        "src/app/api/pedidos/permissions.test.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-21",
+          "RF-22",
+          "RF-23"
+        ],
+        "objective": "Bloquear acceso a pedidos de usuarios no administrativos y mutacion de UsuarioPedidos",
+        "acceptance_criteria": [
+          "Los endpoints de pedidos verifican roles server-side antes de leer o escribir",
+          "UsuarioFinal recibe 403 en GET y POST",
+          "UsuarioPedidos no puede mutar pedidos"
+        ],
+        "required_tests": [
+          "unit-test",
+          "integration-like route negative tests",
+          "typecheck",
+          "lint"
+        ],
+        "expected_evidence": [
+          "unit-test",
+          "negative-test",
+          "typecheck",
+          "lint"
+        ],
+        "blockers": [],
+        "priority": "P0"
+      }
+    },
+    {
+      "id": "SEC-003",
+      "kind": "security",
+      "title": "Rechazar identidades sin roles y sedes corporativas verificables",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "identity-security-engineering",
+      "allowed_paths": [
+        "src/lib/auth/roles.ts",
+        "src/lib/auth/roles.test.ts",
+        "src/lib/auth/session.ts",
+        "src/lib/auth/session.test.ts",
+        "src/lib/auth/api-auth.ts",
+        "src/lib/auth/api-auth.test.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-01",
+          "RF-10",
+          "RF-34"
+        ],
+        "objective": "No crear sesiones corporativas con roles o sedes implícitas; la identidad debe ser estable",
+        "acceptance_criteria": [
+          "Sin roles reconocidos la sesión Entra se rechaza",
+          "Sin sedes no SuperAdmin se rechaza",
+          "No se aceptan tokens propios con roles o sedes vacíos",
+          "No se fabrica identidad aleatoria para un token Entra sin OID/SUB"
+        ],
+        "required_tests": [
+          "unit-test",
+          "negative-test",
+          "typecheck",
+          "lint",
+          "production-build",
+          "dependency-audit"
+        ],
+        "expected_evidence": [
+          "source-sha",
+          "test-and-scan-artifacts"
+        ],
+        "priority": "P0",
+        "blockers": []
+      }
+    },
+    {
+      "id": "SEC-004",
+      "kind": "security",
+      "title": "Restringir inventario y movimientos a roles administrativos del alcance vigente",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "security-engineering",
+      "allowed_paths": [
+        "src/lib/auth/inventory-permissions.ts",
+        "src/app/api/inventario/",
+        "src/app/api/inventario/inventory-permissions.test.ts",
+        "src/components/layout/navigation.tsx"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-15",
+          "RF-17",
+          "RF-19"
+        ],
+        "objective": "Impedir lectura y escritura de inventario a UsuarioFinal, UsuarioPedidos y rol OperarioBodega legado",
+        "acceptance_criteria": [
+          "Solo SuperAdmin y AdminLocal pueden consultar inventario y movimientos",
+          "Los mismos roles realizan movimientos y ajustes autorizados",
+          "La verificación de rol es server-side anterior a cualquier acceso al backend",
+          "La segregación por sede requiere pruebas separadas de datos reales"
+        ],
+        "required_tests": [
+          "unit-test",
+          "negative-test",
+          "typecheck",
+          "lint",
+          "production-build",
+          "dependency-audit"
+        ],
+        "expected_evidence": [
+          "logs of negative HTTP route tests",
+          "lint",
+          "TypeScript",
+          "unit tests",
+          "build",
+          "audit"
+        ],
+        "priority": "P0",
+        "blockers": []
+      }
+    },
+    {
+      "id": "SEC-005",
+      "kind": "security",
+      "title": "Validar autorización de sede antes de escribir en APIs y adaptadores",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "security-engineering",
+      "allowed_paths": [
+        "src/lib/auth/sede-scope.ts",
+        "src/lib/auth/sede-scope.test.ts",
+        "src/lib/dataverse/repositories/common.ts",
+        "src/lib/dataverse/repositories/pedidos.repository.ts",
+        "src/lib/dataverse/repositories/inventario.repository.ts",
+        "src/app/api/pedidos/route.ts",
+        "src/app/api/inventario/",
+        "src/app/api/sede-authorization.test.ts",
+        "scripts/browser-verify.mjs",
+        "docs/SEGURIDAD.md"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-11",
+          "RF-21",
+          "RF-34"
+        ],
+        "objective": "Rechazo BOLA antes de escrituras de pedidos e inventario en sedes no asignadas",
+        "acceptance_criteria": [
+          "Ningún POST usa sede no autorizada",
+          "El backend recibe sede normalizada solo tras autorización",
+          "SuperAdmin no crea registros en sede * ni sin sede real",
+          "Se rechaza ausencia o ambigüedad de sede sin usar fallback de entorno"
+        ],
+        "required_tests": [
+          "unit",
+          "negative API tests",
+          "negative browser HTTP",
+          "typecheck",
+          "lint",
+          "production build",
+          "dependency audit"
+        ],
+        "expected_evidence": [
+          "unit-test",
+          "negative-test",
+          "playwright-e2e",
+          "production-build"
+        ],
+        "priority": "P0",
+        "blockers": []
+      }
+    },
+    {
+      "id": "DOMAIN-CYCLE-001",
+      "kind": "domain-contract",
+      "title": "Motor de reglas validado para ventanas de pedidos y bloqueo de tallas",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001",
+        "SEC-005"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dotacion/cycle-policy.ts",
+        "src/lib/dotacion/cycle-policy.test.ts",
+        "docs/ship/rf-traceability.md",
+        "docs/ship/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-13",
+          "RF-21",
+          "RF-24"
+        ],
+        "objective": "Aplicar reglas de calendario, rol y sede antes de ajustes o cambios de talla; sin imponer un backend no aprobado",
+        "acceptance_criteria": [
+          "Solo UsuarioPedidos puede habilitar ventana y exige bloqueo comprobado del usuario final",
+          "AdminLocal solo modifica pedidos dentro de la ventana habilitada y en su sede",
+          "Tallas bloqueadas por SuperAdmin no pueden modificarse por AdminLocal",
+          "Fechas e intervalos malformados o ambiguos se rechazan",
+          "La validación impide efectos persistentes cuando no está autorizada"
+        ],
+        "required_tests": [
+          "test unitario de límites y reglas",
+          "prueba de integración de autorización con persistencia simulada",
+          "TypeScript, ESLint, build, auditoría de dependencias"
+        ],
+        "expected_evidence": [
+          "unit-test",
+          "integration-test",
+          "domain-check",
+          "typecheck",
+          "lint",
+          "production-build",
+          "dependency-audit"
+        ],
+        "priority": "P0",
+        "blockers": [],
+        "limitation": "No acredita RF-13, RF-21 ni RF-24 hasta que los estados estén persistidos y conectados a los endpoints corporativos"
+      }
+    },
+    {
+      "id": "DOMAIN-SOLPED-001",
+      "kind": "domain-contract",
+      "title": "Selección determinista SOLPED y exclusión de entregas anticipadas",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001",
+        "SEC-005"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dotacion/solped-eligibility.ts",
+        "src/lib/dotacion/solped-eligibility.test.ts",
+        "src/lib/dotacion/solped-eligibility.integration.test.ts",
+        "docs/ship/rf-traceability.md",
+        "docs/ship/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-19",
+          "RF-22"
+        ],
+        "objective": "Seleccionar candidatos nacionales a SOLPED sin elegibilidad semestral ausente ni entregas anticipadas del mismo ciclo",
+        "acceptance_criteria": [
+          "Solo UsuarioPedidos puede seleccionar candidatos para archivo SOLPED",
+          "No incluir inactivos, colaboradores sin indicador semestral o cubiertos por entrega anticipada del ciclo",
+          "Duplicados e indicadores faltantes bloquean exportación con motivo needs_review",
+          "La exclusión por entrega anticipada solo aplica al ciclo cubierto, no a todos los periodos futuros",
+          "Orden de resultados determinista independiente del orden de entrada"
+        ],
+        "required_tests": [
+          "unit tests of domain eligibility",
+          "integration-level test with synthetic selection-to-export gate",
+          "TypeScript ESLint build and dependency audit"
+        ],
+        "expected_evidence": [
+          "unit-test",
+          "integration-test",
+          "domain-check",
+          "typecheck",
+          "lint",
+          "production-build",
+          "dependency-audit"
+        ],
+        "priority": "P0",
+        "blockers": [],
+        "limitation": "This is eligibility pre-filter only; the real SAP flat-file layout and corporate integration remain unverified",
+        "downstream_blockers": [
+          "APPROVED_SAP_SOLPED_FLAT_FILE_LAYOUT_FOR_REAL_EXPORT"
+        ]
+      }
+    },
+    {
+      "id": "ADR-001",
+      "kind": "architecture",
+      "title": "Evaluacion modular-monolith vs backend externo",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "architecture",
+      "allowed_paths": [
+        "docs/ship/ADR-001-backend.md"
+      ],
+      "gates": {
+        "done": [
+          "gate.architecture"
+        ]
+      },
+      "metadata": {
+        "requirements": [],
+        "objective": "Evaluacion modular-monolith vs backend externo",
+        "acceptance_criteria": [
+          "Implementacion real y validacion independiente del nodo"
+        ],
+        "required_tests": [
+          "Evidencias de todas las categorias exigidas por sus gates"
+        ],
+        "expected_evidence": [
+          "gate.architecture"
+        ],
+        "priority": "P0",
+        "blockers": []
+      }
+    },
+    {
+      "id": "DATA-001",
+      "kind": "foundation",
+      "title": "Persistencia transaccional SQL y migraciones",
+      "status": "pending",
+      "depends_on": [
+        "ADR-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/",
+        "migrations/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [],
+        "objective": "Persistencia transaccional SQL y migraciones",
+        "acceptance_criteria": [
+          "Implementacion real y validacion independiente del nodo"
+        ],
+        "required_tests": [
+          "Evidencias de todas las categorias exigidas por sus gates"
+        ],
+        "expected_evidence": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.security"
+        ],
+        "priority": "P0",
+        "blockers": [
+          "HUMAN_ARCHITECTURE_APPROVAL"
+        ]
+      }
+    },
+    {
+      "id": "IDENTITY-001",
+      "kind": "identity",
+      "title": "SSO server-side y controles por sede",
+      "status": "pending",
+      "depends_on": [
+        "ADR-001"
+      ],
+      "capability": "identity-engineering",
+      "allowed_paths": [
+        "src/lib/auth/",
+        "src/app/api/auth/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-01",
+          "RF-02",
+          "RF-03",
+          "RF-04"
+        ],
+        "objective": "SSO server-side y controles por sede",
+        "acceptance_criteria": [
+          "Implementacion real y validacion independiente del nodo"
+        ],
+        "required_tests": [
+          "Evidencias de todas las categorias exigidas por sus gates"
+        ],
+        "expected_evidence": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.security"
+        ],
+        "priority": "P1",
+        "blockers": []
+      }
+    },
+    {
+      "id": "CI-001",
+      "kind": "operations",
+      "title": "Pipeline reproducible SHIP y QA aislada",
+      "status": "pending",
+      "depends_on": [
+        "BOOT-001"
+      ],
+      "capability": "devops",
+      "allowed_paths": [
+        ".github/workflows/",
+        "scripts/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.operational"
+        ]
+      },
+      "metadata": {
+        "requirements": [],
+        "objective": "Pipeline reproducible SHIP y QA aislada",
+        "acceptance_criteria": [
+          "Implementacion real y validacion independiente del nodo"
+        ],
+        "required_tests": [
+          "Evidencias de todas las categorias exigidas por sus gates"
+        ],
+        "expected_evidence": [
+          "gate.engineering",
+          "gate.operational"
+        ],
+        "priority": "P1",
+        "blockers": []
+      }
+    },
+    {
+      "id": "SSFF-001",
+      "kind": "integration",
+      "title": "Adaptador SFTP idempotente y evidencia",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "integration-engineering",
+      "allowed_paths": [
+        "src/lib/integrations/",
+        "src/app/api/integraciones/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [],
+        "objective": "Adaptador SFTP idempotente y evidencia",
+        "acceptance_criteria": [
+          "Implementacion real y validacion independiente del nodo"
+        ],
+        "required_tests": [
+          "Evidencias de todas las categorias exigidas por sus gates"
+        ],
+        "expected_evidence": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.security"
+        ],
+        "priority": "P1",
+        "blockers": []
+      }
+    },
+    {
+      "id": "OPS-001",
+      "kind": "operations",
+      "title": "Observabilidad backup y restore",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "operations",
+      "allowed_paths": [
+        "docs/",
+        "scripts/"
+      ],
+      "gates": {
+        "done": [
+          "gate.operational"
+        ]
+      },
+      "metadata": {
+        "requirements": [],
+        "objective": "Observabilidad backup y restore",
+        "acceptance_criteria": [
+          "Implementacion real y validacion independiente del nodo"
+        ],
+        "required_tests": [
+          "Evidencias de todas las categorias exigidas por sus gates"
+        ],
+        "expected_evidence": [
+          "gate.operational"
+        ],
+        "priority": "P1",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-01",
+      "kind": "functional-requirement",
+      "title": "SSO corporativo Entra ID",
+      "status": "pending",
+      "depends_on": [
+        "IDENTITY-001"
+      ],
+      "capability": "identity-engineering",
+      "allowed_paths": [
+        "src/lib/auth/session.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-01"
+        ],
+        "domain": "Identity",
+        "source": "Updated scope September 2026 page 8",
+        "objective": "SSO corporativo Entra ID",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/auth/session.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-02",
+      "kind": "functional-requirement",
+      "title": "Autenticacion dual aprobada",
+      "status": "pending",
+      "depends_on": [
+        "IDENTITY-001"
+      ],
+      "capability": "identity-engineering",
+      "allowed_paths": [
+        "src/app/api/auth/session/operario/route.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-02"
+        ],
+        "domain": "Identity",
+        "source": "Updated scope September 2026 page 8",
+        "objective": "Autenticacion dual aprobada",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/app/api/auth/session/operario/route.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [
+          "VALIDATE_USER_FINAL_AND_DUAL_AUTH_WITH_SUMMA"
+        ]
+      }
+    },
+    {
+      "id": "RF-03",
+      "kind": "functional-requirement",
+      "title": "CAPTCHA y mitigacion de fuerza bruta",
+      "status": "pending",
+      "depends_on": [
+        "SEC-001"
+      ],
+      "capability": "security-engineering",
+      "allowed_paths": [
+        "src/lib/auth/captcha.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-03"
+        ],
+        "domain": "Security",
+        "source": "Updated scope September 2026 page 8",
+        "objective": "CAPTCHA y mitigacion de fuerza bruta",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/auth/captcha.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-04",
+      "kind": "functional-requirement",
+      "title": "Politica de credenciales usuarios no digitales",
+      "status": "pending",
+      "depends_on": [
+        "IDENTITY-001"
+      ],
+      "capability": "identity-engineering",
+      "allowed_paths": [
+        "src/lib/auth/session.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-04"
+        ],
+        "domain": "Identity",
+        "source": "Updated scope September 2026 page 8",
+        "objective": "Politica de credenciales usuarios no digitales",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/auth/session.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [
+          "VALIDATE_USER_FINAL_AND_DUAL_AUTH_WITH_SUMMA"
+        ]
+      }
+    },
+    {
+      "id": "RF-05",
+      "kind": "functional-requirement",
+      "title": "Migracion masiva inicial",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-05"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 8",
+        "objective": "Migracion masiva inicial",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-06",
+      "kind": "functional-requirement",
+      "title": "Ingesta semanal SSFF por SFTP",
+      "status": "pending",
+      "depends_on": [
+        "SSFF-001"
+      ],
+      "capability": "integration-engineering",
+      "allowed_paths": [
+        "src/lib/integrations/ssff.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-06"
+        ],
+        "domain": "SuccessFactors",
+        "source": "Updated scope September 2026 page 8",
+        "objective": "Ingesta semanal SSFF por SFTP",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/integrations/ssff.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [
+          "SSFF_FILE_LAYOUT_AND_SFTP_ACCESS"
+        ]
+      }
+    },
+    {
+      "id": "RF-07",
+      "kind": "functional-requirement",
+      "title": "Altas reingresos y bajas",
+      "status": "pending",
+      "depends_on": [
+        "SSFF-001"
+      ],
+      "capability": "integration-engineering",
+      "allowed_paths": [
+        "src/lib/integrations/ssff.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-07"
+        ],
+        "domain": "SuccessFactors",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Altas reingresos y bajas",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/integrations/ssff.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-08",
+      "kind": "functional-requirement",
+      "title": "Sincronizacion y alias de sedes",
+      "status": "pending",
+      "depends_on": [
+        "SSFF-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-08"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Sincronizacion y alias de sedes",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-09",
+      "kind": "functional-requirement",
+      "title": "Sedes temporales controladas",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-09"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Sedes temporales controladas",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-10",
+      "kind": "functional-requirement",
+      "title": "Asignacion y revocacion de roles",
+      "status": "pending",
+      "depends_on": [
+        "IDENTITY-001"
+      ],
+      "capability": "identity-engineering",
+      "allowed_paths": [
+        "src/lib/auth/roles.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-10"
+        ],
+        "domain": "Identity",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Asignacion y revocacion de roles",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/auth/roles.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-11",
+      "kind": "functional-requirement",
+      "title": "Administracion local por sede",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-11"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Administracion local por sede",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-12",
+      "kind": "functional-requirement",
+      "title": "Carga masiva de tallas Excel",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-12"
+        ],
+        "domain": "Tallas",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Carga masiva de tallas Excel",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-13",
+      "kind": "functional-requirement",
+      "title": "Ventanas de bloqueo de ajustes",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/pedidos.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-13"
+        ],
+        "domain": "Tallas",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Ventanas de bloqueo de ajustes",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/pedidos.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [],
+        "contract_nodes": [
+          "DOMAIN-CYCLE-001"
+        ]
+      }
+    },
+    {
+      "id": "RF-14",
+      "kind": "functional-requirement",
+      "title": "Actualizacion individual de tallas",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-14"
+        ],
+        "domain": "Tallas",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Actualizacion individual de tallas",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-15",
+      "kind": "functional-requirement",
+      "title": "Entrega fechada con evidencia de firma",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/inventario.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-15"
+        ],
+        "domain": "Entregas",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Entrega fechada con evidencia de firma",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/inventario.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [
+          "SIGNATURE_AND_GRAPH_CUSTODY_APPROVAL"
+        ]
+      }
+    },
+    {
+      "id": "RF-16",
+      "kind": "functional-requirement",
+      "title": "Cambio de talla en entrega",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/inventario.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-16"
+        ],
+        "domain": "Entregas",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Cambio de talla en entrega",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/inventario.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-17",
+      "kind": "functional-requirement",
+      "title": "Faltantes novedades y observaciones",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/inventario.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-17"
+        ],
+        "domain": "Entregas",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Faltantes novedades y observaciones",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/inventario.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-18",
+      "kind": "functional-requirement",
+      "title": "Constancia remitida a SUMMA via Graph",
+      "status": "pending",
+      "depends_on": [
+        "RF-20"
+      ],
+      "capability": "integration-engineering",
+      "allowed_paths": [
+        "src/lib/flows/triggers.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-18"
+        ],
+        "domain": "Firma",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Constancia remitida a SUMMA via Graph",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/flows/triggers.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [
+          "SIGNATURE_AND_GRAPH_CUSTODY_APPROVAL"
+        ]
+      }
+    },
+    {
+      "id": "RF-19",
+      "kind": "functional-requirement",
+      "title": "Entrega anticipada sin duplicacion de ciclo",
+      "status": "pending",
+      "depends_on": [
+        "RF-15"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/inventario.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-19"
+        ],
+        "domain": "Entregas",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Entrega anticipada sin duplicacion de ciclo",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/inventario.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [],
+        "contract_nodes": [
+          "DOMAIN-SOLPED-001"
+        ]
+      }
+    },
+    {
+      "id": "RF-20",
+      "kind": "functional-requirement",
+      "title": "Constancia PDF por ciclo y sede",
+      "status": "pending",
+      "depends_on": [
+        "RF-15"
+      ],
+      "capability": "integration-engineering",
+      "allowed_paths": [
+        "src/lib/",
+        "src/app/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-20"
+        ],
+        "domain": "Firma",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Constancia PDF por ciclo y sede",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": null,
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [
+          "SIGNATURE_AND_GRAPH_CUSTODY_APPROVAL"
+        ]
+      }
+    },
+    {
+      "id": "RF-21",
+      "kind": "functional-requirement",
+      "title": "Ajustes y Excel en ventana habilitada",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/pedidos.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-21"
+        ],
+        "domain": "Pedidos",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Ajustes y Excel en ventana habilitada",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/pedidos.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [],
+        "contract_nodes": [
+          "DOMAIN-CYCLE-001"
+        ]
+      }
+    },
+    {
+      "id": "RF-22",
+      "kind": "functional-requirement",
+      "title": "Archivo plano SAP con exclusion semestral",
+      "status": "pending",
+      "depends_on": [
+        "RF-21"
+      ],
+      "capability": "integration-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/pedidos.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-22"
+        ],
+        "domain": "SOLPED",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Archivo plano SAP con exclusion semestral",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/pedidos.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [
+          "APPROVED_SOLPED_LAYOUT"
+        ],
+        "contract_nodes": [
+          "DOMAIN-SOLPED-001"
+        ]
+      }
+    },
+    {
+      "id": "RF-23",
+      "kind": "functional-requirement",
+      "title": "Validaciones por administrador y periodo",
+      "status": "pending",
+      "depends_on": [
+        "RF-21"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/app/(portal)/pedidos/page.tsx"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-23"
+        ],
+        "domain": "Pedidos",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Validaciones por administrador y periodo",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/app/(portal)/pedidos/page.tsx",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-24",
+      "kind": "functional-requirement",
+      "title": "Configuracion de apertura y cierre",
+      "status": "pending",
+      "depends_on": [
+        "RF-13"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/pedidos.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-24"
+        ],
+        "domain": "Pedidos",
+        "source": "Updated scope September 2026 page 9",
+        "objective": "Configuracion de apertura y cierre",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/pedidos.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": [
+          "VALIDATE_USER_FINAL_AND_DUAL_AUTH_WITH_SUMMA"
+        ],
+        "contract_nodes": [
+          "DOMAIN-CYCLE-001"
+        ]
+      }
+    },
+    {
+      "id": "RF-25",
+      "kind": "functional-requirement",
+      "title": "Reporte de colaboradores por sede",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "reporting-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/dashboard.service.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-25"
+        ],
+        "domain": "Reporting",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Reporte de colaboradores por sede",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/dashboard.service.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-26",
+      "kind": "functional-requirement",
+      "title": "Reporte plano facturacion SOLPED",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "reporting-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/pedidos.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-26"
+        ],
+        "domain": "Reporting",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Reporte plano facturacion SOLPED",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/pedidos.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-27",
+      "kind": "functional-requirement",
+      "title": "Reporte de entregas Excel y PDF",
+      "status": "pending",
+      "depends_on": [
+        "RF-15"
+      ],
+      "capability": "reporting-engineering",
+      "allowed_paths": [
+        "src/lib/",
+        "src/app/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-27"
+        ],
+        "domain": "Reporting",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Reporte de entregas Excel y PDF",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": null,
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-28",
+      "kind": "functional-requirement",
+      "title": "Cargas maestras recurrentes",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-28"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Cargas maestras recurrentes",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-29",
+      "kind": "functional-requirement",
+      "title": "Maestro materiales y codigos proveedor",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-29"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Maestro materiales y codigos proveedor",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-30",
+      "kind": "functional-requirement",
+      "title": "Centros costo-sedes N:M",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-30"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Centros costo-sedes N:M",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-31",
+      "kind": "functional-requirement",
+      "title": "Direcciones entrega por sede",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-31"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Direcciones entrega por sede",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-32",
+      "kind": "functional-requirement",
+      "title": "Deshabilitar sedes sin activos",
+      "status": "pending",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-32"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Deshabilitar sedes sin activos",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-33",
+      "kind": "functional-requirement",
+      "title": "Bandeja ultimo lote de novedades",
+      "status": "pending",
+      "depends_on": [
+        "SSFF-001"
+      ],
+      "capability": "integration-engineering",
+      "allowed_paths": [
+        "src/lib/integrations/ssff.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-33"
+        ],
+        "domain": "SuccessFactors",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Bandeja ultimo lote de novedades",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/integrations/ssff.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-34",
+      "kind": "functional-requirement",
+      "title": "Relacion administradores-sedes N:M",
+      "status": "pending",
+      "depends_on": [
+        "IDENTITY-001"
+      ],
+      "capability": "database-engineering",
+      "allowed_paths": [
+        "src/lib/dataverse/repositories/admin.repository.ts"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-34"
+        ],
+        "domain": "Master Data",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Relacion administradores-sedes N:M",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": "src/lib/dataverse/repositories/admin.repository.ts",
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RF-35",
+      "kind": "functional-requirement",
+      "title": "Visibilidad de reportes por rol",
+      "status": "pending",
+      "depends_on": [
+        "IDENTITY-001"
+      ],
+      "capability": "reporting-engineering",
+      "allowed_paths": [
+        "src/lib/",
+        "src/app/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional",
+          "gate.browser",
+          "gate.security"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-35"
+        ],
+        "domain": "Reporting",
+        "source": "Updated scope September 2026 page 10",
+        "objective": "Visibilidad de reportes por rol",
+        "acceptance_criteria": [
+          "Transaccion persistida, autorizada y auditada cuando aplique",
+          "Casos validos, invalidos y concurrencia verificados"
+        ],
+        "required_tests": [
+          "unit",
+          "integration",
+          "negative",
+          "browser E2E para flujo observable"
+        ],
+        "expected_evidence": [
+          "code commit",
+          "verified test results",
+          "browser evidence or justified non-UI test"
+        ],
+        "implementation_candidate": null,
+        "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
+        "test_status": "NOT_RUN",
+        "blockers": []
+      }
+    },
+    {
+      "id": "RELEASE-001",
+      "kind": "acceptance",
+      "title": "SHIP UAT y gate de produccion",
+      "status": "pending",
+      "depends_on": [
+        "RF-01",
+        "RF-02",
+        "RF-03",
+        "RF-04",
+        "RF-05",
+        "RF-06",
+        "RF-07",
+        "RF-08",
+        "RF-09",
+        "RF-10",
+        "RF-11",
+        "RF-12",
+        "RF-13",
+        "RF-14",
+        "RF-15",
+        "RF-16",
+        "RF-17",
+        "RF-18",
+        "RF-19",
+        "RF-20",
+        "RF-21",
+        "RF-22",
+        "RF-23",
+        "RF-24",
+        "RF-25",
+        "RF-26",
+        "RF-27",
+        "RF-28",
+        "RF-29",
+        "RF-30",
+        "RF-31",
+        "RF-32",
+        "RF-33",
+        "RF-34",
+        "RF-35",
+        "CI-001",
+        "OPS-001",
+        "SEC-001"
+      ],
+      "capability": "qa-release-lead",
+      "allowed_paths": [
+        "docs/ship/",
+        "tests/",
+        "e2e/"
+      ],
+      "gates": {
+        "done": [
+          "gate.release",
+          "gate.browser",
+          "gate.security",
+          "gate.operational"
+        ]
+      },
+      "metadata": {
+        "objective": "GO/NO-GO respaldado por firma humana",
+        "requirements": [
+          "RF-01",
+          "RF-02",
+          "RF-03",
+          "RF-04",
+          "RF-05",
+          "RF-06",
+          "RF-07",
+          "RF-08",
+          "RF-09",
+          "RF-10",
+          "RF-11",
+          "RF-12",
+          "RF-13",
+          "RF-14",
+          "RF-15",
+          "RF-16",
+          "RF-17",
+          "RF-18",
+          "RF-19",
+          "RF-20",
+          "RF-21",
+          "RF-22",
+          "RF-23",
+          "RF-24",
+          "RF-25",
+          "RF-26",
+          "RF-27",
+          "RF-28",
+          "RF-29",
+          "RF-30",
+          "RF-31",
+          "RF-32",
+          "RF-33",
+          "RF-34",
+          "RF-35"
+        ],
+        "acceptance_criteria": [
+          "UAT aprobado y gates vigentes"
+        ],
+        "required_tests": [
+          "e2e",
+          "security",
+          "performance",
+          "restore"
+        ],
+        "expected_evidence": [
+          "signoff",
+          "independent review"
+        ],
+        "blockers": [
+          "PRODUCTION_APPROVAL_REQUIRED"
+        ]
+      }
+    }
+  ]
+}

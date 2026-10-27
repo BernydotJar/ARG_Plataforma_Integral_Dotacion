@@ -1,0 +1,13 @@
+{
+  "result": "PASS",
+  "vulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "command": "npm audit --audit-level=high",
+  "tested_source_sha": "cc038accfc2b26b85a67fda6e6ae01075421c833"
+}

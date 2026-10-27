@@ -1,5 +1,4 @@
-import { canAccessSede } from "@/lib/auth/roles";
-import { env } from "@/lib/config/env";
+import { resolveWriteSede } from "@/lib/auth/sede-scope";
 import { createMockEvent, createMockId, getMockDb } from "@/lib/dataverse/mock-store";
 import type {
   ActividadMantenimiento,
@@ -64,18 +63,7 @@ export const scopeMatchesFilters = <T extends { estado?: string; sedeId: string 
   return true;
 };
 
-export const getRequestedSede = (user: AppUser, requested?: string): string => {
-  const fallback = user.preferredSedeId || user.sedeIds.find((sedeId) => sedeId !== "*") || env.defaultSedes[0] || DEFAULT_SEDE_FALLBACK;
-
-  if (!requested) return fallback;
-  if (user.sedeIds.includes("*")) return requested;
-
-  if (!canAccessSede(user, requested)) {
-    throw new Error(`El usuario no puede operar sobre la sede ${requested}`);
-  }
-
-  return requested;
-};
+export const getRequestedSede = resolveWriteSede;
 
 export const generateCode = (prefix: string): string =>
   `${prefix}-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;

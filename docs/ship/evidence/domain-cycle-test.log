@@ -1,0 +1,27 @@
+
+> argos-portal@0.1.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.12 /workspace/projects/ARG_Plataforma_Integral_Dotacion
+
+ ✓ src/lib/dotacion/cycle-policy.integration.test.ts (5 tests) 7ms
+ ✓ src/lib/dotacion/cycle-policy.test.ts (18 tests) 9ms
+ ✓ src/lib/auth/roles.test.ts (10 tests) 5ms
+ ✓ src/lib/http/route.test.ts (5 tests) 7ms
+ ✓ src/lib/config/env.test.ts (7 tests) 206ms
+ ✓ src/lib/auth/rate-limit.test.ts (5 tests) 6ms
+ ✓ src/lib/auth/sede-scope.test.ts (11 tests) 3ms
+ ✓ src/lib/auth/session.test.ts (13 tests) 9ms
+ ✓ src/lib/auth/api-auth.test.ts (9 tests) 15ms
+ ✓ src/app/api/pedidos/permissions.test.ts (6 tests) 13ms
+ ✓ src/app/api/sede-authorization.test.ts (6 tests) 17ms
+ ✓ src/app/api/inventario/inventory-permissions.test.ts (19 tests) 20ms
+
+ Test Files  12 passed (12)
+      Tests  114 passed (114)
+   Start at  22:45:04
+   Duration  1.34s (transform 2.01s, setup 0ms, import 5.35s, tests 318ms, environment 4ms)

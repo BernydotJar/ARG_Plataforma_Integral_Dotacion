@@ -1,6 +1,6 @@
 # Postura de Seguridad — ARGOS Plataforma Integral
 
-Resumen del modelo de seguridad implementado en el portal (frontend/BFF). El backend .NET aplica sus propios controles además de estos.
+Resumen del modelo de seguridad implementado en el portal (frontend/BFF). La seguridad del backend transaccional definitivo requiere integración y validación independiente; el backend .NET histórico no está en este repositorio.
 
 ## 1. Autenticación
 
@@ -13,7 +13,7 @@ Resumen del modelo de seguridad implementado en el portal (frontend/BFF). El bac
 ## 2. Autorización (RBAC + alcance por sede)
 
 - Roles: `SuperAdmin`, `AdminLocal`, `UsuarioPedidos`, `UsuarioFinal`, `OperarioBodega`, `InspectorCalidad`, `TecnicoMantenimiento` (`src/lib/types/app.ts`).
-- Mapeo desde claims `roles` o grupos Entra (`ENTRA_GROUP_*`). Roles desconocidos degradan a `UsuarioFinal` (mínimo privilegio).
+- Mapeo desde claims `roles` o grupos Entra (`ENTRA_GROUP_*`). Los roles desconocidos o ausentes se rechazan; las sedes deben estar asignadas explícitamente, salvo acceso global de `SuperAdmin`.
 - Todas las rutas de API pasan por `requireApiUser()` (`src/lib/auth/api-auth.ts`): sesión válida + rol permitido.
 - Datos filtrados por sede (`scopeBySede`); `SuperAdmin` recibe comodín `*`.
 
@@ -39,13 +39,13 @@ Doble control en todo POST/PUT/PATCH/DELETE:
 
 - `.env*` está en `.gitignore` (solo `.env.example` con placeholders se versiona). Verificado: ningún archivo env existe en el historial de git.
 - Producción: secretos vía Azure Key Vault con Managed Identity (ver [DESPLIEGUE_AZURE.md](DESPLIEGUE_AZURE.md) §2.3).
-- Salvaguardas de arranque (runtime, no build): rechaza secreto de sesión débil/por defecto, password de operario por defecto, y `DEMO_MODE=true` en producción.
+- Salvaguardas de arranque (runtime, no build): rechaza secreto de sesión débil/por defecto y contraseña de operario por defecto fuera de demo. En producción también rechaza `DEMO_MODE=true`, `DEMO_LOGIN_ENABLED=true` y ausencia de backend persistente. Este es un control transitorio hasta aprobar y construir el almacenamiento SQL.
 
 ## 7. Dependencias y CI
 
 - CI bloquea el merge si fallan typecheck, lint, unit tests, build o `npm audit --audit-level=high`.
-- Next.js se mantiene en la línea 16.2.x (la 16.1.x acumulaba advisories de middleware bypass, cache poisoning y XSS, corregidos en 16.2.9).
-- Pendiente conocido: advisory *moderate* de `postcss` embebido en Next (sin fix upstream aún; no bloquea el gate high+).
+- Next.js usa la línea 16.4.x y el build reproducible emplea el compilador predeterminado Turbopack.
+- El último `npm audit` ejecutado en QA reportó cero vulnerabilidades; el resultado debe repetirse sobre cada SHA candidato de release.
 
 ## 8. Mejoras futuras recomendadas
 
@@ -54,3 +54,29 @@ Doble control en todo POST/PUT/PATCH/DELETE:
 3. **Rate limiting distribuido** (el actual es in-memory por instancia; con múltiples réplicas considerar Azure Front Door/APIM o un store compartido).
 4. **Paginación server-side** en listados grandes para mitigar respuestas no acotadas.
 5. **Trazas OpenTelemetry** end-to-end (hoy: correlation IDs + logs estructurados).
+
+## Seguridad del alcance septiembre 2026
+
+Las rutas de pedidos y adjuntos limitan la lectura a `SuperAdmin`, `AdminLocal` y `UsuarioPedidos`, y las mutaciones a `SuperAdmin` y `AdminLocal`. `UsuarioFinal` no tiene acceso a pedidos; los permisos deben revalidarse si SUMMA aprueba una experiencia de usuario final. Véanse las pruebas negativas de `src/app/api/pedidos/permissions.test.ts`.
+
+## Control explícito de roles de inventario (RF-15/17/19)
+
+- Las APIs `/api/inventario/*` autorizan exclusivamente a `SuperAdmin` y `AdminLocal`.
+- `UsuarioFinal`, `UsuarioPedidos` y el rol heredado `OperarioBodega` no pueden leer ni mutar inventario.
+- `src/app/api/inventario/inventory-permissions.test.ts` valida rutas negativas con sesiones y tokens CSRF sintéticos.
+- La segregación de sedes y la concurrencia SQL son gates independientes: no se han acreditado por esta restricción de roles.
+- El acceso demo de operarios solo puede aparecer en la UI cuando se declara `NEXT_PUBLIC_OPERARIO_LOGIN_ENABLED=true` y sigue sujeto al control del backend. Los botones demo administrativos requieren `NEXT_PUBLIC_DEMO_LOGIN_ENABLED=true`, sin habilitación productiva.
+
+## Autorización por sede antes de escribir (SEC-005)
+
+El servidor valida la sede antes de crear pedidos o movimientos y normaliza la sede
+antes de enviar solicitudes al adaptador externo. Un `AdminLocal` no puede especificar
+otra sede; `SuperAdmin` debe seleccionar una sede real y no puede escribir en `*`.
+No se utilizan `DEFAULT_SEDES` ni sedes sintéticas como fallback de autorización.
+La validación aplica tanto al modo de QA como al adaptador de API.
+
+Pruebas: `src/lib/auth/sede-scope.test.ts`,
+`src/app/api/sede-authorization.test.ts`, y Playwright HTTP con sesiones firmadas
+sintéticamente. El backend final debe repetir autorización server-side y controles
+transaccionales; este incremento solo garantiza que el BFF no envíe operaciones
+intencionadamente fuera del ámbito del usuario.
