@@ -360,6 +360,61 @@
       }
     },
     {
+      "id": "DOMAIN-CYCLE-001",
+      "kind": "domain-contract",
+      "title": "Motor de reglas validado para ventanas de pedidos y bloqueo de tallas",
+      "status": "spec_ready",
+      "depends_on": [
+        "BOOT-001",
+        "SEC-005"
+      ],
+      "capability": "product-engineering",
+      "allowed_paths": [
+        "src/lib/dotacion/cycle-policy.ts",
+        "src/lib/dotacion/cycle-policy.test.ts",
+        "docs/ship/rf-traceability.md",
+        "docs/ship/"
+      ],
+      "gates": {
+        "done": [
+          "gate.engineering",
+          "gate.functional"
+        ]
+      },
+      "metadata": {
+        "requirements": [
+          "RF-13",
+          "RF-21",
+          "RF-24"
+        ],
+        "objective": "Aplicar reglas de calendario, rol y sede antes de ajustes o cambios de talla; sin imponer un backend no aprobado",
+        "acceptance_criteria": [
+          "Solo UsuarioPedidos puede habilitar ventana y exige bloqueo comprobado del usuario final",
+          "AdminLocal solo modifica pedidos dentro de la ventana habilitada y en su sede",
+          "Tallas bloqueadas por SuperAdmin no pueden modificarse por AdminLocal",
+          "Fechas e intervalos malformados o ambiguos se rechazan",
+          "La validación impide efectos persistentes cuando no está autorizada"
+        ],
+        "required_tests": [
+          "test unitario de límites y reglas",
+          "prueba de integración de autorización con persistencia simulada",
+          "TypeScript, ESLint, build, auditoría de dependencias"
+        ],
+        "expected_evidence": [
+          "unit-test",
+          "integration-test",
+          "domain-check",
+          "typecheck",
+          "lint",
+          "production-build",
+          "dependency-audit"
+        ],
+        "priority": "P0",
+        "blockers": [],
+        "limitation": "No acredita RF-13, RF-21 ni RF-24 hasta que los estados estén persistidos y conectados a los endpoints corporativos"
+      }
+    },
+    {
       "id": "ADR-001",
       "kind": "architecture",
       "title": "Evaluacion modular-monolith vs backend externo",
@@ -1210,7 +1265,10 @@
         "implementation_candidate": "src/lib/dataverse/repositories/pedidos.repository.ts",
         "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
         "test_status": "NOT_RUN",
-        "blockers": []
+        "blockers": [],
+        "contract_nodes": [
+          "DOMAIN-CYCLE-001"
+        ]
       }
     },
     {
@@ -1601,7 +1659,10 @@
         "implementation_candidate": "src/lib/dataverse/repositories/pedidos.repository.ts",
         "implementation_status": "UNVERIFIED_NO_COMPLETION_CLAIM",
         "test_status": "NOT_RUN",
-        "blockers": []
+        "blockers": [],
+        "contract_nodes": [
+          "DOMAIN-CYCLE-001"
+        ]
       }
     },
     {
@@ -1749,6 +1810,9 @@
         "test_status": "NOT_RUN",
         "blockers": [
           "VALIDATE_USER_FINAL_AND_DUAL_AUTH_WITH_SUMMA"
+        ],
+        "contract_nodes": [
+          "DOMAIN-CYCLE-001"
         ]
       }
     },
